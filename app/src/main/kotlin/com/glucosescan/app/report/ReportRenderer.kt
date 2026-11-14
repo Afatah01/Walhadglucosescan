@@ -204,20 +204,26 @@ class ReportRenderer(
         text(canvas, words, MARGIN, y, 12f, BLUE, bold = true)
     }
 
+    /**
+     * The end of every page: a rule, the careful words, the name of the maker and the number
+     * of the page. The name stands at the bottom left, where the eye looks last, on both
+     * pages, so that a printed report always says who made it.
+     */
     private fun footer(canvas: Canvas, page: Int) {
-        line(canvas, MARGIN, 806f, WIDTH - MARGIN, 806f, GRID)
+        line(canvas, MARGIN, 794f, WIDTH - MARGIN, 794f, GRID)
         paragraph(
             canvas,
             "Walhad Glucose Scan $appVersion. This app is not a medical device" +
                 (if (fromLinkUp) ". The values come from LibreLinkUp. " else ", and the values can differ from FreeStyle LibreLink. ") +
                 "Show the report to your doctor or diabetes nurse. Do not change insulin or medicine by yourself because of it.",
             MARGIN,
-            811f,
-            WIDTH - 2 * MARGIN - 50f,
+            799f,
+            WIDTH - 2 * MARGIN,
             7.5f,
             GREY
         )
-        text(canvas, "Page " + (page + 1) + " of " + PAGES, WIDTH - MARGIN, 820f, 8f, GREY, align = Paint.Align.RIGHT)
+        text(canvas, CREDIT, MARGIN, 828f, 8.5f, TEXT, bold = true)
+        text(canvas, "Page " + (page + 1) + " of " + PAGES, WIDTH - MARGIN, 828f, 8f, GREY, align = Paint.Align.RIGHT)
     }
 
     // ------------------------------------------------------------------ page 1
@@ -557,6 +563,9 @@ class ReportRenderer(
 
     companion object {
         /** A4 paper in points. */
+        /** The line at the bottom of every page of the report. */
+        const val CREDIT = "Powered by: Abdifatah Elmi"
+
         const val PAGE_WIDTH = 595
         const val PAGE_HEIGHT = 842
         const val PAGES = 2

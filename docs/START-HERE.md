@@ -79,19 +79,18 @@ keeps no backups, so the phone stays the real home of your values.
 
 ---
 
-## Step 6 — Only if you want it: the AI (10 minutes, optional)
+## Step 6 — Only if you want it: the AI (5 minutes, optional)
 
 Skip this if you like. It explains your numbers in English, Somali or Arabic.
 
-1. Open **aistudio.google.com** → sign in → **Get API key** → **Create API key**.
-2. Copy the key (a long text starting with `AIza`).
-3. In my app: **More** → **AI explanation** → paste the key → save.
+1. In the app: **More** → **AI** → press **Get a free key**. The browser opens.
+2. Sign in with a Google account → **Create API key** → copy the key.
+3. Back in the app: choose **Gemini**, paste the key, press **Save**.
 4. On the Analysis screen, press **Ask the AI now**.
 
-It is free at first, then it can cost a little. An AI can be wrong — never change
-insulin because of it.
-
----
+It is free (no card). The key must be your own — I cannot give you one, because a key is
+tied to the account that makes it, and yours is the only one that should read your numbers.
+An AI can be wrong — never change insulin because of it.
 
 ## What I suggest you do not do yet
 

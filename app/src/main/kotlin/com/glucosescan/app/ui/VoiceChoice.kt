@@ -4,6 +4,14 @@ import android.speech.tts.Voice
 import java.util.Locale
 
 /**
+ * One voice of the phone, with the four things [VoiceChoice] looks at. A test can make these
+ * by hand; the app makes them from the voices the phone offers.
+ */
+data class VoiceCandidate(val name: String, val language: String, val quality: Int, val needsInternet: Boolean) {
+    constructor(voice: Voice) : this(voice.name, voice.locale.language, voice.quality, voice.isNetworkConnectionRequired)
+}
+
+/**
  * Which voice of the phone the app uses: **a man's voice**, so that the app always sounds the
  * same, wherever it is installed.
  *
@@ -28,11 +36,14 @@ object VoiceChoice {
      * The best man's voice for [language] out of [voices]: the one with the highest quality
      * that speaks that language and works without the internet. Null if there is none.
      */
-    fun pick(voices: Collection<Voice>?, language: String): Voice? {
-        val all = voices ?: return null
+    fun pick(voices: Collection<VoiceCandidate>?, language: String): VoiceCandidate? {
+        val all = (voices ?: return null).filter { !it.needsInternet }
+        val men = all.filter { soundsMale(it.name) }
+        if (men.isEmpty()) {
+            return null
+        }
         val wanted = language.lowercase(Locale.US)
-        val here = all.filter { !it.isNetworkConnectionRequired && it.locale.language.equals(wanted, ignoreCase = true) }
-        val men = (here.ifEmpty { all.filter { !it.isNetworkConnectionRequired } }).filter { soundsMale(it.name) }
-        return men.maxByOrNull { it.quality }
+        val here = men.filter { it.language.lowercase(Locale.US) == wanted }
+        return (here.ifEmpty { men }).maxByOrNull { it.quality }
     }
 }

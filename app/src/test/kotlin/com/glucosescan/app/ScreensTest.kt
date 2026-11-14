@@ -787,7 +787,7 @@ class ScreensTest {
         settings.lastScanDetails = "time: 2026-01-01 12:00:00 UTC\noutcome: OK\nserial: 3MH001HM1LM\n"
         val activity = Robolectric.buildActivity(AboutActivity::class.java).setup().get()
         assertEquals("Walhad Glucose Scan", text(activity, R.id.appName))
-        assertEquals("Version 4.1.0", text(activity, R.id.version))
+        assertEquals("Version 4.2.0", text(activity, R.id.version))
         assertEquals("Powered by Abdifatah Elmi", text(activity, R.id.madeBy))
         assertTrue(logoIsShown(activity))
         // the only credit on the screen is the maker of this app
@@ -817,7 +817,7 @@ class ScreensTest {
         assertTrue(notice.contains("github.com/creepymonster/GlucoseDirect"))
         // word for word the permission notice of the LICENSE file of this project
         val licenseFile = listOf(File("../LICENSE"), File("LICENSE")).first { it.exists() }
-        val permission = licenseFile.readText().substringAfter("Copyright (c) 2026 Abdifatah Elmi (Walhad)").trim()
+        val permission = licenseFile.readText().substringAfter("Reimar Metzen.").trim()
         assertTrue(permission.startsWith("Permission is hereby granted") && permission.endsWith("DEALINGS IN THE\nSOFTWARE."))
         val spaces = Regex("\\s+")
         assertTrue(notice.replace(spaces, " ").contains(permission.replace(spaces, " ")))

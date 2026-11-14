@@ -30,20 +30,27 @@ Then Home shows **LIVE** at the top.
 
 ---
 
-## 2. AI
+## 2. AI (optional)
 
-1. In a browser open `aistudio.google.com/apikey`. Sign in with a Google account. Press
-   **Create API key**. Copy the key. (This is Google Gemini. It has a free level.)
-2. Open the app → **More** → **AI**. Choose **Gemini**. Paste the key. Press **Save**.
-3. Open **Analysis**. Go down to "Ask an AI". Choose the language (English, Somali,
-   Arabic). Press **Ask the AI now**.
+The app asks an AI to explain your numbers in plain words. The AI is Google Gemini, and it
+has **a free level: no card, no payment**. The key must be **your own** — a key belongs to
+the account that made it, and the app cannot carry a key of its own.
 
-The answer comes in the app after some seconds.
+1. In the app: **More** → **AI** → press **Get a free key**. The browser opens on
+   `aistudio.google.com/apikey`.
+2. Sign in with a Google account → **Create API key** → copy the key (a long text that
+   starts with `AIza`).
+3. Back in the app: choose **Gemini**, paste the key into the field, press **Save**.
+4. Open **Analysis** → go down to "Ask an AI" → choose the language (English, Somali,
+   Arabic) → press **Ask the AI now**. The answer comes after some seconds.
 
-- If the app says that the service does not know the model: More → AI → **Find models**,
-  choose one, **Save**.
+The app asks `gemini-3.5-flash-lite`, which is free and takes 500 questions a day. If it
+ever stops working (Google changes the names of its models): **More** → **AI** → **Find
+models**, pick one from the list, **Save**.
+
 - An AI can be wrong. Do not change insulin or medicine because of it.
-- Give the key to nobody.
+- Give the key to nobody. On the free level Google may read what is sent, to make its own
+  products better.
 
 ---
 

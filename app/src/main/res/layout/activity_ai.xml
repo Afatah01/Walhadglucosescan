@@ -111,6 +111,12 @@
                 android:maxLength="120" />
 
             <Button
+                android:id="@+id/aiGetKey"
+                style="@style/TonalButton"
+                android:layout_marginTop="8dp"
+                android:text="@string/ai_get_key" />
+
+            <Button
                 android:id="@+id/aiFindModels"
                 style="@style/OutlineButton"
                 android:layout_marginTop="6dp"

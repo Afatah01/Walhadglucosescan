@@ -1,6 +1,8 @@
 package com.glucosescan.app
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -48,6 +50,7 @@ class AiSetupActivity : BaseActivity() {
             findViewById<EditText>(R.id.aiModel).setText(settings.aiModelInUse)
             findViewById<EditText>(R.id.aiUrl).setText(settings.aiUrlInUse)
         }
+        findViewById<View>(R.id.aiGetKey).setOnClickListener { openKeyPage() }
         findViewById<View>(R.id.aiFindModels).setOnClickListener { findModels() }
         findViewById<View>(R.id.aiSave).setOnClickListener { save() }
         findViewById<View>(R.id.aiRemove).setOnClickListener { remove() }
@@ -83,6 +86,28 @@ class AiSetupActivity : BaseActivity() {
     private fun keyInUse(): String {
         val typed = findViewById<EditText>(R.id.aiKey).text.toString().trim()
         return if (typed.isNotEmpty() || provider != settings.aiProvider) typed else settings.aiKey
+    }
+
+    /**
+     * Opens the page where the user makes a key, in the browser. The app never has a key of
+     * its own: a key belongs to the person who made it, and a shared key would stop working
+     * the moment somebody used it up.
+     */
+    private fun openKeyPage() {
+        val page = when (settings.aiProvider) {
+            AiProvider.GEMINI -> "https://aistudio.google.com/apikey"
+            AiProvider.OPENAI -> "https://platform.openai.com/api-keys"
+            AiProvider.OTHER -> null
+        }
+        if (page == null) {
+            say(getString(R.string.ai_help_other), false)
+            return
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(page)))
+        } catch (e: android.content.ActivityNotFoundException) {
+            say(getString(R.string.ai_key_open_failed), true)
+        }
     }
 
     private fun url(): String = findViewById<EditText>(R.id.aiUrl).text.toString().trim().trimEnd('/')

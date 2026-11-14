@@ -20,8 +20,8 @@ android {
         applicationId = "com.glucosescan.app"
         minSdk = 23
         targetSdk = 34
-        versionCode = 8
-        versionName = "4.1.0"
+        versionCode = 9
+        versionName = "4.2.0"
     }
 
     signingConfigs {

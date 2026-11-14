@@ -419,11 +419,8 @@ class LiveService : Service(), SessionHost {
             notifications()?.notify(LiveNotifications.ID_ALARM, LiveNotifications.alarm(this, sound, current, stateWords(), unit()))
             val sentence = SpeechText.alarm(sound, current.shown, unit())
             val short = if (sound == AlarmKind.NO_DATA || current.shown == null) "" else SpeechText.number(current.shown!!, unit())
-            sounder.play {
-                if (settings.speakAlarms) {
-                    Speaker.get(this).say(sentence, short)
-                }
-            }
+            // no ringtone: the alarm vibrates and the voice says what it is about
+            sounder.play(words = if (settings.speakAlarms) sentence else null, short = short)
         } else if (reason == null && alarmShown != null) {
             // the reason is gone: take the alarm away
             alarmShown = null

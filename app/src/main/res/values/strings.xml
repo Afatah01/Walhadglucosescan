@@ -276,6 +276,7 @@
     <string name="alarm_high_up">Make the high alarm limit bigger</string>
     <string name="alarms_how_title">How an alarm sounds</string>
     <string name="alarms_how">An alarm rings for 20 seconds with the alarm tone and the alarm volume of the phone, and the phone vibrates. While the reason stays, it rings again every 15 minutes. \"Silence\" on the notification keeps that alarm quiet for 30 minutes.\n\nThe low alarm also rings when the sensor value without your correction is below the limit.</string>
+    <string name="alarms_test_words">This is how an alarm sounds. Your glucose is low.</string>
     <string name="alarms_test">Test the alarm sound</string>
     <string name="alarms_test_stop">Stop the sound</string>
     <string name="alarms_warning">These alarms are a help only. They are not as sure as the alarms of a medical device. When the phone sleeps, the alarm \"no values\" can come some minutes late.</string>
@@ -631,6 +632,12 @@
     <string name="ai_url_hint">https://…/v1</string>
     <string name="ai_model_label">Model</string>
     <string name="ai_model_hint">Name of the model</string>
+    <string name="ai_get_key">Get a free key</string>
+    <string name="ai_help_gemini_short">Google Gemini, free. Press the button, sign in with a
+        Google account, press "Create API key", copy the key and paste it above. Nothing is
+        paid, and nothing has to be paid for later.</string>
+    <string name="ai_key_open_failed">No browser on this phone. Open aistudio.google.com/apikey
+        yourself.</string>
     <string name="ai_find_models">Find models</string>
     <string name="ai_finding_models">Asking the service…</string>
     <string name="ai_models_title">Choose a model</string>

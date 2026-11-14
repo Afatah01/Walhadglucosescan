@@ -26,6 +26,11 @@ value in two ways: you **scan** the sensor with the phone (NFC), or the app **fe
 values from LibreLinkUp** over the internet, one each minute, while the sensor stays
 connected to FreeStyle LibreLink.
 
+New in version 4.2: **the app speaks with a man's voice, and no ringtone is played any
+more.** An alarm vibrates and *says* what it is about, every nine seconds, for half a
+minute. The report carries "Powered by: Abdifatah Elmi" at the bottom of both pages. The
+AI now asks a model that really exists (see "Version 4.2" below).
+
 New in version 4.1: **a new look.** Calm, light screens with one brand colour; the app's
 own letters (Inter), so that it looks the same on every phone; "More" as three short
 lists; fields and buttons of one kind. The button "Correct the value" left the Home screen
@@ -885,6 +890,24 @@ Android SDK, and `source tools/env.sh` sets the paths. On a machine with little 
     "Off", in place of eleven coloured buttons.
   - **Fields.** A field to type in has an edge that turns blue while it is in use.
   - The line "Powered by Abdifatah Elmi" stands at the end of Home and More, and on About.
+- Version 4.2 changed the voice, the alarm sound, the end of the report and the AI:
+  - **A man's voice.** `ui/VoiceChoice.kt` reads the names of the voices the phone offers and
+    takes the best man's voice for the language in use (`ui/Speaker.kt`). If the phone has
+    none, the voice it has is put a little deeper (pitch 0.88). Voices that need the internet
+    are left out.
+  - **No ringtone and no beep.** `live/AlarmSounder.kt` vibrates and speaks the words of the
+    alarm, again after nine seconds, and stops after thirty. The words are the same sentences
+    as before ("Low glucose alarm. 60."). A phone with no voice only vibrates.
+  - **The report** ends with the line `Powered by: Abdifatah Elmi` on both pages, under the
+    careful words; `ReportRenderer.CREDIT` holds it.
+  - **The AI really works.** The model written into the app was never a real one
+    (`gemini-4-hydrogen`). It is now `gemini-3.5-flash-lite`, which Google gives away free of
+    charge and which takes 500 questions a day. The AI screen has a button **Get a free key**
+    that opens the page where a key is made, because a key has to be the user's own.
+  Checked in the finished APK as before (`tools/compare_dex.py`, 4.1 against 4.2): every
+  class of `core/` (77), `linkup/` (18), `nfc/` (19), `cloud/` (12), `net/` (8), `ai/` (7)
+  and `ble/` (29) is the same. What differs is `AlarmSounder`, `Speaker` with the new
+  `VoiceChoice`, `ReportRenderer`, `AiProvider` and the screens.
 - Version 4.1 changed the look and nothing else. Checked in the finished APK as before
   (`tools/compare_dex.py`, version 4.0 against 4.1): every compiled class of `libre/`
   (26), `core/` (77), `linkup/` (18), `nfc/` (18), `cloud/` (12), `net/` (8) and `ai/`

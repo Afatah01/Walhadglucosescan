@@ -609,7 +609,7 @@ class OnlineScreensTest {
     fun settingUpGemini() {
         val screen = open(AiSetupActivity::class.java)
         assertTrue(screen.findViewById<View>(R.id.aiGemini).isSelected)
-        assertEquals("gemini-4-hydrogen", text(screen, R.id.aiModel))
+        assertEquals("gemini-3.5-flash-lite", text(screen, R.id.aiModel))
         assertFalse("Google's address is known: it is not asked for", isShown(screen, R.id.aiUrl))
         assertTrue(text(screen, R.id.aiHelp).contains("aistudio.google.com/apikey"))
         assertFalse(isShown(screen, R.id.aiRemove))
@@ -625,7 +625,7 @@ class OnlineScreensTest {
         assertTrue(settings.aiReady)
         assertEquals(AiProvider.GEMINI, settings.aiProvider)
         assertEquals("KEY-123", settings.aiKey)
-        assertEquals("gemini-4-hydrogen", settings.aiModelInUse)
+        assertEquals("gemini-3.5-flash-lite", settings.aiModelInUse)
         assertEquals("https://generativelanguage.googleapis.com/v1beta", settings.aiUrlInUse)
         assertEquals("the key does not stay on the screen", "", text(screen, R.id.aiKey))
         assertTrue(isShown(screen, R.id.aiKeySaved))
@@ -750,7 +750,7 @@ class OnlineScreensTest {
 
         // what went to the service
         val request = server.last
-        assertEquals("https://generativelanguage.googleapis.com/v1beta/models/gemini-4-hydrogen:generateContent", request.url)
+        assertEquals("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", request.url)
         assertEquals("KEY-123", request.headers["x-goog-api-key"])
         val body = JSONObject(request.body!!)
         val rules = body.getJSONObject("system_instruction").getJSONArray("parts").getJSONObject(0).getString("text")
@@ -765,7 +765,7 @@ class OnlineScreensTest {
         // the answer
         assertTrue(isShown(screen, R.id.aiAnswerBox))
         assertTrue(text(screen, R.id.aiAnswer).startsWith("Your glucose was in range most of the time."))
-        assertEquals("2:32 PM · gemini-4-hydrogen", text(screen, R.id.aiAnswerMeta))
+        assertEquals("2:32 PM · gemini-3.5-flash-lite", text(screen, R.id.aiAnswerMeta))
         assertTrue(words(screen).contains("An AI can be wrong. Do not change insulin or medicine because of this. Ask your doctor."))
         assertFalse(isShown(screen, R.id.aiAskState))
         scrollTo(screen, R.id.aiCard, 150)
@@ -775,7 +775,7 @@ class OnlineScreensTest {
         now += 30 * minute
         val later = open(AnalysisActivity::class.java)
         assertTrue(isShown(later, R.id.aiAnswerBox))
-        assertEquals("2:32 PM · gemini-4-hydrogen", text(later, R.id.aiAnswerMeta))
+        assertEquals("2:32 PM · gemini-3.5-flash-lite", text(later, R.id.aiAnswerMeta))
     }
 
     @Test

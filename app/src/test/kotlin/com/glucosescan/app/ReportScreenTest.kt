@@ -453,6 +453,8 @@ class ReportScreenTest {
         assertEquals(2, words.count { it.startsWith("Walhad Glucose Scan 4.0.0. This app is not a medical device") })
         assertTrue(words.contains("Page 1 of 2"))
         assertTrue(words.contains("Page 2 of 2"))
+        assertEquals("the name of the maker stands at the bottom of both pages", 2, words.count { it == ReportRenderer.CREDIT })
+        assertEquals("Powered by: Abdifatah Elmi", ReportRenderer.CREDIT)
 
         // nothing about the person is on the paper
         assertFalse(all.contains(ReportTesting.SERIAL))

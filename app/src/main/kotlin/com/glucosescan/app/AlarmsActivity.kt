@@ -57,7 +57,9 @@ class AlarmsActivity : BaseActivity() {
                 test.setText(R.string.alarms_test)
             } else {
                 test.setText(R.string.alarms_test_stop)
-                sound.play(TEST_MILLIS) { test.setText(R.string.alarms_test) }
+                sound.play(TEST_MILLIS, words = getString(R.string.alarms_test_words)) {
+                    test.setText(R.string.alarms_test)
+                }
             }
         }
         ready = true

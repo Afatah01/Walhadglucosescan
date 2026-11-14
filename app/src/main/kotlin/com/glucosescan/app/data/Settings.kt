@@ -177,7 +177,8 @@ enum class LinkUpState {
 /** Which kind of AI service the app talks to. The code is what is saved. */
 enum class AiProvider(val code: String, val defaultUrl: String, val defaultModel: String) {
     /** Google Gemini, asked the way Google describes it. */
-    GEMINI("gemini", "https://generativelanguage.googleapis.com/v1beta", "gemini-4-hydrogen"),
+    // gemini-3.5-flash-lite: free of charge, and it takes 500 questions a day
+    GEMINI("gemini", "https://generativelanguage.googleapis.com/v1beta", "gemini-3.5-flash-lite"),
 
     /** OpenAI (ChatGPT). */
     OPENAI("openai", "https://api.openai.com/v1", ""),

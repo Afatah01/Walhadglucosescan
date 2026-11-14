@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Makes one picture that shows the screens of version 4.1 side by side.
+"""Makes one picture that shows the screens of version 4.2 side by side.
 
 Usage: python3 tools/make_screens_sheet.py OUTPUT.png
 
@@ -21,7 +21,7 @@ INK = (20, 28, 46)
 BLUE = (11, 95, 214)
 FRAME = (200, 210, 228)
 
-TITLE = "Walhad Glucose Scan 4.1  \u00b7  The new look"
+TITLE = "Walhad Glucose Scan 4.2  \u00b7  Voice, report, new look"
 
 # file, number, two lines of words, and how the picture is shown:
 #   True   the top of the screen and the bar at its bottom

@@ -14,7 +14,8 @@ import android.speech.tts.UtteranceProgressListener
 import java.util.Locale
 
 /**
- * Says texts aloud with the voice of the phone (text-to-speech).
+ * Says texts aloud with the voice of the phone (text-to-speech), with **a man's voice** if
+ * the phone has one, so that the app always sounds the same.
  *
  * The app writes English sentences. If the voice of the phone has no English, only the number
  * is said, in the language of the phone. If the phone has no voice at all, nothing is said and
@@ -101,16 +102,19 @@ class Speaker private constructor(context: Context) {
             return
         }
         var english = false
+        var spoken = Locale.getDefault()
         try {
             for (locale in listOf(Locale.US, Locale.UK, Locale.ENGLISH)) {
                 if (current.setLanguage(locale) >= TextToSpeech.LANG_AVAILABLE) {
                     english = true
+                    spoken = locale
                     break
                 }
             }
             if (!english) {
-                current.setLanguage(Locale.getDefault())
+                current.setLanguage(spoken)
             }
+            chooseVoice(current, spoken)
             current.setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -158,6 +162,29 @@ class Speaker private constructor(context: Context) {
             giveBackFocus()
             shutDown()
             setStatus(Status.STARTING)
+        }
+    }
+
+    /**
+     * Takes a man's voice for [language] if the phone has one, so that the app sounds the
+     * same on every phone. If it has none, the voice it has is put a little deeper.
+     */
+    private fun chooseVoice(engine: TextToSpeech, language: Locale) {
+        val offered = try {
+            engine.voices
+        } catch (e: RuntimeException) {
+            null
+        }
+        val picked = offered?.let { VoiceChoice.pick(it.map { voice -> VoiceCandidate(voice) }, language.language) }
+        try {
+            val voice = picked?.let { chosen -> offered?.firstOrNull { it.name == chosen.name } }
+            if (voice != null) {
+                engine.setVoice(voice)
+            } else {
+                engine.setPitch(DEEPER_PITCH)
+            }
+        } catch (e: RuntimeException) {
+            // this voice will not change: keep the one the phone chose
         }
     }
 
@@ -214,6 +241,9 @@ class Speaker private constructor(context: Context) {
     }
 
     companion object {
+        /** How much deeper a voice is put when the phone has no man's voice. */
+        const val DEEPER_PITCH = 0.88f
+
         // no leak: the speaker keeps the context of the app, not of a screen
         @SuppressLint("StaticFieldLeak")
         @Volatile
