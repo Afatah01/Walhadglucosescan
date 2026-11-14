@@ -3,101 +3,167 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Walhad Glucose Scan — read your Libre sensor with your phone</title>
-<meta name="description" content="An Android app for the FreeStyle Libre sensor: scan with NFC or get a value each minute from LibreLinkUp, with alarms, 14-day charts and PDF reports.">
+<title>Walhad Glucose Scan — your Libre values on your phone, free</title>
+<meta name="description" content="Free Android app for the FreeStyle Libre sensor. Scan with your phone or get a value every minute. Alarms before a low, 14-day charts, PDF reports. No ads, no account, no tracking.">
 <style>
-  :root { --blue:#0B5ED7; --ink:#111827; --soft:#5b6472; --line:#e5e7eb; --bg:#ffffff; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-         color:var(--ink); background:var(--bg); line-height:1.55; }
-  .wrap { max-width: 900px; margin:0 auto; padding: 0 20px; }
-  header { background:var(--blue); color:#fff; padding: 42px 0 46px; text-align:center; }
-  header img { width:110px; height:110px; border-radius:24px; background:#fff; padding:8px; }
-  h1 { margin:16px 0 6px; font-size:30px; line-height:1.25; }
-  header p { margin:0; color:#dbe7ff; font-size:17px; }
-  .btn { display:inline-block; margin-top:22px; background:#fff; color:var(--blue);
-         font-weight:700; font-size:18px; padding:15px 30px; border-radius:12px; text-decoration:none; }
-  .small { color:#dbe7ff; font-size:13px; margin-top:12px; }
-  h2 { font-size:22px; margin:38px 0 8px; }
-  ul { padding-left:20px; margin:8px 0; }
-  li { margin:6px 0; }
-  p.soft { color:var(--soft); }
-  .cards { display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; }
-  .card { flex:1 1 240px; border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
-  .card b { display:block; margin-bottom:4px; }
-  .shots { display:flex; gap:14px; overflow-x:auto; padding:10px 0 4px; }
-  .shots img { height:460px; border:1px solid var(--line); border-radius:14px; }
-  .note { background:#fff7ed; border:1px solid #fed7aa; border-radius:14px; padding:16px 18px; margin-top:26px; }
-  footer { margin:46px 0 34px; border-top:1px solid var(--line); padding-top:18px; color:var(--soft); font-size:14px; }
-  a { color:var(--blue); }
+  :root { --blue:#0B5ED7; --deep:#072f6b; --ink:#101827; --soft:#5b6472; --line:#e6e9ef; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+         color:var(--ink); background:#fff; line-height:1.55; -webkit-text-size-adjust:100%; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 20px; }
+  a.btn { display:inline-block; text-decoration:none; font-weight:800; border-radius:14px; }
+
+  /* ---------- the advert ---------- */
+  .hero { background:linear-gradient(160deg,#0B5ED7 0%,#072f6b 100%); color:#fff;
+          padding:38px 0 0; text-align:center; }
+  .badge { display:inline-block; background:rgba(255,255,255,.16); color:#eaf1ff;
+           font-size:13px; font-weight:700; letter-spacing:.4px; padding:7px 14px;
+           border-radius:999px; margin-bottom:16px; }
+  .hero h1 { font-size:38px; line-height:1.15; margin:0 0 14px; font-weight:800; }
+  .hero h1 span { color:#8fc2ff; }
+  .hero p.lead { font-size:18px; color:#d5e4ff; margin:0 auto 26px; max-width:640px; }
+  .hero a.btn { background:#fff; color:var(--deep); font-size:20px; padding:18px 42px;
+                box-shadow:0 10px 24px rgba(0,0,0,.28); }
+  .hero .under { color:#bfd6ff; font-size:13.5px; margin:14px 0 0; }
+  .hero .strip { display:flex; flex-wrap:wrap; justify-content:center; gap:26px;
+                 margin:26px 0 0; padding:18px 0; background:rgba(255,255,255,.08); }
+  .hero .strip b { display:block; font-size:15px; }
+  .hero .strip span { font-size:12.5px; color:#c3d9ff; }
+  .hero img.phone { display:block; margin:0 auto; width:min(300px,72%);
+                    margin-top:-1px; border-radius:16px 16px 0 0; }
+
+  h2 { font-size:26px; margin:44px 0 6px; font-weight:800; }
+  h2 + p.sub { color:var(--soft); margin:0 0 18px; font-size:16.5px; }
+
+  .cards { display:flex; flex-wrap:wrap; gap:16px; margin-top:16px; }
+  .card { flex:1 1 270px; border:1px solid var(--line); border-radius:16px; padding:20px;
+          background:#fff; box-shadow:0 2px 6px rgba(16,24,39,.04); }
+  .card .ico { font-size:26px; line-height:1; margin-bottom:8px; }
+  .card b { display:block; font-size:17.5px; margin-bottom:4px; }
+  .card span { color:var(--soft); font-size:15px; }
+
+  .reasons { display:flex; flex-wrap:wrap; gap:14px; margin-top:14px; }
+  .reason { flex:1 1 220px; background:#f4f8ff; border-radius:14px; padding:16px 18px; }
+  .reason b { display:block; margin-bottom:2px; }
+  .reason span { color:var(--soft); font-size:14.5px; }
+
+  .shots { display:flex; gap:14px; overflow-x:auto; padding:12px 2px 6px; }
+  .shots img { height:440px; border:1px solid var(--line); border-radius:16px;
+               box-shadow:0 3px 10px rgba(16,24,39,.08); }
+
+  .cta { margin:46px 0 0; background:linear-gradient(120deg,#0B5ED7,#072f6b); color:#fff;
+         border-radius:20px; padding:34px 26px; text-align:center; }
+  .cta h3 { margin:0 0 8px; font-size:25px; font-weight:800; }
+  .cta p { margin:0 0 20px; color:#d5e4ff; }
+  .cta a.btn { background:#fff; color:var(--deep); font-size:19px; padding:16px 38px; }
+  .cta .ver { display:block; color:#bfd6ff; font-size:13px; margin-top:14px; }
+
+  .note { background:#fff7ed; border:1px solid #fed7aa; border-radius:16px;
+          padding:16px 18px; margin-top:28px; font-size:15px; }
+
+  footer { margin:40px 0 30px; padding-top:16px; border-top:1px solid var(--line);
+           color:var(--soft); font-size:14px; text-align:center; }
+  footer b { color:var(--ink); }
 </style>
 </head>
 <body>
 
-<header>
+<div class="hero">
   <div class="wrap">
-    <img src="brand/walhad-logo.png" alt="Walhad Glucose Scan logo">
-    <h1>Walhad Glucose Scan</h1>
-    <p>Read your FreeStyle Libre sensor with your phone — by scanning, or by itself, every minute.</p>
+    <div class="badge">FREE · NO ADS · NO ACCOUNT</div>
+    <h1>Your Libre values,<br><span>on your phone, always.</span></h1>
+    <p class="lead">Scan your FreeStyle Libre sensor with the phone — or let the number come
+      by itself, every single minute. Alarms before a low, 14-day charts, and a report you
+      can hand to your doctor.</p>
     <a class="btn" href="https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.1.0/Walhad-GlucoseScan-v4.1.apk">
-      Download the app (4.1)
+      ⬇ Download free — 1.7 MB
     </a>
-    <div class="small">Android 6.0 or newer · 1.7 MB · free and open source</div>
+    <p class="under">Android 6.0 or newer · installs in 10 seconds · no sign-up, no tracking</p>
+
+    <div class="strip">
+      <div><b>Scan</b><span>one touch, one second</span></div>
+      <div><b>Live</b><span>a value every minute</span></div>
+      <div><b>Alarms</b><span>before you go low</span></div>
+      <div><b>Reports</b><span>PDF for your doctor</span></div>
+    </div>
+    <img class="phone" src="screenshots/40-home.png" alt="Walhad Glucose Scan on a phone">
   </div>
-</header>
+</div>
 
 <div class="wrap">
 
-  <h2>What it does</h2>
+  <h2>Everything you need. Nothing you don't.</h2>
+  <p class="sub">Built for one thing: seeing your glucose without fuss.</p>
   <div class="cards">
-    <div class="card"><b>Scan with the phone</b>Hold the phone on the sensor. The value, the arrow and the time come at once.</div>
-    <div class="card"><b>Values by themselves</b>One value each minute from LibreLinkUp, or from the sensor over Bluetooth. LibreLink keeps its alarms.</div>
-    <div class="card"><b>Alarms before a low</b>A warning before the value goes low, with sound, vibration and speech.</div>
-    <div class="card"><b>Charts and reports</b>14 days, time in range, statistics, and a PDF report you can send to your doctor.</div>
-    <div class="card"><b>Your data stays yours</b>Everything is on the phone. The three online parts are off until you switch them on.</div>
-    <div class="card"><b>Optional: AI explanation</b>Ask for a plain explanation of your numbers, in English, Somali or Arabic.</div>
+    <div class="card">
+      <div class="ico">📱</div><b>Scan with the phone</b>
+      <span>Hold the phone on the sensor. Value, arrow and time appear at once — no reader,
+        no extra device.</span>
+    </div>
+    <div class="card">
+      <div class="ico">🔄</div><b>Values by themselves</b>
+      <span>One value each minute from LibreLinkUp, or straight from the sensor over
+        Bluetooth. LibreLink keeps its alarms.</span>
+    </div>
+    <div class="card">
+      <div class="ico">🔔</div><b>A warning before a low</b>
+      <span>The app sees the curve going down and speaks before it happens — with sound,
+        vibration and voice.</span>
+    </div>
+    <div class="card">
+      <div class="ico">📊</div><b>Charts that tell the truth</b>
+      <span>14 days, time in range, day and night, and what your last hours really looked
+        like.</span>
+    </div>
+    <div class="card">
+      <div class="ico">📄</div><b>A report in one tap</b>
+      <span>A clean PDF with the curve, the numbers and the patterns. Print it or send it
+        to your doctor.</span>
+    </div>
+    <div class="card">
+      <div class="ico">🔒</div><b>Your data stays yours</b>
+      <span>Everything lives on the phone. The three online parts stay off until you switch
+        them on yourself.</span>
+    </div>
   </div>
 
-  <h2>The app</h2>
+  <h2>Take a look inside</h2>
   <div class="shots">
-    <img src="screenshots/40-home.png" alt="Home screen with the current value">
-    <img src="screenshots/21-statistics.png" alt="Statistics screen">
-    <img src="screenshots/60-more.png" alt="More screen">
+    <img src="screenshots/40-home.png" alt="Home screen">
+    <img src="screenshots/21-statistics.png" alt="Statistics">
+    <img src="screenshots/60-more.png" alt="More">
     <img src="screenshots/report-page-1.png" alt="The PDF report">
   </div>
 
-  <h2>How to install</h2>
-  <ul>
-    <li>Tap <b>Download the app</b> above. The file <b>Walhad-GlucoseScan-v4.1.apk</b> downloads.</li>
-    <li>Open the file. Android asks <b>“Allow from this source”</b> — allow it for your browser.</li>
-    <li>Press <b>Install</b>, then <b>Open</b>. Read the safety notice once and accept it.</li>
-  </ul>
-  <p class="soft">The app is not on Google Play. It is signed with one key, so new versions install over old
-  ones without losing your values.</p>
+  <h2>Why people keep it</h2>
+  <div class="reasons">
+    <div class="reason"><b>Free, and stays free</b><span>No ads, no subscription, no account.
+      Open source — anyone can read the code.</span></div>
+    <div class="reason"><b>Works with your sensor</b><span>FreeStyle Libre 1, 2 and 2 Plus
+      (European type). Nothing extra to buy.</span></div>
+    <div class="reason"><b>Speaks your language</b><span>The numbers and the warnings are
+      read out loud in English, Somali or Arabic.</span></div>
+    <div class="reason"><b>Made by one person</b><span>Abdifatah Elmi, for the people around
+      him who check their glucose every day.</span></div>
+  </div>
 
-  <h2>Set it up in ten minutes</h2>
-  <ul>
-    <li><b>Values by themselves (LibreLinkUp):</b> in LibreLink, share your data with an e-mail,
-      accept the invitation, then in this app: More → Values from LibreLinkUp → log in.</li>
-    <li><b>Online copy:</b> make a free project at supabase.com, run the set-up text the app gives
-      you, and paste the project URL and key into the app. Your values then survive a lost phone.</li>
-    <li><b>AI (optional):</b> a key from aistudio.google.com.</li>
-  </ul>
-  <p class="soft">The steps are written out one by one in the repository:
-  <a href="https://github.com/Afatah01/Walhadglucosescan/blob/main/docs/SET-UP.md">SET-UP.md</a> (LibreLinkUp, AI, online copy) and
-  <a href="https://github.com/Afatah01/Walhadglucosescan/blob/main/docs/WHERE-TO-DEPLOY.md">WHERE-TO-DEPLOY.md</a> (which free plan to use and why).
-  A beginner's order is in <a href="https://github.com/Afatah01/Walhadglucosescan/blob/main/docs/START-HERE.md">START-HERE.md</a>.</p>
+  <div class="cta">
+    <h3>Get it on your phone now</h3>
+    <p>1.7 MB · Android 6.0+ · free</p>
+    <a class="btn" href="https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.1.0/Walhad-GlucoseScan-v4.1.apk">
+      ⬇ Download Walhad Glucose Scan
+    </a>
+    <span class="ver">Version 4.1 · updates install over the old one, your values stay</span>
+  </div>
 
   <div class="note">
-    <b>Read this.</b> This app is not a medical device. It was never tried with the real LibreLinkUp,
-    AI or Supabase services, and it does not replace your meter or your doctor. Keep LibreLink and its
-    alarms on. Never change insulin or medicine because of a number in this app.
+    <b>Please read.</b> This app is not a medical device. Keep LibreLink and its alarms on,
+    and never change insulin or medicine because of a number in this app. The online parts
+    were tested with pretended services, not the real ones.
   </div>
 
   <footer>
-    Walhad Glucose Scan 4.1 · Powered by Abdifatah Elmi · MIT licence ·
-    <a href="https://github.com/Afatah01/Walhadglucosescan">Source code on GitHub</a><br>
-    The letters of the app are Inter (SIL Open Font License).
+    <b>Walhad Glucose Scan 4.1</b> — Powered by Abdifatah Elmi · MIT licence
   </footer>
 
 </div>
