@@ -654,7 +654,7 @@ medical device, and it does not make the numbers equal.
 
 ## What was tested, and what was not
 
-Everything below ran on a computer. 602 automatic tests, all pass.
+Everything below ran on a computer. 603 automatic tests, all pass.
 
 | Tested | How |
 |---|---|
@@ -762,6 +762,15 @@ forecast, the analysis, the daily report with its PDF writer, everything about h
 Android's Bluetooth and background work are used, and everything that uses the internet
 (LibreLinkUp, the AI, the online copy).
 
+## Building the app on GitHub
+
+`docs/github-actions-build.yml` is a ready-made GitHub Actions file. Copy it to
+`.github/workflows/build.yml` and push: from then on every push runs the tests, checks the
+code and builds the app file, which you can download from the "Actions" page of the
+repository. (It is kept outside `.github/` because adding a workflow file needs a token
+with the extra `workflow` permission.) The built file is not signed with your key, so it
+is for trying out, not for publishing.
+
 ## Building the app
 
 With Android Studio: open this folder, wait for the sync, then Build → Build APK.
@@ -857,7 +866,14 @@ Android SDK, and `source tools/env.sh` sets the paths. On a machine with little 
     "Off", in place of eleven coloured buttons.
   - **Fields.** A field to type in has an edge that turns blue while it is in use.
   - The line "Powered by Abdifatah Elmi" stands at the end of Home and More, and on About.
-  @@DEX41@@
+- Version 4.1 changed the look and nothing else. Checked in the finished APK as before
+  (`tools/compare_dex.py`, version 4.0 against 4.1): every compiled class of `libre/`
+  (26), `core/` (77), `linkup/` (18), `nfc/` (18), `cloud/` (12), `net/` (8) and `ai/`
+  (7) is the same as in version 4.0, except that six classes of `nfc/`, `ble/`,
+  `live/` and `ui/` now ask `AppFont` for a call where they asked `Speaker` before
+  (`ScanRunner`, `AndroidBleLink`, `AlarmSounder`, `LiveNotifications`, `LiveService`,
+  `PulseDotView`: two or three lines each, the rest of the class is the same). What
+  really differs is the screens, the three charts and the report.
 - Version 1.3 added "Correct the value": `core/Correction.kt` (the numbers and the rules)
   and the screen `CorrectionActivity`. Reading and decoding the sensor are the same code
   as before; the stored values are still the values of the formula. This was checked in the
