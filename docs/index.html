@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walhad Glucose Scan — read your Libre sensor with your phone</title>
+<meta name="description" content="An Android app for the FreeStyle Libre sensor: scan with NFC or get a value each minute from LibreLinkUp, with alarms, 14-day charts and PDF reports.">
+<style>
+  :root { --blue:#0B5ED7; --ink:#111827; --soft:#5b6472; --line:#e5e7eb; --bg:#ffffff; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+         color:var(--ink); background:var(--bg); line-height:1.55; }
+  .wrap { max-width: 900px; margin:0 auto; padding: 0 20px; }
+  header { background:var(--blue); color:#fff; padding: 42px 0 46px; text-align:center; }
+  header img { width:110px; height:110px; border-radius:24px; background:#fff; padding:8px; }
+  h1 { margin:16px 0 6px; font-size:30px; line-height:1.25; }
+  header p { margin:0; color:#dbe7ff; font-size:17px; }
+  .btn { display:inline-block; margin-top:22px; background:#fff; color:var(--blue);
+         font-weight:700; font-size:18px; padding:15px 30px; border-radius:12px; text-decoration:none; }
+  .small { color:#dbe7ff; font-size:13px; margin-top:12px; }
+  h2 { font-size:22px; margin:38px 0 8px; }
+  ul { padding-left:20px; margin:8px 0; }
+  li { margin:6px 0; }
+  p.soft { color:var(--soft); }
+  .cards { display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; }
+  .card { flex:1 1 240px; border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+  .card b { display:block; margin-bottom:4px; }
+  .shots { display:flex; gap:14px; overflow-x:auto; padding:10px 0 4px; }
+  .shots img { height:460px; border:1px solid var(--line); border-radius:14px; }
+  .note { background:#fff7ed; border:1px solid #fed7aa; border-radius:14px; padding:16px 18px; margin-top:26px; }
+  footer { margin:46px 0 34px; border-top:1px solid var(--line); padding-top:18px; color:var(--soft); font-size:14px; }
+  a { color:var(--blue); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <img src="brand/walhad-logo.png" alt="Walhad Glucose Scan logo">
+    <h1>Walhad Glucose Scan</h1>
+    <p>Read your FreeStyle Libre sensor with your phone — by scanning, or by itself, every minute.</p>
+    <a class="btn" href="https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.1.0/Walhad-GlucoseScan-v4.1.apk">
+      Download the app (4.1)
+    </a>
+    <div class="small">Android 6.0 or newer · 1.7 MB · free and open source</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>What it does</h2>
+  <div class="cards">
+    <div class="card"><b>Scan with the phone</b>Hold the phone on the sensor. The value, the arrow and the time come at once.</div>
+    <div class="card"><b>Values by themselves</b>One value each minute from LibreLinkUp, or from the sensor over Bluetooth. LibreLink keeps its alarms.</div>
+    <div class="card"><b>Alarms before a low</b>A warning before the value goes low, with sound, vibration and speech.</div>
+    <div class="card"><b>Charts and reports</b>14 days, time in range, statistics, and a PDF report you can send to your doctor.</div>
+    <div class="card"><b>Your data stays yours</b>Everything is on the phone. The three online parts are off until you switch them on.</div>
+    <div class="card"><b>Optional: AI explanation</b>Ask for a plain explanation of your numbers, in English, Somali or Arabic.</div>
+  </div>
+
+  <h2>The app</h2>
+  <div class="shots">
+    <img src="screenshots/40-home.png" alt="Home screen with the current value">
+    <img src="screenshots/21-statistics.png" alt="Statistics screen">
+    <img src="screenshots/60-more.png" alt="More screen">
+    <img src="screenshots/report-page-1.png" alt="The PDF report">
+  </div>
+
+  <h2>How to install</h2>
+  <ul>
+    <li>Tap <b>Download the app</b> above. The file <b>Walhad-GlucoseScan-v4.1.apk</b> downloads.</li>
+    <li>Open the file. Android asks <b>“Allow from this source”</b> — allow it for your browser.</li>
+    <li>Press <b>Install</b>, then <b>Open</b>. Read the safety notice once and accept it.</li>
+  </ul>
+  <p class="soft">The app is not on Google Play. It is signed with one key, so new versions install over old
+  ones without losing your values.</p>
+
+  <h2>Set it up in ten minutes</h2>
+  <ul>
+    <li><b>Values by themselves (LibreLinkUp):</b> in LibreLink, share your data with an e-mail,
+      accept the invitation, then in this app: More → Values from LibreLinkUp → log in.</li>
+    <li><b>Online copy:</b> make a free project at supabase.com, run the set-up text the app gives
+      you, and paste the project URL and key into the app. Your values then survive a lost phone.</li>
+    <li><b>AI (optional):</b> a key from aistudio.google.com.</li>
+  </ul>
+  <p class="soft">The steps are written out one by one in the repository, in
+  <code>Walhad-GlucoseScan-v4.1-set-up.md</code> and <code>Where-to-deploy-Walhad-online.md</code>.</p>
+
+  <div class="note">
+    <b>Read this.</b> This app is not a medical device. It was never tried with the real LibreLinkUp,
+    AI or Supabase services, and it does not replace your meter or your doctor. Keep LibreLink and its
+    alarms on. Never change insulin or medicine because of a number in this app.
+  </div>
+
+  <footer>
+    Walhad Glucose Scan 4.1 · Powered by Abdifatah Elmi · MIT licence ·
+    <a href="https://github.com/Afatah01/Walhadglucosescan">Source code on GitHub</a><br>
+    The letters of the app are Inter (SIL Open Font License).
+  </footer>
+
+</div>
+</body>
+</html>
