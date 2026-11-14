@@ -62,6 +62,11 @@
   .shots img { height:430px; border:1px solid var(--line); border-radius:18px; scroll-snap-align:start;
                box-shadow:0 6px 18px rgba(15,23,42,.10); }
 
+  .facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;
+            margin-top:26px; padding:22px; border-radius:18px; background:#f6f9ff; text-align:center; }
+  .facts b { display:block; font-size:22px; font-weight:800; color:#0B5ED7; }
+  .facts span { color:var(--soft); font-size:13.5px; }
+
   .cta { margin:52px 0 0; background:radial-gradient(700px 300px at 20% 0%, #2b7bff 0%, transparent 65%),
          linear-gradient(120deg,#0B5ED7,#072f6b); color:#fff; border-radius:24px; padding:40px 26px;
          text-align:center; box-shadow:0 14px 32px rgba(10,60,150,.22); }
@@ -170,17 +175,21 @@
   <h2>Why people keep it</h2>
   <div class="reasons">
     <div class="reason"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B5ED7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      <div><b>Free, and stays free</b><span>No ads, no subscription, no account. The code is open
-        for anyone to read.</span></div></div>
-    <div class="reason"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B5ED7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       <div><b>Works with your sensor</b><span>FreeStyle Libre 1, 2 and 2 Plus (European type).
         Nothing extra to buy.</span></div></div>
     <div class="reason"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B5ED7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       <div><b>Speaks your language</b><span>Numbers and warnings are read out loud in English,
-        Somali or Arabic.</span></div></div>
+        Somali or Arabic, with a man's voice.</span></div></div>
     <div class="reason"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B5ED7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      <div><b>Made by one person</b><span>Abdifatah Elmi, for the people around him who check
-        their glucose every day.</span></div></div>
+      <div><b>Ready in ten seconds</b><span>No account, no sign-in, no setup. Install, scan,
+        done — your values stay on your phone.</span></div></div>
+  </div>
+
+  <div class="facts">
+    <div><b>1.7 MB</b><span>small download</span></div>
+    <div><b>14 days</b><span>of history on screen</span></div>
+    <div><b>1 minute</b><span>between live values</span></div>
+    <div><b>PDF</b><span>report for your doctor</span></div>
   </div>
 
   <div class="cta">
