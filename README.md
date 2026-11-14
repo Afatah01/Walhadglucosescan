@@ -2,7 +2,26 @@
 
 <img src="docs/brand/walhad-logo.png" width="160" alt="Walhad Glucose Scan logo">
 
+## Download the app
+
+[<img src="docs/brand/download-button.png" width="260" alt="Download the app">](https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.1.0/Walhad-GlucoseScan-v4.1.apk)
+
+**Walhad-GlucoseScan-v4.1.apk** — free, 1.7 MB, no account, nothing to pay.
+Android 6.0 or newer. NFC is needed for scanning.
+
+On the phone: tap the button, open the downloaded file, allow "install from this source"
+for your browser, press **Install**. New versions install over old ones without losing
+your values.
+
+| | | |
+| --- | --- | --- |
+| <img src="docs/screenshots/40-home.png" width="200" alt="Home"> | <img src="docs/screenshots/21-statistics.png" width="200" alt="Statistics"> | <img src="docs/screenshots/60-more.png" width="200" alt="More"> |
+
+*This app is not a medical device. Keep LibreLink and its alarms on. It was never tried
+with the real LibreLinkUp, AI or Supabase services — only with pretended ones.*
+
 An Android app for the **FreeStyle Libre 2** sensor (European type). It shows the glucose
+value in two ways: you **scan** the sensor with the phone (NFC), or the app **fetches the It shows the glucose
 value in two ways: you **scan** the sensor with the phone (NFC), or the app **fetches the
 values from LibreLinkUp** over the internet, one each minute, while the sensor stays
 connected to FreeStyle LibreLink.
