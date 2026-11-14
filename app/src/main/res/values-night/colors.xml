@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#0B1018</color>
+    <color name="surface">#151B28</color>
+    <color name="card_stroke">#252E40</color>
+    <color name="chip">#1E2636</color>
+    <color name="outline">#36425A</color>
+    <color name="text">#E9EDF4</color>
+    <color name="text_secondary">#A0ABBD</color>
+    <color name="text_tertiary">#77839A</color>
+
+    <color name="bar">#151B28</color>
+    <color name="bar_dark">#151B28</color>
+    <color name="brand">#2F6FE0</color>
+    <color name="blue">#7DB5FF</color>
+    <color name="brand_soft">#1B2A47</color>
+
+    <color name="red">#F2625F</color>
+    <color name="green">#7ED389</color>
+    <color name="danger_stroke">#6B2B2E</color>
+
+    <color name="grid">#2A3447</color>
+    <color name="chart_band">#2E22A35A</color>
+
+    <color name="scan_card">#151B28</color>
+    <color name="scan_card_stroke">#252E40</color>
+    <color name="notice_card">#2E2610</color>
+    <color name="notice_card_stroke">#5E4C1E</color>
+    <color name="notice_title">#FFD277</color>
+    <color name="disabled">#2A344C</color>
+
+    <color name="dot_live">#4ADE80</color>
+    <color name="dot_waiting">#FFC53D</color>
+    <color name="dot_problem">#FF7B7B</color>
+    <color name="chart_fill">#407DB5FF</color>
+    <color name="chart_fill_end">#007DB5FF</color>
+    <color name="chart_forecast">#7DB5FF</color>
+    <color name="chart_now">#6F7C93</color>
+    <color name="badge_good">#1B3A26</color>
+    <color name="badge_note">#1B2A47</color>
+    <color name="badge_attention">#3D3212</color>
+    <color name="badge_urgent">#4A1F22</color>
+    <color name="state_on">#1B3A26</color>
+    <color name="state_on_text">#7ED389</color>
+</resources>

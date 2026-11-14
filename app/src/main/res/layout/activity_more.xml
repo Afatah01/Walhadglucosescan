@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <!-- Three short lists. MoreActivity fills each row: icon, name, a few words, state. -->
+    <LinearLayout style="@style/Page">
+
+        <TextView
+            style="@style/SectionLabel"
+            android:layout_marginTop="14dp"
+            android:text="@string/more_group_values" />
+
+        <LinearLayout
+            android:id="@+id/groupValues"
+            style="@style/ListCard"
+            android:layout_marginTop="8dp">
+
+            <include
+                android:id="@+id/buttonLinkUp"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonLive"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonAlarms"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonVoice"
+                layout="@layout/row_nav" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/SectionLabel"
+            android:text="@string/more_group_data" />
+
+        <LinearLayout
+            android:id="@+id/groupData"
+            style="@style/ListCard"
+            android:layout_marginTop="8dp">
+
+            <include
+                android:id="@+id/buttonStatistics"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonReadings"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonExport"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonBackup"
+                layout="@layout/row_nav" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/SectionLabel"
+            android:text="@string/more_group_app" />
+
+        <LinearLayout
+            android:id="@+id/groupApp"
+            style="@style/ListCard"
+            android:layout_marginTop="8dp">
+
+            <include
+                android:id="@+id/buttonAi"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonSettings"
+                layout="@layout/row_nav" />
+
+            <include
+                android:id="@+id/buttonAbout"
+                layout="@layout/row_nav" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/more_online_note" />
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/export_note" />
+
+        <TextView
+            android:id="@+id/credit"
+            style="@style/Credit"
+            android:text="@string/powered_by" />
+    </LinearLayout>
+</ScrollView>

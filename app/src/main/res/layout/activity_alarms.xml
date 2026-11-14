@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout style="@style/Page">
+
+        <!-- Alarms need live values: said on a yellow card while live values are off -->
+        <LinearLayout
+            android:id="@+id/alarmsNeedLive"
+            style="@style/Card"
+            android:background="@drawable/card_notice"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/alarms_need_live" />
+
+            <Button
+                android:id="@+id/alarmsOpenLinkUp"
+                style="@style/ColorButton"
+                android:layout_marginTop="10dp"
+                android:text="@string/alarms_open_linkup" />
+
+            <Button
+                android:id="@+id/alarmsOpenLive"
+                style="@style/OutlineButton"
+                android:layout_marginTop="10dp"
+                android:text="@string/alarms_open_live" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <Switch
+                android:id="@+id/alarmLowSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_low_switch"
+                android:textColor="@color/red"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/alarm_low_limit"
+                    android:textColor="@color/text"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/alarmLowMinus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_low_down"
+                    android:text="@string/minus" />
+
+                <TextView
+                    android:id="@+id/alarmLowValue"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/alarmLowPlus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_low_up"
+                    android:text="@string/plus" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <Switch
+                android:id="@+id/alarmHighSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_high_switch"
+                android:textColor="@color/text"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/alarm_high_limit"
+                    android:textColor="@color/text"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/alarmHighMinus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_high_down"
+                    android:text="@string/minus" />
+
+                <TextView
+                    android:id="@+id/alarmHighValue"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/alarmHighPlus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_high_up"
+                    android:text="@string/plus" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/alarm_low_soon_card" />
+
+            <Switch
+                android:id="@+id/alarmLowSoonSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_low_soon_switch" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/alarm_low_soon_note" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/alarm_no_data_title_card" />
+
+            <Switch
+                android:id="@+id/alarmNoDataSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_no_data_switch" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/alarms_how_title" />
+
+            <TextView
+                style="@style/NoteText"
+                android:text="@string/alarms_how" />
+
+            <Button
+                android:id="@+id/alarmsTest"
+                style="@style/TonalButton"
+                android:layout_marginTop="12dp"
+                android:text="@string/alarms_test" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="14dp"
+            android:text="@string/alarms_warning" />
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One finding of the analysis: a word that says how important it is, then the sentence. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="7dp"
+    android:paddingTop="7dp">
+
+    <!-- Only where the row needs a small headline of its own -->
+    <TextView
+        android:id="@+id/caption"
+        style="@style/NoteText"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/level"
+        style="@style/LevelWord" />
+
+    <TextView
+        android:id="@+id/text"
+        style="@style/BodyText"
+        android:layout_marginTop="5dp" />
+</LinearLayout>

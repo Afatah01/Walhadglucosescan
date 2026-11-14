@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout style="@style/Page">
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_spark"
+                android:gravity="center_vertical"
+                android:text="@string/ai_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/ai_setup_what" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/ai_provider_label" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/aiGemini"
+                    style="@style/RangeButton"
+                    android:text="@string/ai_provider_gemini" />
+
+                <TextView
+                    android:id="@+id/aiOpenAi"
+                    style="@style/RangeButton"
+                    android:text="@string/ai_provider_openai" />
+
+                <TextView
+                    android:id="@+id/aiOther"
+                    style="@style/RangeButton"
+                    android:text="@string/ai_provider_other" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/aiHelp"
+                style="@style/NoteText"
+                android:layout_marginTop="10dp" />
+
+            <TextView
+                android:id="@+id/aiUrlLabel"
+                style="@style/NoteText"
+                android:layout_marginTop="12dp"
+                android:labelFor="@+id/aiUrl"
+                android:text="@string/ai_url_label"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/aiUrl"
+                style="@style/Input"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:maxLength="300" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="12dp"
+                android:labelFor="@+id/aiKey"
+                android:text="@string/ai_key_label"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/aiKey"
+                style="@style/Input"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:maxLength="400" />
+
+            <TextView
+                android:id="@+id/aiKeySaved"
+                style="@style/NoteText"
+                android:text="@string/ai_key_saved"
+                android:visibility="gone" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="12dp"
+                android:labelFor="@+id/aiModel"
+                android:text="@string/ai_model_label"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/aiModel"
+                style="@style/Input"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions"
+                android:maxLength="120" />
+
+            <Button
+                android:id="@+id/aiFindModels"
+                style="@style/OutlineButton"
+                android:layout_marginTop="6dp"
+                android:text="@string/ai_find_models" />
+
+            <Button
+                android:id="@+id/aiSave"
+                style="@style/ColorButton"
+                android:layout_marginTop="12dp"
+                android:text="@string/ai_save" />
+
+            <TextView
+                android:id="@+id/aiMessage"
+                style="@style/BodyText"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/aiRemove"
+                style="@style/OutlineButton"
+                android:layout_marginTop="12dp"
+                android:text="@string/ai_remove"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Card"
+            android:background="@drawable/card_notice">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/ai_notice_title"
+                android:textColor="@color/notice_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/ai_notice" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

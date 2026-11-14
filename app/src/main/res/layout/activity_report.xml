@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout style="@style/Page">
+
+        <!-- Which day -->
+        <LinearLayout
+            style="@style/Card"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/dayBefore"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/report_day_before"
+                    android:text="@string/report_arrow_before" />
+
+                <TextView
+                    android:id="@+id/dayLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/dayAfter"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/report_day_after"
+                    android:text="@string/report_arrow_after" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/daySummary"
+                style="@style/NoteText"
+                android:layout_marginTop="6dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/savePdf"
+            style="@style/ColorButton"
+            android:layout_marginTop="12dp"
+            android:drawablePadding="10dp"
+            android:drawableStart="@drawable/ic_save"
+            android:text="@string/report_save" />
+
+        <!-- After the file is saved: open it, or hand it to another app -->
+        <LinearLayout
+            android:id="@+id/savedButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/openPdf"
+                style="@style/OutlineButton"
+                android:layout_width="0dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="@string/report_open" />
+
+            <Button
+                android:id="@+id/sharePdf"
+                style="@style/OutlineButton"
+                android:layout_width="0dp"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="@string/report_share" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/reportMessage"
+            style="@style/BodyText"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="@color/green"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/reportEmpty"
+            style="@style/Card"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/report_empty" />
+        </LinearLayout>
+
+        <!-- The two pages of the report, as they will be in the PDF file -->
+        <ImageView
+            android:id="@+id/page1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/paper"
+            android:contentDescription="@string/report_page_1"
+            android:elevation="3dp"
+            android:padding="1dp"
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/page2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/paper"
+            android:contentDescription="@string/report_page_2"
+            android:elevation="3dp"
+            android:padding="1dp"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="14dp"
+            android:text="@string/report_note" />
+    </LinearLayout>
+</ScrollView>

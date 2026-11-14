@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One sentence of the analysis, with a small dot in front. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingBottom="4dp"
+    android:paddingTop="4dp">
+
+    <View
+        android:layout_width="6dp"
+        android:layout_height="6dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/dot_blue" />
+
+    <TextView
+        android:id="@+id/text"
+        style="@style/BodyText"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:textSize="15sp" />
+</LinearLayout>

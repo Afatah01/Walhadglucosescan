@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- The app reads the sensor with NFC and vibrates when a scan ends. -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- New in 4.0. The internet is used for three things, each only after the user has set it
+         up: values from LibreLinkUp, questions to an AI service, and the online copy of the
+         values. Without them the app sends nothing. Only https addresses are used. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Live values (only if the user switches them on): a Bluetooth connection to the sensor.
+         Android 11 and older: the plain Bluetooth permissions, and "location", which those
+         versions need before an app may search for Bluetooth devices. The app never reads the
+         location. Android 12 and newer: the two "devices nearby" permissions. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- The connection must stay while the app is closed: a service with a notification that
+         shows the value, started again after the phone was switched on. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- The same service while the values come from LibreLinkUp: no Bluetooth then, so Android 14
+         and newer want another name for what it does ("special use", explained at the service). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- LibreLinkUp must be asked once a minute, also while the phone sleeps: that needs a
+         wake-up at an exact time. Android 12 gives the first permission by itself; Android 13
+         and newer give the second one by itself. -->
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.USE_EXACT_ALARM"
+        tools:ignore="ExactAlarm" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Lets the app ask the user to keep it running in the background. Alarms need that. -->
+    <uses-permission
+        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        tools:ignore="BatteryLife" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+    <!-- Live values are extra. The scan works on a phone without them. -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+
+    <!-- To say values aloud the app must be able to see the voice (text-to-speech) of the phone. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:targetApi="31">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.Main">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Lets the phone open the app when it touches a sensor. Switched off until the user
+             switches it on in the settings, so that installing the app changes nothing for
+             other apps that read the sensor. -->
+        <activity-alias
+            android:name=".SensorTouchAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+        </activity-alias>
+
+        <activity
+            android:name=".WelcomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReadingsActivity"
+            android:exported="false"
+            android:label="@string/readings"
+            android:parentActivityName=".MoreActivity" />
+        <activity
+            android:name=".CorrectionActivity"
+            android:exported="false"
+            android:label="@string/correction_title"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings"
+            android:parentActivityName=".MoreActivity" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:label="@string/about"
+            android:parentActivityName=".MoreActivity" />
+        <activity
+            android:name=".StatisticsActivity"
+            android:exported="false"
+            android:label="@string/stats_title"
+            android:parentActivityName=".MoreActivity" />
+        <activity
+            android:name=".AnalysisActivity"
+            android:exported="false"
+            android:label="@string/analysis_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.Main" />
+        <activity
+            android:name=".ReportActivity"
+            android:exported="false"
+            android:label="@string/report_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.Main" />
+        <activity
+            android:name=".MoreActivity"
+            android:exported="false"
+            android:label="@string/tab_more"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.Main" />
+        <activity
+            android:name=".LiveActivity"
+            android:exported="false"
+            android:label="@string/live_title"
+            android:parentActivityName=".MoreActivity" />
+        <activity
+            android:name=".AlarmsActivity"
+            android:exported="false"
+            android:label="@string/alarms_title"
+            android:parentActivityName=".MoreActivity" />
+        <activity
+            android:name=".VoiceActivity"
+            android:exported="false"
+            android:label="@string/voice_title"
+            android:parentActivityName=".MoreActivity" />
+
+        <activity
+            android:name=".AiSetupActivity"
+            android:exported="false"
+            android:label="@string/ai_setup_title"
+            android:parentActivityName=".MoreActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".BackupActivity"
+            android:exported="false"
+            android:label="@string/backup_title"
+            android:parentActivityName=".MoreActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".LinkUpActivity"
+            android:exported="false"
+            android:label="@string/linkup_title"
+            android:parentActivityName=".MoreActivity"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- Gets a value each minute while the app is closed: over Bluetooth from the sensor
+             ("connected device"), or over the internet from LibreLinkUp ("special use"). Runs
+             only while one of the two is switched on. -->
+        <service
+            android:name=".live.LiveService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice|specialUse"
+            tools:targetApi="34">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Fetches the glucose value of the user from LibreLinkUp once a minute, shows it in a notification and sounds the glucose alarms the user has set." />
+        </service>
+
+        <receiver
+            android:name=".live.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".live.TickReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

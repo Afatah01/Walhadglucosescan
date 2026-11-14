@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One choice in a row of choices (3 h, 6 h ...). The chosen one is filled. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <inset android:insetBottom="4dp" android:insetLeft="3dp" android:insetRight="3dp" android:insetTop="4dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="10dp" />
+                <solid android:color="@color/brand" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset android:insetBottom="4dp" android:insetLeft="3dp" android:insetRight="3dp" android:insetTop="4dp">
+            <ripple android:color="@color/outline">
+                <item>
+                    <shape android:shape="rectangle">
+                        <corners android:radius="10dp" />
+                        <solid android:color="@color/chip" />
+                    </shape>
+                </item>
+            </ripple>
+        </inset>
+    </item>
+</selector>

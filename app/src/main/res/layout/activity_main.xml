@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- The value, on a big coloured card.
+             Green: in the target range. Red: outside of it, or a problem. Blue: no current value. -->
+        <com.glucosescan.app.ui.HeroLayout
+            android:id="@+id/valueCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/hero_none"
+            android:elevation="2dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="20dp"
+            android:paddingEnd="12dp"
+            android:paddingStart="12dp"
+            android:paddingTop="18dp">
+
+            <TextView
+                android:id="@+id/rangeChip"
+                style="@style/HeroText"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/pill_on_hero"
+                android:paddingBottom="4dp"
+                android:paddingEnd="14dp"
+                android:paddingStart="14dp"
+                android:paddingTop="4dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- MainActivity makes the number and the arrow smaller when they would not
+                     fit side by side (small phone, big text). -->
+                <TextView
+                    android:id="@+id/value"
+                    style="@style/HeroText"
+                    android:includeFontPadding="false"
+                    android:textSize="84sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/arrow"
+                    style="@style/HeroText"
+                    android:layout_marginStart="12dp"
+                    android:includeFontPadding="false"
+                    android:textSize="48sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/unit"
+                style="@style/HeroText"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/valueNote"
+                style="@style/HeroText"
+                android:layout_marginTop="4dp"
+                android:breakStrategy="balanced"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Only when the user has set up a correction: says so, and names the sensor value -->
+            <TextView
+                android:id="@+id/correctedNote"
+                style="@style/HeroText"
+                android:layout_marginTop="6dp"
+                android:breakStrategy="balanced"
+                android:textSize="15sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/trendLine"
+                style="@style/HeroText"
+                android:layout_marginTop="8dp"
+                android:breakStrategy="balanced"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/trendBasis"
+                style="@style/HeroText"
+                android:textSize="13sp" />
+
+            <!-- Where the value lies between low and high, with the target range marked -->
+            <com.glucosescan.app.ui.ScaleView
+                android:id="@+id/scale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/valueTime"
+                style="@style/HeroText"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/pill_on_hero"
+                android:paddingBottom="5dp"
+                android:paddingEnd="14dp"
+                android:paddingStart="14dp"
+                android:paddingTop="5dp"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/lastValue"
+                style="@style/HeroText"
+                android:layout_marginTop="6dp"
+                android:breakStrategy="balanced"
+                android:textSize="15sp" />
+        </com.glucosescan.app.ui.HeroLayout>
+
+        <!-- Where the values head in the next half hour. Only with a current value and enough
+             values before it. Yellow when the value may go below the target range soon. -->
+        <LinearLayout
+            android:id="@+id/outlookCard"
+            style="@style/Card"
+            android:paddingBottom="12dp"
+            android:paddingTop="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/outlookTitle"
+                style="@style/CardTitle"
+                android:layout_marginBottom="4dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_outlook"
+                android:gravity="center_vertical"
+                android:text="@string/outlook_title" />
+
+            <TextView
+                android:id="@+id/outlookWarning"
+                style="@style/BodyText"
+                android:layout_marginBottom="4dp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/outlookText"
+                style="@style/BodyText" />
+
+            <TextView
+                android:id="@+id/outlookNote"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- What the last scan did, and how to scan -->
+        <LinearLayout
+            android:id="@+id/scanCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/card_scan"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <!-- The NFC sign, with the word NFC under it -->
+            <TextView
+                android:id="@+id/nfcSign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:drawablePadding="4dp"
+                android:drawableTop="@drawable/nfc_badge"
+                android:gravity="center_horizontal"
+                android:text="@string/nfc_label"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/scanStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/scanHint"
+                    style="@style/NoteText"
+                    android:text="@string/hint_scan" />
+
+                <Button
+                    android:id="@+id/nfcSettings"
+                    style="@style/ColorButton"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/open_nfc_settings"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- The offer to let the values come by themselves. Only while live values are off
+             and the user has not said "not now". -->
+        <LinearLayout
+            android:id="@+id/liveOffer"
+            style="@style/Card"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/CardTitle"
+                android:layout_marginBottom="4dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_bluetooth"
+                android:gravity="center_vertical"
+                android:text="@string/offer_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/offer_text" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/offerYes"
+                    style="@style/ColorButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/offer_yes" />
+
+                <Button
+                    android:id="@+id/offerNo"
+                    style="@style/SmallButton"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/offer_no" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/offerBluetooth"
+                style="@style/OutlineButton"
+                android:layout_marginTop="10dp"
+                android:text="@string/offer_bluetooth" />
+        </LinearLayout>
+
+        <!-- Live values: what the Bluetooth connection does. Only while live values are on. -->
+        <LinearLayout
+            android:id="@+id/liveCard"
+            style="@style/Card"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingBottom="12dp"
+            android:paddingTop="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/liveCardTitle"
+                style="@style/CardTitle"
+                android:layout_marginBottom="2dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_live"
+                android:gravity="center_vertical"
+                android:text="@string/home_live_title" />
+
+            <TextView
+                android:id="@+id/liveState"
+                style="@style/BodyText" />
+        </LinearLayout>
+
+        <!-- Chart -->
+        <LinearLayout
+            style="@style/Card"
+            android:paddingBottom="10dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/range3"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_3" />
+
+                <TextView
+                    android:id="@+id/range6"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_6" />
+
+                <TextView
+                    android:id="@+id/range12"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_12" />
+
+                <TextView
+                    android:id="@+id/range24"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_24" />
+            </LinearLayout>
+
+            <com.glucosescan.app.ui.ChartView
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="4dp" />
+
+            <!-- What the dotted line means: only if the chart shows a forecast. -->
+            <TextView
+                android:id="@+id/chartForecastLegend"
+                style="@style/NoteText"
+                android:layout_marginEnd="6dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="4dp"
+                android:text="@string/chart_forecast_legend"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Four numbers of the last 24 hours -->
+        <TextView
+            style="@style/SectionLabel"
+            android:text="@string/day_title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout style="@style/Tile">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_green" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_in_target" />
+
+                    <TextView
+                        android:id="@+id/tileInTarget"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Tile"
+                android:layout_marginStart="10dp">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_blue" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_average" />
+
+                    <TextView
+                        android:id="@+id/tileAverage"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout style="@style/Tile">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_red" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_lowest" />
+
+                    <TextView
+                        android:id="@+id/tileLowest"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Tile"
+                android:layout_marginStart="10dp">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_amber" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_highest" />
+
+                    <TextView
+                        android:id="@+id/tileHighest"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- The short analysis: what stands out most. A tap opens the whole analysis. -->
+        <LinearLayout
+            android:id="@+id/analysisCard"
+            style="@style/Card"
+            android:background="@drawable/card_ripple"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                style="@style/CardTitle"
+                android:layout_marginBottom="2dp"
+                android:drawableEnd="@drawable/ic_chevron"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_analysis"
+                android:gravity="center_vertical"
+                android:text="@string/home_analysis_title" />
+
+            <TextView
+                android:id="@+id/analysisPeriod"
+                style="@style/NoteText"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:id="@+id/analysisBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/analysisEmpty"
+                style="@style/BodyText"
+                android:text="@string/analysis_too_few"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Sensor -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:layout_marginBottom="6dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_sensor"
+                android:gravity="center_vertical"
+                android:text="@string/sensor_title" />
+
+            <ProgressBar
+                android:id="@+id/sensorProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="2dp"
+                android:contentDescription="@string/sensor_progress_description"
+                android:max="1000"
+                android:progressDrawable="@drawable/sensor_progress"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/sensorBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/credit"
+            style="@style/Credit"
+            android:text="@string/powered_by" />
+    </LinearLayout>
+</ScrollView>

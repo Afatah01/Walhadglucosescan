@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        style="@style/NoteText"
+        android:background="@drawable/card_scan"
+        android:padding="14dp"
+        android:text="@string/readings_note" />
+
+    <!-- Only when the user has set up a correction -->
+    <TextView
+        android:id="@+id/correctedNote"
+        style="@style/NoteText"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/card_notice"
+        android:padding="12dp"
+        android:textColor="@color/text"
+        android:visibility="gone" />
+
+    <!-- The list lies on a white card. Its rows have no ground of their own. -->
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        android:layout_weight="1"
+        android:background="@drawable/card_background"
+        android:divider="@null"
+        android:listSelector="@android:color/transparent"
+        android:paddingBottom="8dp"
+        android:paddingTop="6dp"
+        android:scrollbarStyle="insideInset" />
+
+    <TextView
+        android:id="@+id/empty"
+        style="@style/BodyText"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        android:layout_weight="1"
+        android:background="@drawable/card_background"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="@string/readings_empty"
+        android:visibility="gone" />
+</LinearLayout>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout style="@style/Page">
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/voice_scan_title" />
+
+            <Switch
+                android:id="@+id/voiceAfterScan"
+                style="@style/SwitchRow"
+                android:text="@string/voice_after_scan" />
+
+            <Switch
+                android:id="@+id/voiceTrend"
+                style="@style/SwitchRow"
+                android:text="@string/voice_trend" />
+
+            <Switch
+                android:id="@+id/voiceLowSoon"
+                style="@style/SwitchRow"
+                android:text="@string/voice_low_soon" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/voice_live_title" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginBottom="4dp"
+                android:text="@string/voice_live_note" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/voiceLive0"
+                    style="@style/RangeButton"
+                    android:text="@string/voice_off" />
+                <TextView
+                    android:id="@+id/voiceLive5"
+                    style="@style/RangeButton"
+                    android:text="@string/voice_5" />
+                <TextView
+                    android:id="@+id/voiceLive15"
+                    style="@style/RangeButton"
+                    android:text="@string/voice_15" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/voiceLive30"
+                    style="@style/RangeButton"
+                    android:text="@string/voice_30" />
+                <TextView
+                    android:id="@+id/voiceLive60"
+                    style="@style/RangeButton"
+                    android:text="@string/voice_60" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/voiceAlarms"
+                style="@style/SwitchRow"
+                android:layout_marginTop="6dp"
+                android:text="@string/voice_alarms" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/voice_test_title" />
+
+            <TextView
+                android:id="@+id/voiceExample"
+                style="@style/BodyText" />
+
+            <Button
+                android:id="@+id/voiceTest"
+                style="@style/TonalButton"
+                android:layout_marginTop="10dp"
+                android:text="@string/voice_test" />
+
+            <TextView
+                android:id="@+id/voiceStatus"
+                style="@style/BodyText"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="14dp"
+            android:text="@string/voice_note" />
+    </LinearLayout>
+</ScrollView>

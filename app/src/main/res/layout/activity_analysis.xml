@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout style="@style/Page">
+
+        <!-- Right now: the value and where it heads -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_clock"
+                android:gravity="center_vertical"
+                android:text="@string/analysis_now_title" />
+
+            <TextView
+                android:id="@+id/nowValue"
+                style="@style/BodyText"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/nowWarning"
+                style="@style/BodyText"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/notice_title"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/nowBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/nowNote"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- The last hours: how the glucose was, in words; then hour by hour -->
+        <LinearLayout
+            style="@style/Card"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp">
+
+            <TextView
+                style="@style/CardTitle"
+                android:layout_marginStart="6dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_outlook"
+                android:gravity="center_vertical"
+                android:text="@string/analysis_hours_title" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/hours3"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_3" />
+
+                <TextView
+                    android:id="@+id/hours6"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_6" />
+
+                <TextView
+                    android:id="@+id/hours12"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_12" />
+
+                <TextView
+                    android:id="@+id/hours24"
+                    style="@style/RangeButton"
+                    android:text="@string/hours_24" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/hoursWords"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_marginStart="6dp"
+                android:orientation="vertical" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/analysis_hour_by_hour"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/hoursBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_marginStart="6dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <!-- Day by day -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_tab_stats"
+                android:gravity="center_vertical"
+                android:text="@string/analysis_days_title" />
+
+            <LinearLayout
+                android:id="@+id/daysBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/daysNote"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp" />
+
+            <Button
+                android:id="@+id/openReport"
+                style="@style/TonalButton"
+                android:layout_marginTop="10dp"
+                android:text="@string/analysis_open_report" />
+        </LinearLayout>
+
+        <!-- The last days: what stands out, goals, parts of the day, low events -->
+        <TextView
+            style="@style/SectionLabel"
+            android:text="@string/analysis_period_label" />
+
+        <LinearLayout
+            style="@style/Card"
+            android:layout_marginTop="8dp"
+            android:paddingBottom="10dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/days1"
+                    style="@style/RangeButton"
+                    android:contentDescription="@string/days_1"
+                    android:text="@string/days_1_short" />
+
+                <TextView
+                    android:id="@+id/days7"
+                    style="@style/RangeButton"
+                    android:contentDescription="@string/days_7"
+                    android:text="@string/days_7_short" />
+
+                <TextView
+                    android:id="@+id/days14"
+                    style="@style/RangeButton"
+                    android:contentDescription="@string/days_14"
+                    android:text="@string/days_14_short" />
+
+                <TextView
+                    android:id="@+id/days30"
+                    style="@style/RangeButton"
+                    android:contentDescription="@string/days_30"
+                    android:text="@string/days_30_short" />
+
+                <TextView
+                    android:id="@+id/days90"
+                    style="@style/RangeButton"
+                    android:contentDescription="@string/days_90"
+                    android:text="@string/days_90_short" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/analysisPeriodLine"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/analysisEmptyCard"
+            style="@style/Card"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/analysis_too_few" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/analysisContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_analysis"
+                android:gravity="center_vertical"
+                android:text="@string/analysis_findings_title" />
+
+            <LinearLayout
+                android:id="@+id/findingsBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/analysis_goals_title" />
+
+            <LinearLayout
+                android:id="@+id/goalsBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+                <TextView
+                    style="@style/NoteText"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/analysis_goals_note" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/analysis_parts_title" />
+
+            <LinearLayout
+                android:id="@+id/partsBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/partsNote"
+                    style="@style/NoteText"
+                    android:layout_marginTop="6dp" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/analysis_lows_title" />
+
+            <LinearLayout
+                android:id="@+id/lowsBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/lowsNote"
+                    style="@style/NoteText"
+                    android:layout_marginTop="6dp" />
+            </LinearLayout>
+
+            <!-- Ask an AI: the numbers as a text with a question, for an AI app of the user -->
+            <LinearLayout
+                android:id="@+id/aiCard"
+                style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_spark"
+                android:gravity="center_vertical"
+                android:text="@string/ai_title" />
+
+                <TextView
+                    style="@style/BodyText"
+                    android:text="@string/ai_text" />
+
+                <TextView
+                    style="@style/NoteText"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/ai_language"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/aiEnglish"
+                        style="@style/RangeButton"
+                        android:text="@string/ai_english" />
+
+                    <TextView
+                        android:id="@+id/aiSomali"
+                        style="@style/RangeButton"
+                        android:text="@string/ai_somali" />
+
+                    <TextView
+                        android:id="@+id/aiArabic"
+                        style="@style/RangeButton"
+                        android:text="@string/ai_arabic" />
+                </LinearLayout>
+
+                <!-- New in 4.0: the app asks an AI service itself and shows the answer -->
+                <EditText
+                    android:id="@+id/aiQuestion"
+                    style="@style/Input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/ai_question_hint"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="500"
+                    android:maxLines="4" />
+
+                <Button
+                    android:id="@+id/aiAsk"
+                    style="@style/ColorButton"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/ai_ask" />
+
+                <TextView
+                    android:id="@+id/aiAskState"
+                    style="@style/BodyText"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/aiAnswerBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/box_inner"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/NoteText"
+                        android:text="@string/ai_answer_title"
+                        android:textColor="@color/blue"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/aiAnswerMeta"
+                        style="@style/NoteText"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/aiAnswer"
+                        style="@style/BodyText"
+                        android:layout_marginTop="8dp"
+                        android:textAlignment="viewStart"
+                        android:textDirection="firstStrong"
+                        android:textIsSelectable="true" />
+
+                    <TextView
+                        style="@style/NoteText"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/ai_answer_warning"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/aiSend"
+                    style="@style/OutlineButton"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/ai_send" />
+
+                <Button
+                    android:id="@+id/aiCopy"
+                    style="@style/OutlineButton"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/ai_copy" />
+
+                <Button
+                    android:id="@+id/aiShow"
+                    style="@style/OutlineButton"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/ai_show" />
+
+                <TextView
+                    android:id="@+id/aiReport"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/box_inner"
+                    android:padding="12dp"
+                    android:textColor="@color/text"
+                    android:textIsSelectable="true"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"
+                    android:visibility="gone" />
+
+                <TextView
+                    style="@style/NoteText"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/ai_privacy" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/openStatistics"
+            style="@style/OutlineButton"
+            android:layout_marginTop="14dp"
+            android:text="@string/analysis_open_statistics" />
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="14dp"
+            android:text="@string/analysis_intro" />
+
+        <TextView
+            android:id="@+id/analysisFooter"
+            style="@style/NoteText"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/analysis_footer" />
+    </LinearLayout>
+</ScrollView>

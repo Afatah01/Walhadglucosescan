@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="2dp">
+
+        <!-- The right value now -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/correction_now_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:layout_marginBottom="6dp"
+                android:text="@string/correction_now_intro" />
+
+            <LinearLayout
+                android:id="@+id/nowBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Green: a value can be saved now. Red: why it cannot. -->
+            <TextView
+                android:id="@+id/status"
+                style="@style/BodyText"
+                android:layout_marginTop="6dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/inputRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/input"
+                    style="@style/Input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:digits="0123456789.,"
+                    android:hint="@string/correction_input_hint"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:maxLength="6"
+                    android:maxLines="1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/inputUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/text"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/inputError"
+                style="@style/BodyText"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/red"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/save"
+                style="@style/ColorButton"
+                android:layout_marginTop="10dp"
+                android:text="@string/correction_save" />
+        </LinearLayout>
+
+        <!-- How it works -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/correction_how_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/correction_how_text" />
+        </LinearLayout>
+
+        <!-- What is saved -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/correction_list_title" />
+
+            <TextView
+                android:id="@+id/summary"
+                style="@style/BodyText" />
+
+            <TextView
+                android:id="@+id/otherSensor"
+                style="@style/BodyText"
+                android:layout_marginTop="4dp"
+                android:text="@string/correction_other_sensor"
+                android:textColor="@color/red"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/pairsHeader"
+                style="@style/NoteText"
+                android:layout_marginTop="8dp"
+                android:text="@string/correction_pairs_header"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/pairsBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tip"
+                style="@style/NoteText"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/deleteAll"
+                style="@style/DangerButton"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/correction_delete_all" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="10dp"
+                android:text="@string/correction_new_sensor_note" />
+        </LinearLayout>
+
+        <!-- Keep in mind -->
+        <LinearLayout
+            style="@style/Card"
+            android:background="@drawable/card_notice">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/correction_warning_title"
+                android:textColor="@color/notice_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/correction_warning_text" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

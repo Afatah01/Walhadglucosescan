@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- The brand, on a blue card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/hero_none"
+            android:elevation="2dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <ImageView
+                android:id="@+id/brandLogo"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:contentDescription="@string/brand_logo_description"
+                android:src="@drawable/brand_logo" />
+
+            <TextView
+                android:id="@+id/appName"
+                style="@style/HeroText"
+                android:layout_marginTop="12dp"
+                android:text="@string/app_name"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/version"
+                style="@style/HeroText"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/madeBy"
+                style="@style/HeroText"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/pill_on_hero"
+                android:paddingBottom="5dp"
+                android:paddingEnd="14dp"
+                android:paddingStart="14dp"
+                android:paddingTop="5dp"
+                android:text="@string/about_made_by"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- The notice, on a yellow card -->
+        <LinearLayout
+            style="@style/Card"
+            android:background="@drawable/card_notice">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/notice_title"
+                android:textColor="@color/notice_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/notice_text" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/about_what_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/about_what_text" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/about_details_title" />
+
+            <TextView
+                style="@style/NoteText"
+                android:text="@string/about_details_note" />
+
+            <Button
+                android:id="@+id/copy"
+                style="@style/TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="10dp"
+                android:minWidth="120dp"
+                android:text="@string/copy" />
+
+            <TextView
+                android:id="@+id/details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/box_inner"
+                android:padding="12dp"
+                android:textColor="@color/text"
+                android:textIsSelectable="true"
+                android:textSize="12sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/about_credits_title" />
+
+            <TextView
+                android:id="@+id/credits"
+                style="@style/BodyText"
+                android:text="@string/about_credits_text" />
+
+            <Button
+                android:id="@+id/licenses"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-12dp"
+                android:layout_marginTop="4dp"
+                android:minHeight="48dp"
+                android:text="@string/about_licenses_button"
+                android:textAllCaps="false"
+                android:textColor="@color/blue"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

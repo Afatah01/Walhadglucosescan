@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A white card that can be tapped. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="@color/chip">
+    <item android:drawable="@drawable/card_background" />
+</ripple>

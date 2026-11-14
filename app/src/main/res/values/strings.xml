@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Walhad Glucose Scan</string>
+    <string name="brand_logo_description">Walhad Glucose Scan logo</string>
+    <string name="about_made_by">Powered by Abdifatah Elmi</string>
+
+    <!-- Main screen: the value -->
+    <string name="value_none">– –</string>
+    <string name="value_low">LOW</string>
+    <string name="value_high">HIGH</string>
+    <string name="low_explained">Below %1$s %2$s</string>
+    <string name="high_explained">Above %1$s %2$s</string>
+    <string name="range_in">In target range</string>
+    <string name="range_below">Below target range</string>
+    <string name="range_above">Above target range</string>
+    <string name="no_value_yet">No value yet</string>
+    <string name="no_current_value">No current value</string>
+    <string name="clock_wrong">The time of the phone was changed. Scan the sensor again.</string>
+    <string name="last_value">Last value: %1$s, %2$s (%3$s)</string>
+    <string name="just_now">just now</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <string name="time_ago">%s ago</string>
+    <string name="value_time">%1$s · %2$s</string>
+    <string name="trend_line">%1$s · %2$s %3$s per minute</string>
+    <string name="trend_basis">Change over the last %d minutes</string>
+    <string name="trend_constant">Steady</string>
+    <string name="trend_rising">Rising</string>
+    <string name="trend_fast_rising">Rising fast</string>
+    <string name="trend_rapidly_rising">Rising very fast</string>
+    <string name="trend_falling">Falling</string>
+    <!-- The arrow "steady" also covers a slow fall. These words are used when that slow fall heads below the target range. -->
+    <string name="trend_falling_slowly">Falling slowly</string>
+    <string name="trend_fast_falling">Falling fast</string>
+    <string name="trend_rapidly_falling">Falling very fast</string>
+
+    <!-- Main screen: scanning -->
+    <string name="hint_scan">To get a value, hold the back of the phone to the sensor until the phone vibrates.</string>
+    <string name="reading_sensor">Reading the sensor … hold still.</string>
+    <string name="nfc_off">NFC is switched off. Switch it on to scan.</string>
+    <string name="nfc_missing">This phone has no NFC. It cannot read the sensor.</string>
+    <string name="open_nfc_settings">Open NFC settings</string>
+    <string name="nfc_label">NFC</string>
+    <string name="scan_line">%1$s · %2$s</string>
+
+    <string name="scan_ok">Scan OK</string>
+    <string name="scan_ok_no_new">Scan OK. No new value yet. The sensor makes one value each minute.</string>
+    <string name="scan_no_value">The sensor has no good value for this minute. Scan again in a few minutes.</string>
+    <string name="scan_too_noisy">The sensor values jump too much. Nothing was saved. Scan again in a few minutes.</string>
+    <string name="scan_not_started">This sensor is new. Start it first with the FreeStyle LibreLink app or the Libre 2 reader.</string>
+    <plurals name="scan_starting">
+        <item quantity="one">The sensor is warming up. First value in about %d minute.</item>
+        <item quantity="other">The sensor is warming up. First value in about %d minutes.</item>
+    </plurals>
+    <string name="scan_starting_no_time">The sensor is warming up. It has no values yet.</string>
+    <string name="scan_expired">This sensor has ended. It gives no more values.</string>
+    <string name="scan_stopped">This sensor has stopped working. It gives no more values.</string>
+    <string name="scan_unknown_state">The sensor is in a state this app does not know (%s). No values are shown.</string>
+    <string name="scan_unsupported">This sensor is not supported (%s). This app reads only FreeStyle Libre 2 of the European type.</string>
+    <string name="scan_bad_data">The sensor was not read correctly. Hold the phone still on the sensor and try again.</string>
+    <string name="scan_lost">The sensor was lost. Hold the phone still on the sensor until the phone vibrates.</string>
+    <string name="scan_not_sensor">This is not a Libre sensor.</string>
+    <string name="scan_error">Something went wrong (%s). Please try again.</string>
+
+    <!-- Main screen: chart -->
+    <string name="hours_3">3 h</string>
+    <string name="hours_6">6 h</string>
+    <string name="hours_12">12 h</string>
+    <string name="hours_24">24 h</string>
+    <string name="chart_empty">No values in this time</string>
+    <string name="chart_description">Chart of the glucose values of the last %d hours</string>
+
+    <!-- Main screen: sensor -->
+    <string name="sensor_title">Sensor</string>
+    <string name="sensor_none">No sensor scanned yet.</string>
+    <string name="sensor_as_of">From the last scan: %s</string>
+    <string name="sensor_state">State</string>
+    <string name="sensor_start">Started</string>
+    <string name="sensor_end">Ends</string>
+    <string name="sensor_warmup_left">Warm-up left</string>
+    <string name="sensor_age">Age</string>
+    <string name="sensor_left">Time left</string>
+    <string name="sensor_type">Type</string>
+    <string name="sensor_region">Region</string>
+    <string name="sensor_serial">Serial number</string>
+    <string name="state_ready">Ready</string>
+    <string name="state_not_started">Not started</string>
+    <string name="state_starting">Warming up</string>
+    <string name="state_expired">Ended</string>
+    <string name="state_shut_down">Stopped</string>
+    <string name="state_failure">Failed</string>
+    <string name="state_unknown">Unknown</string>
+
+    <!-- Main screen: the corrected value -->
+    <string name="corrected_note">Corrected · sensor value: %s</string>
+    <string name="two_lines">%1$s\n%2$s</string>
+    <string name="range_sensor_below">Sensor value is below target range</string>
+
+    <!-- Correct the value -->
+    <string name="correction_title">Correct the value</string>
+    <string name="correction_how_title">How it works</string>
+    <string name="correction_how_text">This app and LibreLink do not calculate in the same way. So the two numbers can be different. Here you tell the app the right number, and the app learns from it.\n\n1. Scan the sensor with this app.\n\n2. Right away, measure with your finger-prick meter. Or read the number in LibreLink in the same minute.\n\n3. Type that number above and press Save.\n\nDo this two times or more: one time when your glucose is low or normal, and one time when it is high. Then the app can also correct low and high values.</string>
+    <string name="correction_now_title">The right value now</string>
+    <string name="correction_now_intro">Measure with your finger-prick meter now, or read LibreLink in the same minute. Then type that number here.</string>
+    <string name="correction_sensor_value">Sensor value</string>
+    <string name="correction_shown_value">Shown in the app</string>
+    <string name="correction_value_at">%1$s · %2$s</string>
+    <string name="correction_ready">Your glucose is steady. You can save the right value now.</string>
+    <string name="correction_input_hint">Type the number</string>
+    <string name="correction_save">Save</string>
+    <string name="correction_no_value">Scan the sensor first. Then come back here.</string>
+    <string name="correction_old_value">The value is too old. Scan the sensor again, then come back here.</string>
+    <string name="correction_not_measurable">The sensor shows LOW or HIGH. This value cannot be used for a correction.</string>
+    <string name="correction_change_unknown">The app cannot see yet if your glucose is steady. Scan again in 5 minutes, then come back here.</string>
+    <string name="correction_not_steady">Your glucose is changing fast now (%1$s %2$s per minute). A correction made now would be wrong. Wait until the arrow shows → and scan again.</string>
+    <string name="correction_not_a_number">Type the number from your meter.</string>
+    <string name="correction_out_of_range">The number must be between %1$s and %2$s %3$s.</string>
+    <string name="correction_too_different">This number is too far from the sensor value (%1$s). The app allows about %2$s more or less. Check the number. If it is right, measure again later.</string>
+    <string name="correction_confirm">Sensor value: %1$s\nRight value: %2$s\n\nSave this? The app then changes its numbers for this sensor.</string>
+    <string name="correction_saved">Saved</string>
+    <string name="correction_list_title">Saved for this sensor</string>
+    <string name="correction_none">Nothing saved. The app shows the sensor value.</string>
+    <plurals name="correction_count">
+        <item quantity="one">%1$d value saved for sensor %2$s.</item>
+        <item quantity="other">%1$d values saved for sensor %2$s.</item>
+    </plurals>
+    <string name="correction_other_sensor">You scanned another sensor last. These values are not used for it.</string>
+    <string name="correction_pairs_header">Sensor value → right value</string>
+    <string name="correction_pair">%1$s → %2$s</string>
+    <string name="correction_pair_delete">Delete</string>
+    <string name="correction_pair_deleted">Deleted</string>
+    <string name="correction_tip">For low and high values to be right too, save one more value when the sensor value is at least %s higher or lower than the saved ones.</string>
+    <string name="correction_delete_all">Delete the correction</string>
+    <string name="correction_delete_question">Delete the correction? The app then shows the sensor value again.</string>
+    <string name="correction_deleted">The correction was deleted.</string>
+    <string name="correction_new_sensor_note">A new sensor starts without a correction.</string>
+    <string name="correction_warning_title">Please keep in mind</string>
+    <string name="correction_warning_text">• The corrected number is only as good as the number you typed.\n\n• This app cannot show exactly the same number as LibreLink. It can only come closer.\n\n• The app never moves a value far from the sensor value.\n\n• If the sensor value is below your target range, the card stays red.\n\n• Do not decide about insulin or food from this app alone. Use LibreLink and your finger-prick meter.</string>
+    <string name="readings_corrected_note">The values of sensor %s are shown corrected.</string>
+
+    <!-- Buttons -->
+    <string name="readings">Readings</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+
+    <!-- Readings -->
+    <string name="readings_empty">No readings yet. Scan the sensor first.</string>
+    <string name="readings_note">One value each minute for the 15 minutes before a scan, and while live values are on. Before a scan, one value each 15 minutes.</string>
+
+    <!-- Settings -->
+    <string name="unit_title">Unit</string>
+    <string name="unit_mgdl">mg/dL (for example 100)</string>
+    <string name="unit_mmoll">mmol/L (for example 5.6)</string>
+    <string name="limits_title">Target range</string>
+    <string name="limits_note">Values inside this range are shown on a green card, values outside of it on a red card. The alarms have their own limits (More, Alarms).</string>
+    <string name="limit_low">Low</string>
+    <string name="limit_high">High</string>
+    <string name="minus">−</string>
+    <string name="plus">+</string>
+    <string name="lower_limit_down">Make the low limit smaller</string>
+    <string name="lower_limit_up">Make the low limit bigger</string>
+    <string name="upper_limit_down">Make the high limit smaller</string>
+    <string name="upper_limit_up">Make the high limit bigger</string>
+    <string name="touch_title">Open by touching the sensor</string>
+    <string name="touch_switch">Open this app when the phone touches a sensor</string>
+    <string name="touch_note">If another app also reads the sensor, the phone may ask each time which app to use.</string>
+    <string name="delete_title">Data</string>
+    <string name="delete_button">Delete all readings</string>
+    <string name="delete_question">Delete all saved readings from this phone? You cannot undo this.</string>
+    <string name="delete_yes">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="deleted">All readings were deleted.</string>
+    <string name="readings_count">Saved readings: %1$d. Readings older than 90 days are removed.</string>
+
+    <!-- Safety notice -->
+    <string name="notice_title">Please read this first</string>
+    <string name="notice_text">• This app is not a medical device. Nobody has tested or approved it.\n\n• The values can be wrong or late.\n\n• Do not decide about insulin, food or other treatment from this app alone. Check with a blood glucose meter (finger prick) first.\n\n• If you feel different from what the app shows, trust how you feel and use your meter.\n\n• The app shows a value only after you scan the sensor, unless you let the values come by themselves (from LibreLinkUp, or over Bluetooth). Its alarms work only then, and they can fail.\n\n• Keep your reader or the app from the maker of the sensor ready to use.</string>
+
+    <!-- First start -->
+    <string name="welcome_unit_question">Which unit do you use?</string>
+    <string name="welcome_unit_note">If you are not sure, look at your blood glucose meter. You can change this later in the settings.</string>
+    <string name="welcome_accept">I have read this and I understand it.</string>
+    <string name="welcome_start">Start</string>
+
+    <!-- About -->
+    <string name="about_version">Version %s</string>
+    <string name="about_what_title">What this app does</string>
+    <string name="about_what_text">It reads a FreeStyle Libre 2 sensor of the European type and shows the glucose value. You scan the sensor with the phone (NFC). If you want, the sensor also sends a value each minute over Bluetooth (\"Live values\").\n\nA scan only reads. It never changes the sensor. Only when you switch on live values, the app tells the sensor to send its values to this app. A new sensor must be started with the FreeStyle LibreLink app or the Libre 2 reader.\n\nThe app also looks at your values and says what stands out (\"Analysis\"), and it makes a report of a day with graphs as a PDF file (\"Report\"). It counts by fixed rules, on this phone. There is no AI inside the app; if you want, it asks an AI service over the internet.\n\nThe app uses the internet only for three things, and only after you have set them up: values from LibreLinkUp, questions to an AI service, and the online copy of your values. Without them your values stay on this phone; they leave it only when you send a file or a text yourself.</string>
+    <string name="about_credits_title">Credits</string>
+    <string name="about_credits_text">Walhad Glucose Scan is powered by Abdifatah Elmi. Walhad is his brand.\n\nFreeStyle, Libre and LibreLink are trademarks of Abbott. This app is not from Abbott and has no connection with Abbott.\n\nThe letters of the app are Inter, by The Inter Project Authors (SIL Open Font License 1.1).</string>
+    <string name="about_licenses_button">Open-source licenses</string>
+    <string name="about_licenses_title">Open-source licenses</string>
+    <string name="about_licenses_text">This app uses open-source software. The license of that software says that the notice below must stay in every copy of the app.\n\nGLUCOSE DIRECT\ngithub.com/creepymonster/GlucoseDirect\n\nThe way to read and decode the sensor comes from this software. It thanks guidos, ivalkou and dabear for their work.\n\nMIT License\n\nCopyright (c) 2023 Reimar Metzen\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\nLIBRETRANSMITTER\ngithub.com/LoopKit/LibreTransmitter\n\nThe two example scans that were used to test this app come from this software (MIT License, Copyright (c) 2016 Mark Wilson). They are not inside the app.</string>
+    <string name="close">Close</string>
+    <string name="about_details_title">Technical details of the last scan</string>
+    <string name="about_details_note">If a scan does not work, copy this text and send it to the person who helps you with the app. It holds your sensor data.</string>
+    <string name="about_details_empty">No scan yet.</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied</string>
+    <!-- The bar at the bottom -->
+    <string name="tab_home">Home</string>
+    <string name="tab_analysis">Analysis</string>
+    <string name="tab_report">Report</string>
+    <string name="tab_more">More</string>
+
+    <!-- More -->
+    <string name="export_title">Save data as a file</string>
+    <string name="export_note">\"Save data as a file\" writes all readings into one CSV file. A spreadsheet app can open it. The file holds your health data: take care who gets it.</string>
+    <string name="export_done">Saved. Readings: %1$d.</string>
+    <string name="export_failed">The file could not be saved.</string>
+    <string name="export_nothing">There is nothing to save yet.</string>
+
+    <!-- Live values -->
+    <string name="live_title">Live values</string>
+    <string name="live_switch">Get a value each minute over Bluetooth</string>
+    <string name="live_what">The sensor can send a value each minute over Bluetooth. The phone then stays connected to the sensor, also when the app is closed and the screen is off.\n\nScanning stays the main way. You can scan at any time. The first scan after you switch this on sets up the connection.</string>
+    <string name="live_warning_title">Read this before you switch it on</string>
+    <string name="live_warning_title_on">While live values are on</string>
+    <string name="live_warning">• The sensor sends to one app only. When this app takes the connection, FreeStyle LibreLink gets no more values over Bluetooth and its alarms stop. LibreLink can still scan. LibreLinkUp gets new values only when you scan with LibreLink.\n\n• To give the connection back: switch live values off here, then scan the sensor with LibreLink. Then check in LibreLink that its alarms work again.\n\n• This part of the app was made after the open-source app Glucose Direct and was tested on a computer, not with a real sensor. If it does not work on your phone, scanning still works.\n\n• The alarms of this app are a help only. They can fail: the phone can be out of reach, switched off or silent.</string>
+    <string name="live_confirm_title">Switch on live values?</string>
+    <string name="live_confirm_text">While this is on, FreeStyle LibreLink gets no more values over Bluetooth, and the alarms of LibreLink stop.\n\nThe alarms of this app were never tried on a real phone. Do not rely on them.\n\nYou can switch this off at any time. Then scan the sensor with LibreLink to give the connection back.</string>
+    <string name="live_confirm_yes">Switch on</string>
+    <string name="live_status_title">Connection</string>
+    <string name="live_state_off">Live values are off.</string>
+    <string name="live_state_needs_scan">Hold the phone to the sensor once. The scan sets up the connection.</string>
+    <string name="live_state_no_permission">The app may not use Bluetooth yet. Open More, Live values and allow it.</string>
+    <string name="live_state_bluetooth_off">Bluetooth is off. Switch it on.</string>
+    <string name="live_state_searching">Looking for the sensor…</string>
+    <string name="live_state_connecting">Sensor found. Connecting…</string>
+    <string name="live_state_connected">Connected. Waiting for the first value.</string>
+    <string name="live_state_receiving">Connected. A new value each minute.</string>
+    <string name="live_state_warming_up">Connected. The sensor is still warming up.</string>
+    <string name="live_state_sensor_ended">The sensor has ended. Scan the new sensor when it runs.</string>
+    <string name="live_state_rejected">The sensor does not answer this phone any more. Scan the sensor to connect again.</string>
+    <string name="live_sensor_line">Sensor %1$s</string>
+    <string name="live_sensor_none">No sensor set up yet</string>
+    <string name="live_last_message">Last message: %1$s</string>
+    <string name="live_no_message">No message from the sensor yet</string>
+    <string name="live_allow_bluetooth">Allow Bluetooth</string>
+    <string name="live_allow_notifications">Allow notifications</string>
+    <string name="live_permission_note">Android asks if the app may find devices nearby and connect to them. On Android 11 and older Android calls this \"location\". The app never reads where you are.</string>
+    <string name="live_permission_denied">Without this permission live values cannot work. You can allow it in the Android settings of the app.</string>
+    <string name="live_battery_title">Keep it running</string>
+    <string name="live_battery_text">Many phones stop apps to save battery. Then the values and the alarms stop too. Allow this app to run in the background.</string>
+    <string name="live_battery_button">Allow background use</string>
+    <string name="live_battery_ok">Background use is allowed.</string>
+    <string name="live_pair_again">Set up again with the next scan</string>
+    <string name="live_pair_again_done">The next scan sets up the connection again.</string>
+    <string name="live_details_title">Technical details</string>
+    <string name="live_details_empty">Nothing happened yet.</string>
+    <string name="home_live_title">Live values</string>
+
+    <!-- Notifications -->
+    <string name="channel_live">Live value</string>
+    <string name="channel_live_text">Shows the newest value while live values are on.</string>
+    <string name="channel_alarm">Glucose alarms</string>
+    <string name="channel_alarm_text">Low glucose, high glucose, no values.</string>
+    <string name="notification_no_value">No current value</string>
+
+    <!-- Alarms -->
+    <string name="alarms_title">Alarms</string>
+    <string name="alarms_need_live">Alarms only work while values come by themselves: from LibreLinkUp, or over Bluetooth. With scans alone the app gets no value by itself, so it cannot warn you.</string>
+    <string name="alarms_open_linkup">Open LibreLinkUp</string>
+    <string name="alarms_open_live">Open Bluetooth values</string>
+    <string name="alarm_low_switch">Low glucose alarm</string>
+    <string name="alarm_low_limit">Alarm below</string>
+    <string name="alarm_high_switch">High glucose alarm</string>
+    <string name="alarm_high_limit">Alarm above</string>
+    <string name="alarm_no_data_title_card">No values</string>
+    <string name="alarm_no_data_switch">Alarm when no value comes for 20 minutes</string>
+    <string name="alarm_low_down">Make the low alarm limit smaller</string>
+    <string name="alarm_low_up">Make the low alarm limit bigger</string>
+    <string name="alarm_high_down">Make the high alarm limit smaller</string>
+    <string name="alarm_high_up">Make the high alarm limit bigger</string>
+    <string name="alarms_how_title">How an alarm sounds</string>
+    <string name="alarms_how">An alarm rings for 20 seconds with the alarm tone and the alarm volume of the phone, and the phone vibrates. While the reason stays, it rings again every 15 minutes. \"Silence\" on the notification keeps that alarm quiet for 30 minutes.\n\nThe low alarm also rings when the sensor value without your correction is below the limit.</string>
+    <string name="alarms_test">Test the alarm sound</string>
+    <string name="alarms_test_stop">Stop the sound</string>
+    <string name="alarms_warning">These alarms are a help only. They are not as sure as the alarms of a medical device. When the phone sleeps, the alarm \"no values\" can come some minutes late.</string>
+    <string name="alarm_low_title">Low glucose: %1$s</string>
+    <string name="alarm_low_plain">Low glucose</string>
+    <string name="alarm_high_title">High glucose: %1$s</string>
+    <string name="alarm_high_plain">High glucose</string>
+    <string name="alarm_no_data_title">No values from the sensor</string>
+    <string name="alarm_low_text">Check with a blood glucose meter if you can. Tap to open the app.</string>
+    <string name="alarm_high_text">Tap to open the app.</string>
+    <string name="alarm_no_data_text">No value for 20 minutes. %1$s</string>
+    <string name="alarm_silence">Silence for 30 minutes</string>
+
+    <!-- Voice -->
+    <string name="voice_title">Voice</string>
+    <string name="voice_scan_title">After a scan</string>
+    <string name="voice_after_scan">Say the value after every scan</string>
+    <string name="voice_trend">Say the direction too (rising, falling, steady)</string>
+    <string name="voice_live_title">Live values</string>
+    <string name="voice_live_note">How often the app says a value by itself. This works only while values come by themselves: from LibreLinkUp, or over Bluetooth.</string>
+    <string name="voice_alarms">Say what an alarm is about</string>
+    <string name="voice_off">Off</string>
+    <string name="voice_5">5 min</string>
+    <string name="voice_15">15 min</string>
+    <string name="voice_30">30 min</string>
+    <string name="voice_60">60 min</string>
+    <string name="voice_test_title">Try it</string>
+    <string name="voice_test">Test the voice</string>
+    <string name="voice_note">The voice uses the media volume of the phone. The words are English. If the voice of your phone has no English, the app says the number only.</string>
+    <string name="voice_status_ready">The voice works.</string>
+    <string name="voice_status_numbers">The voice of this phone has no English. The app says numbers only.</string>
+    <string name="voice_status_none">This phone has no voice (text-to-speech). Install one, for example \"Speech Recognition and Synthesis\" from Google.</string>
+    <string name="voice_status_starting">Starting the voice…</string>
+    <string name="voice_example">Example: %1$s</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Statistics</string>
+    <string name="days_1">1 day</string>
+    <string name="days_7">7 days</string>
+    <string name="days_14">14 days</string>
+    <string name="days_30">30 days</string>
+    <string name="days_90">90 days</string>
+    <string name="stats_none">No values in this time. Scan the sensor, or switch on live values.</string>
+    <string name="stats_summary">Summary</string>
+    <string name="stats_average">Average</string>
+    <string name="stats_gmi">Estimated A1c (GMI)</string>
+    <string name="stats_gmi_weak">%1$s (rough: needs 14 days with values most of the time)</string>
+    <string name="stats_variation">Variation (CV)</string>
+    <string name="stats_lowest_highest">Lowest and highest</string>
+    <string name="stats_from_to">%1$s to %2$s</string>
+    <string name="stats_coverage">Time with values</string>
+    <string name="stats_days_with_values">Days with values</string>
+    <string name="stats_ranges_title">Time in ranges</string>
+    <string name="stats_range_very_high">Very high: over %1$s</string>
+    <string name="stats_range_high">High: over %1$s to %2$s</string>
+    <string name="stats_range_target">In range: %1$s to %2$s</string>
+    <string name="stats_range_low">Low: %1$s to under %2$s</string>
+    <string name="stats_range_very_low">Very low: under %1$s</string>
+    <string name="stats_your_target">In your target range (%1$s to %2$s)</string>
+    <string name="stats_day_title">Typical day</string>
+    <string name="stats_day_note">The line is the middle value for each hour of the day. The band holds 8 of 10 values. Hours with too few values stay empty.</string>
+    <string name="stats_note">Each quarter of an hour counts once, so that many values around a scan do not count more than the rest of the day. Times without values are missing: with scans alone, scan at least every 8 hours. The numbers come from the values as the app shows them.</string>
+
+    <string name="days_1_short">1</string>
+    <string name="days_7_short">7</string>
+    <string name="days_14_short">14</string>
+    <string name="days_30_short">30</string>
+    <string name="days_90_short">90</string>
+    <string name="stats_period">Days: %1$d. From %2$s to %3$s.</string>
+    <string name="live_stopped_title">Live values have stopped</string>
+    <string name="live_stopped_text">The phone has stopped the app. No values and no alarms come now. Tap to open the app.</string>
+
+    <!-- ============================ version 3 ============================ -->
+
+    <!-- The sign at the top of the Home screen while live values are on -->
+    <string name="pill_live">LIVE</string>
+    <string name="pill_waiting">WAITING</string>
+    <string name="pill_problem">PROBLEM</string>
+
+    <!-- Home: the scale under the big value -->
+    <string name="scale_description">The value on a line from %1$s to %2$s. Your target range is %3$s to %4$s.</string>
+
+    <!-- Home: where the values head -->
+    <string name="outlook_title">Next 30 minutes</string>
+    <string name="outlook_line">If it goes on like this: %1$s at %2$s.</string>
+    <string name="outlook_about">about %s</string>
+    <string name="outlook_under">under %s</string>
+    <string name="outlook_over">over %s</string>
+    <plurals name="outlook_low_soon">
+        <item quantity="one">It may go below your target range (%1$s) in about %2$d minute.</item>
+        <item quantity="other">It may go below your target range (%1$s) in about %2$d minutes.</item>
+    </plurals>
+    <string name="outlook_note">A guess from the values of the last %1$d minutes. Food, medicine and movement change it.</string>
+    <string name="chart_forecast_legend">Dotted line: where the values head in the next 30 minutes. It is a guess.</string>
+
+    <!-- Home: numbers of the last 24 hours -->
+    <string name="day_title">Last 24 hours</string>
+    <string name="day_in_target">In target range</string>
+    <string name="day_average">Average</string>
+    <string name="day_lowest">Lowest</string>
+    <string name="day_highest">Highest</string>
+    <string name="day_none">–</string>
+
+    <!-- Home: the offer of live values -->
+    <string name="offer_title">Values by themselves</string>
+    <string name="offer_text">A scan cannot start by itself: the phone must touch the sensor. Values come by themselves in two other ways.\n\nFrom LibreLinkUp, over the internet: FreeStyle LibreLink keeps the sensor, and the number is the same as in LibreLink.\n\nOver Bluetooth, from the sensor: then LibreLink loses its values and its alarms.</string>
+    <string name="offer_yes">From LibreLinkUp</string>
+    <string name="offer_bluetooth">Over Bluetooth</string>
+    <string name="offer_no">Not now</string>
+
+    <!-- Home: the short analysis -->
+    <string name="home_analysis_title">Analysis</string>
+    <string name="analysis_too_few">Not enough values yet. The analysis needs the values of 12 hours or more.</string>
+    <plurals name="days_count">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="analysis_period">Last %s</string>
+    <string name="sensor_progress_description">Time of the sensor that is used</string>
+
+    <!-- Analysis -->
+    <string name="analysis_title">Analysis</string>
+    <string name="analysis_intro">The app looks at your values and says what stands out. It counts on this phone, by fixed rules. It is not a doctor, and it gives no advice about insulin or medicine.</string>
+    <string name="analysis_now_title">Right now</string>
+    <string name="analysis_now_none">No current value. Scan the sensor, or switch on live values.</string>
+    <string name="analysis_now_value">%1$s · %2$s</string>
+    <string name="analysis_now_no_forecast">No forecast now. It needs the values of at least 8 minutes without big jumps.</string>
+    <string name="analysis_forecast_15">In 15 minutes</string>
+    <string name="analysis_forecast_30">In 30 minutes</string>
+    <string name="analysis_findings_title">What stands out</string>
+    <string name="level_urgent">Talk to your doctor</string>
+    <string name="level_attention">Look at this</string>
+    <string name="level_note">Good to know</string>
+    <string name="level_good">Good</string>
+
+    <string name="finding_few_values">There are values for only %1$s of this time. The numbers can be far off. Scan at least every 8 hours, or switch on live values.</string>
+    <string name="finding_very_low_time">%1$s of the time was under %2$s. That is very low. The common goal is less than %3$s.</string>
+    <string name="finding_low_time">%1$s of the time was under %2$s. The common goal is less than %3$s.</string>
+    <plurals name="finding_low_events">
+        <item quantity="one">%1$d low event (under %2$s). It lasted %3$s.</item>
+        <item quantity="other">%1$d low events (under %2$s). On average they lasted %3$s, the longest %4$s.</item>
+    </plurals>
+    <string name="finding_lows_at_part">%1$d of the %2$d low events started %3$s.</string>
+    <string name="finding_no_lows">No low events (under %1$s) in this time.</string>
+    <string name="finding_very_high_time">%1$s of the time was over %2$s. The common goal is less than %3$s.</string>
+    <string name="finding_high_time">%1$s of the time was over %2$s. The common goal is less than %3$s.</string>
+    <string name="finding_highest_part">Your glucose is highest %1$s: %2$s on average. Over the whole day it is %3$s.</string>
+    <string name="finding_swings">Your glucose goes up and down a lot: variation (CV) %1$s. The common goal is %2$s or less.</string>
+    <string name="finding_steady">Your glucose is quite even: variation (CV) %1$s. The common goal is %2$s or less.</string>
+    <string name="finding_in_range_good">%1$s of the time was in range (%2$s to %3$s). The common goal is %4$s or more.</string>
+    <string name="finding_in_range_under">%1$s of the time was in range (%2$s to %3$s). The common goal is %4$s or more.</string>
+    <string name="finding_better">More time in range than in the %3$s before: %1$s then, %2$s now.</string>
+    <string name="finding_worse">Less time in range than in the %3$s before: %1$s then, %2$s now.</string>
+    <string name="finding_better_hours">More time in range than in the 24 hours before: %1$s then, %2$s now.</string>
+    <string name="finding_worse_hours">Less time in range than in the 24 hours before: %1$s then, %2$s now.</string>
+    <string name="finding_better_day">More time in range than on the day before: %1$s then, %2$s now.</string>
+    <string name="finding_worse_day">Less time in range than on the day before: %1$s then, %2$s now.</string>
+    <plurals name="finding_morning_rise">
+        <item quantity="one">In the early morning (about 2:30 to 5:30) your glucose rose by %2$s, in %1$d night.</item>
+        <item quantity="other">In the early morning (about 2:30 to 5:30) your glucose rose by %2$s on average, in %1$d nights.</item>
+    </plurals>
+    <plurals name="finding_night_fall">
+        <item quantity="one">In the early morning (about 2:30 to 5:30) your glucose fell by %2$s, in %1$d night.</item>
+        <item quantity="other">In the early morning (about 2:30 to 5:30) your glucose fell by %2$s on average, in %1$d nights.</item>
+    </plurals>
+    <string name="part_at_night">at night (midnight to 6 AM)</string>
+    <string name="part_at_morning">in the morning (6 AM to noon)</string>
+    <string name="part_at_afternoon">in the afternoon (noon to 6 PM)</string>
+    <string name="part_at_evening">in the evening (6 PM to midnight)</string>
+
+    <string name="analysis_goals_title">Common goals</string>
+    <string name="goal_in_range">In range (%1$s to %2$s): %3$s or more</string>
+    <string name="goal_under">Under %1$s: less than %2$s</string>
+    <string name="goal_over">Over %1$s: less than %2$s</string>
+    <string name="goal_variation">Variation (CV): %1$s or less</string>
+    <string name="goal_met">Reached</string>
+    <string name="goal_not_met">Not reached</string>
+    <string name="analysis_goals_note">These are common goals for adults with diabetes (international agreement of 2019). Your doctor may give you other goals, for example for older people or in pregnancy.</string>
+
+    <string name="analysis_parts_title">By time of day</string>
+    <string name="part_night">Night · midnight to 6 AM</string>
+    <string name="part_morning">Morning · 6 AM to noon</string>
+    <string name="part_afternoon">Afternoon · noon to 6 PM</string>
+    <string name="part_evening">Evening · 6 PM to midnight</string>
+    <string name="part_values">Average %1$s · low %2$s · high %3$s</string>
+    <plurals name="part_low_events">
+        <item quantity="one">%1$s · %2$d low event</item>
+        <item quantity="other">%1$s · %2$d low events</item>
+    </plurals>
+    <string name="part_no_values">No values</string>
+    <string name="analysis_parts_note">Low means under %1$s, high means over %2$s. The bar shows low, in range and high.</string>
+
+    <string name="analysis_lows_title">Low events</string>
+    <string name="analysis_lows_none">None in this time.</string>
+    <string name="analysis_low_line">%1$s · %2$s · lowest %3$s</string>
+    <plurals name="analysis_lows_more">
+        <item quantity="one">And %d more before that.</item>
+        <item quantity="other">And %d more before that.</item>
+    </plurals>
+    <string name="analysis_lows_note">A low event is a time under %1$s that lasts 15 minutes or longer.</string>
+
+    <string name="ai_title">Ask an AI</string>
+    <string name="ai_text">An AI can explain your numbers in your language. The app writes them as a text with a question. Either the app asks an AI over the internet and shows the answer here, or you give the text to an AI app on your phone yourself.</string>
+    <string name="ai_language">The AI shall answer in</string>
+    <string name="ai_english">English</string>
+    <string name="ai_somali">Somali</string>
+    <string name="ai_arabic">Arabic</string>
+    <string name="ai_send">Send to an AI app</string>
+    <string name="ai_copy">Copy the text</string>
+    <string name="ai_show">Show the text</string>
+    <string name="ai_hide">Hide the text</string>
+    <string name="ai_privacy">The text holds your glucose numbers of this time. It does not hold your name. It leaves the phone only when you press \"Ask the AI now\" or send it yourself.\n\nAn AI can be wrong. Do not change insulin or medicine because of it. Ask your doctor.</string>
+    <string name="ai_copied">Copied. Open your AI app and paste the text.</string>
+    <string name="ai_no_app">No app can take the text. Copy it instead.</string>
+    <string name="ai_chooser">Send the text to</string>
+    <string name="ai_subject">My glucose data</string>
+    <string name="analysis_footer">Show this screen to your doctor or diabetes nurse. The numbers come from the values as this app shows them. They can differ from FreeStyle LibreLink.</string>
+    <string name="analysis_footer_linkup">Show this screen to your doctor or diabetes nurse. The numbers come from LibreLinkUp.</string>
+
+    <!-- More, Statistics -->
+
+    <!-- Alarms: before a low -->
+    <string name="alarm_low_soon_card">Before a low</string>
+    <string name="alarm_low_soon_switch">Warn before a low comes</string>
+    <string name="alarm_low_soon_note">Rings when the values of the last 15 minutes head below the low alarm limit within 20 minutes. It is a guess: it can ring when no low comes, and it can miss a fast low. It rings at most once in 30 minutes.</string>
+    <string name="alarm_low_soon_title">Low glucose soon: %1$s</string>
+    <string name="alarm_low_soon_plain">Low glucose soon</string>
+    <string name="alarm_low_soon_text">The glucose is falling. If it goes on like this, it is below your low alarm limit within 20 minutes. Check how you feel. Tap to open the app.</string>
+
+    <!-- Voice -->
+    <string name="voice_low_soon">Say \"Below target soon\" when the values head below your target range</string>
+
+    <!-- Analysis: the last hours, hour by hour, day by day -->
+    <string name="analysis_hours_title">The last hours</string>
+    <string name="analysis_hours_none">No values in this time.</string>
+    <string name="analysis_hour_by_hour">Hour by hour (average · lowest to highest)</string>
+    <string name="analysis_hour_line">%1$s · %2$s to %3$s</string>
+    <string name="analysis_hour_none">no values</string>
+    <string name="analysis_days_title">Day by day</string>
+    <string name="analysis_day_line">Average %1$s · in range %2$s · %3$s to %4$s</string>
+    <plurals name="analysis_day_lows">
+        <item quantity="one">%1$s · %2$d low event</item>
+        <item quantity="other">%1$s · %2$d low events</item>
+    </plurals>
+    <string name="analysis_day_none">No values</string>
+    <string name="analysis_days_note">In range means %1$s to %2$s. The bar shows low, in range and high.</string>
+    <string name="analysis_open_report">Daily report with graphs (PDF)</string>
+    <string name="analysis_period_label">The last days</string>
+    <string name="analysis_open_statistics">More numbers: statistics</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="day_with_word">%1$s · %2$s</string>
+
+    <!-- Report -->
+    <string name="report_title">Daily report</string>
+    <string name="report_arrow_before">‹</string>
+    <string name="report_arrow_after">›</string>
+    <string name="report_day_before">The day before</string>
+    <string name="report_day_after">The day after</string>
+    <string name="report_day_values">Values for %1$s of the day</string>
+    <string name="report_day_running">The day is not over. Values until %1$s.</string>
+    <string name="report_save">Download the report (PDF)</string>
+    <string name="report_open">Open the file</string>
+    <string name="report_share">Send the file</string>
+    <string name="report_share_subject">Daily glucose report</string>
+    <string name="report_no_share">No app on this phone can take the file.</string>
+    <string name="report_saved_downloads">Saved in the Downloads folder of the phone:\n%1$s</string>
+    <string name="report_empty">No values on this day. Choose another day with the arrows.</string>
+    <string name="report_saved">The report was saved.</string>
+    <string name="report_failed">The report could not be saved.</string>
+    <string name="report_no_viewer">No app on this phone can open a PDF file.</string>
+    <string name="report_page_1">Page 1 of the report: the day, time in ranges and how the day was</string>
+    <string name="report_page_2">Page 2 of the report: hour by hour and the six days before</string>
+    <string name="report_note">\"Download the report (PDF)\" puts the file into the Downloads folder of the phone. You find it in the Files app. On Android 9 and older the app asks where to put the file. The file looks like the two pages above. It holds your health data: take care who gets it.</string>
+
+    <!-- ============================================================ version 4.0 -->
+
+    <!-- More -->
+    <string name="more_online_note">LibreLinkUp, AI and the online copy use the internet. They are off until you set them up.</string>
+
+    <!-- LibreLinkUp -->
+    <string name="linkup_title">LibreLinkUp</string>
+    <string name="linkup_what_title">Values from LibreLinkUp</string>
+    <string name="linkup_what">The sensor sends its values to FreeStyle LibreLink over Bluetooth. LibreLink sends them on to Abbott, and LibreLinkUp shows them to the people who follow. This app can fetch them from there too: a value each minute, with the same number as in LibreLink.\n\nBluetooth stays with LibreLink the whole time. Nothing changes for LibreLink and for LibreLinkUp.</string>
+    <string name="linkup_login_title">Log in</string>
+    <string name="linkup_login_note">Type the e-mail and the password of a LibreLinkUp account that follows the sensor. That is the account of the LibreLinkUp app, not the one of LibreLink.\n\nThe app sends them only to Abbott\'s LibreView servers. They are saved on this phone, locked.</string>
+    <string name="linkup_email_hint">E-mail of the LibreLinkUp account</string>
+    <string name="linkup_password_hint">Password</string>
+    <string name="linkup_connect">Connect</string>
+    <string name="linkup_busy">Asking LibreLinkUp…</string>
+    <string name="linkup_status_title">Now</string>
+    <string name="linkup_person">Values of: %1$s</string>
+    <string name="linkup_person_unnamed">the person who shares with this account</string>
+    <string name="linkup_account">Account: %1$s</string>
+    <string name="linkup_last_answer">Last answer of LibreLinkUp: %1$s</string>
+    <string name="linkup_no_answer_yet">No answer of LibreLinkUp yet.</string>
+    <string name="linkup_switch_off">Switch off</string>
+    <string name="linkup_switched_off">LibreLinkUp is switched off. The password was removed from this phone.</string>
+    <string name="linkup_notice_title">Good to know</string>
+    <string name="linkup_notice">• This way is not from Abbott. Abbott has not allowed it and can stop it at any time. Then no values come until the app is changed.\n\n• The values need the internet twice: LibreLink must send them, and this app must fetch them. Without internet no values come, and the alarms of this app cannot ring. The alarms of LibreLink need no internet: keep them switched on.\n\n• While this is on, every screen shows the numbers of LibreLinkUp. \"Correct the value\" is not used for them. A scan still works; its values are kept apart and are shown again when you switch this off.\n\n• LibreLinkUp and Bluetooth values cannot be on together.</string>
+    <string name="linkup_error_fields">Type the e-mail and the password first.</string>
+    <string name="linkup_error_no_internet">No answer from LibreLinkUp. Is the internet on?</string>
+    <string name="linkup_error_wrong_login">LibreLinkUp does not accept this e-mail and password. Check them in the LibreLinkUp app.\n\nCareful: after a few wrong tries LibreLinkUp locks the account for some minutes.</string>
+    <plurals name="linkup_error_locked">
+        <item quantity="one">Too many tries. LibreLinkUp asks to wait %d minute.</item>
+        <item quantity="other">Too many tries. LibreLinkUp asks to wait %d minutes.</item>
+    </plurals>
+    <string name="linkup_error_server">LibreLinkUp answered with an error. Try again later. If this stays, copy the technical details below and send them to the person who helps you with the app.</string>
+    <string name="linkup_error_no_patient">Nobody shares values with this account yet.\n\nIn FreeStyle LibreLink open the menu, then \"Connected apps\", then \"LibreLinkUp\", and invite this e-mail address. Accept the invitation in the LibreLinkUp app. Then press \"Connect\" again.</string>
+    <string name="linkup_step_title">Abbott asks for your yes</string>
+    <string name="linkup_step_tou">LibreLinkUp wants you to accept its terms of use again. You can read them in the LibreLinkUp app.\n\nDo you accept them?</string>
+    <string name="linkup_step_pp">LibreLinkUp wants you to confirm its privacy notice again. You can read it in the LibreLinkUp app.\n\nDo you confirm it?</string>
+    <string name="linkup_step_yes">I accept</string>
+    <string name="linkup_choose_title">Whose values?</string>
+    <string name="linkup_bluetooth_title">Bluetooth values are on</string>
+    <string name="linkup_bluetooth_text">Both cannot be on together. Bluetooth values will be switched off.\n\nAfter that, scan the sensor once with FreeStyle LibreLink. This gives the Bluetooth connection back to LibreLink. Check in LibreLink that its values and its alarms come again.</string>
+    <string name="linkup_bluetooth_yes">Switch Bluetooth values off</string>
+    <string name="linkup_allow_notifications">Allow notifications</string>
+    <string name="linkup_notifications_note">Without notifications the app cannot show the value in the status bar, and an alarm cannot come up on the screen.</string>
+    <string name="linkup_details_title">Technical details</string>
+
+    <string name="linkup_state_off">LibreLinkUp is off.</string>
+    <string name="linkup_state_starting">Asking LibreLinkUp…</string>
+    <string name="linkup_state_receiving">Values come from LibreLinkUp, one each minute.</string>
+    <string name="linkup_state_no_new">LibreLinkUp has no new value. Is LibreLink running on the phone at the sensor, with internet?</string>
+    <string name="linkup_state_no_internet">No internet. No values come.</string>
+    <string name="linkup_state_wrong_login">LibreLinkUp does not accept the password any more. Open More, LibreLinkUp and log in again.</string>
+    <string name="linkup_state_needs_step">LibreLinkUp asks for your yes to its terms. Open More, LibreLinkUp and press \"Connect\".</string>
+    <string name="linkup_state_locked">LibreLinkUp asks the app to wait. The app tries again by itself.</string>
+    <string name="linkup_state_no_patient">Nobody shares values with the LibreLinkUp account any more. Open More, LibreLinkUp.</string>
+    <string name="linkup_state_server">LibreLinkUp answers with an error. The app tries again by itself.</string>
+    <string name="linkup_state_clock">The clock of this phone seems to be wrong. Set the time; then the values come again.</string>
+
+    <!-- Home, while the values come from LibreLinkUp -->
+    <string name="home_linkup_title">LibreLinkUp</string>
+    <string name="scan_apart">%1$s\nThe scan gave %2$s by the app\'s own formula. The big number is from LibreLinkUp.</string>
+    <string name="live_confirm_linkup">LibreLinkUp will be switched off: both cannot be on together.\n\n</string>
+
+    <!-- AI: the app asks a service over the internet -->
+    <string name="ai_setup_title">AI</string>
+    <string name="ai_setup_what">The app can ask an AI over the internet to explain your numbers. It sends the text that \"Show the text\" shows on the Analysis screen: your glucose numbers, not your name. The answer comes back into the app.\n\nFor this you need a key of an AI service. A key is like a password: the service counts what is asked with it.</string>
+    <string name="ai_provider_label">AI service</string>
+    <string name="ai_provider_gemini">Gemini</string>
+    <string name="ai_provider_openai">OpenAI</string>
+    <string name="ai_provider_other">Other</string>
+    <string name="ai_help_gemini">Google Gemini. To get a key: open aistudio.google.com/apikey in a browser, sign in with a Google account and press \"Create API key\". There is a free level. On the free level Google may use what you send to make its products better.</string>
+    <string name="ai_help_openai">OpenAI. To get a key: open platform.openai.com/api-keys. This costs money: OpenAI charges for each question.</string>
+    <string name="ai_help_other">Any service that understands the same questions as OpenAI (\"OpenAI-compatible\"), for example Groq, OpenRouter or Mistral. Type the address of the service; in most cases it ends with /v1. Then press \"Find models\".</string>
+    <string name="ai_key_label">Key</string>
+    <string name="ai_key_hint">Paste the key here</string>
+    <string name="ai_key_saved">A key is saved on this phone. Leave the field empty to keep it, or paste a new one.</string>
+    <string name="ai_url_label">Address of the service</string>
+    <string name="ai_url_hint">https://…/v1</string>
+    <string name="ai_model_label">Model</string>
+    <string name="ai_model_hint">Name of the model</string>
+    <string name="ai_find_models">Find models</string>
+    <string name="ai_finding_models">Asking the service…</string>
+    <string name="ai_models_title">Choose a model</string>
+    <string name="ai_models_none">The service named no model.</string>
+    <string name="ai_save">Save</string>
+    <string name="ai_saved">Saved. Open Analysis and press \"Ask the AI now\".</string>
+    <string name="ai_remove">Remove the key from this phone</string>
+    <string name="ai_removed">The key was removed.</string>
+    <string name="ai_notice_title">Good to know</string>
+    <string name="ai_notice">• The numbers leave the phone and go to the company of the AI service. The app cannot take them back.\n\n• An AI can be wrong. It does not know you, your medicines or what you ate. Do not change insulin or medicine because of it. Ask your doctor.\n\n• The key is saved on this phone, locked. Give it to nobody: whoever has the key can ask at your cost.</string>
+    <string name="ai_error_need_key">Paste the key first.</string>
+    <string name="ai_error_need_url">Type the address of the service. It must start with https://</string>
+    <string name="ai_error_need_model">Type the name of a model, or press \"Find models\".</string>
+
+    <!-- Analysis: asking the AI -->
+    <string name="ai_ask">Ask the AI now</string>
+    <string name="ai_set_up">Set up the AI</string>
+    <string name="ai_question_hint">Your own question (you can leave this empty)</string>
+    <string name="ai_asking">The AI is thinking… This can take a minute or two.</string>
+    <string name="ai_answer_title">Answer of the AI</string>
+    <string name="ai_answer_meta">%1$s · %2$s</string>
+    <string name="ai_answer_warning">An AI can be wrong. Do not change insulin or medicine because of this. Ask your doctor.</string>
+    <string name="ai_error_no_internet">No answer from the AI service. Is the internet on?</string>
+    <string name="ai_error_key">The AI service does not accept the key. Check it under More, AI.</string>
+    <string name="ai_error_model">The AI service does not know this model. Open More, AI and press \"Find models\".</string>
+    <string name="ai_error_limit">The AI service says: too many questions, or the free amount is used up. Try again later.</string>
+    <string name="ai_error_blocked">The AI service refused to answer this text.</string>
+    <string name="ai_error_empty">The AI gave an empty answer. Try again.</string>
+    <string name="ai_error_server">The AI service answered with an error.</string>
+    <string name="ai_error_detail">%1$s\n\n(%2$s)</string>
+
+    <!-- The online copy -->
+    <string name="backup_title">Online copy</string>
+    <string name="backup_what">The app can keep a copy of your values in a database on the internet that belongs to you. After a new phone or a new install you get the values back.\n\nThe database is a Supabase project that you make yourself. Only your e-mail and your password open your copy.</string>
+    <string name="backup_steps_title">Once: make the database</string>
+    <string name="backup_steps">1. Open supabase.com in a browser. Make an account and a new project. This is free.\n\n2. In the project open \"SQL Editor\". Paste the set-up text (the button below copies it) and press \"Run\".\n\n3. Press \"Connect\" at the top of the project page. Copy the \"Project URL\" and the \"Publishable key\" into the first two fields below.</string>
+    <string name="backup_copy_sql">Copy the set-up text</string>
+    <string name="backup_sql_copied">The set-up text is copied. Paste it into the SQL Editor of your project.</string>
+    <string name="backup_account_title">Your project and your account</string>
+    <string name="backup_url_hint">Project URL: https://….supabase.co</string>
+    <string name="backup_key_hint">Publishable key: sb_publishable_…</string>
+    <string name="backup_account_note">Choose an e-mail and a password for your copy. The first time press \"Create account\". The database may send you an e-mail: open the link in it once. After that press \"Log in\".</string>
+    <string name="backup_email_hint">E-mail</string>
+    <string name="backup_password_hint">Password (8 signs or more)</string>
+    <string name="backup_create">Create account</string>
+    <string name="backup_login">Log in</string>
+    <string name="backup_busy">Talking to the database…</string>
+    <string name="backup_status_title">Now</string>
+    <string name="backup_status_on">The online copy is on.</string>
+    <string name="backup_account">Account: %1$s</string>
+    <string name="backup_last">Last copy: %1$s</string>
+    <string name="backup_never">Nothing was copied yet.</string>
+    <plurals name="backup_waiting">
+        <item quantity="one">%d value waits to be copied.</item>
+        <item quantity="other">%d values wait to be copied.</item>
+    </plurals>
+    <string name="backup_waiting_none">Every value of this phone is in the copy.</string>
+    <plurals name="backup_online_count">
+        <item quantity="one">The copy holds %d value.</item>
+        <item quantity="other">The copy holds %d values.</item>
+    </plurals>
+    <string name="backup_now">Copy now</string>
+    <string name="backup_restore">Get the values back from the copy</string>
+    <string name="backup_logout">Switch off and log out</string>
+    <string name="backup_delete_online">Empty the online copy</string>
+    <string name="backup_delete_title">Empty the online copy?</string>
+    <string name="backup_delete_text">All your values are removed from the database on the internet. The values on this phone stay.</string>
+    <string name="backup_delete_yes">Empty it</string>
+    <string name="backup_deleted">The online copy is empty now.</string>
+    <string name="backup_confirm_first">The account was made. The database has sent an e-mail to %1$s. Open the link in it once. The page that opens may show an error: that does not matter. Then press \"Log in\".</string>
+    <string name="backup_logged_in">You are logged in. The online copy is on.</string>
+    <string name="backup_logged_out">The online copy is off. What is in the database stays there.</string>
+    <plurals name="backup_done">
+        <item quantity="one">%d value was copied.</item>
+        <item quantity="other">%d values were copied.</item>
+    </plurals>
+    <string name="backup_done_none">Nothing new to copy.</string>
+    <plurals name="backup_restore_done">
+        <item quantity="one">%d value came back from the copy.</item>
+        <item quantity="other">%d values came back from the copy.</item>
+    </plurals>
+    <string name="backup_restore_none">The copy holds no value of the last 90 days that this phone does not have.</string>
+    <string name="backup_error_fields">Fill in all four fields first.</string>
+    <string name="backup_error_url">The Project URL must look like https://name.supabase.co</string>
+    <string name="backup_error_no_internet">No answer from the database. Is the internet on? A free Supabase project falls asleep after a week without use: then open supabase.com and wake it.</string>
+    <string name="backup_error_login">The database does not accept this e-mail and password.</string>
+    <string name="backup_error_login_again">The database does not accept the saved login any more. Switch off and log in again.</string>
+    <string name="backup_error_not_confirmed">The e-mail is not confirmed yet. Open the link in the e-mail from the database, then press \"Log in\".</string>
+    <string name="backup_error_weak">The database wants a longer or less simple password.</string>
+    <string name="backup_error_exists">This e-mail has an account already. Press \"Log in\".</string>
+    <string name="backup_error_key">The database does not accept the key. Copy the \"Publishable key\" of your project again.</string>
+    <string name="backup_error_table">The database has no table for the values yet. Do step 2: paste the set-up text into the SQL Editor of your project and press \"Run\".</string>
+    <string name="backup_error_server">The database answered with an error.</string>
+    <string name="backup_notice_title">Good to know</string>
+    <string name="backup_notice">• The copy holds your glucose values with their times. It does not hold your name.\n\n• The app copies new values when you open it, after a scan, and about every 15 minutes while values come by themselves.\n\n• The phone keeps values for 90 days. The copy keeps them until you empty it.\n\n• A free Supabase project falls asleep after a week without use. Then open supabase.com and wake it.</string>
+
+    <!-- ============================================================ version 4.1: the new look -->
+    <string name="powered_by">Powered by Abdifatah Elmi</string>
+
+    <!-- More: three short lists -->
+    <string name="more_group_values">Values</string>
+    <string name="more_group_data">Your data</string>
+    <string name="more_group_app">App</string>
+    <string name="more_bluetooth">Bluetooth values</string>
+    <string name="more_note_linkup">Values over the internet</string>
+    <string name="more_note_live">Values from the sensor</string>
+    <string name="more_note_alarms">Low, high, before a low, no values</string>
+    <string name="more_note_voice">The app says the value aloud</string>
+    <string name="more_note_statistics">Average and time in range</string>
+    <string name="more_note_readings">The list of all values</string>
+    <string name="more_note_export">All readings as a CSV file</string>
+    <string name="more_note_backup">A copy in your own database</string>
+    <string name="more_note_ai">Explains your numbers</string>
+    <string name="more_note_settings">Unit, target range, your data</string>
+    <string name="more_note_about">Version, safety notice, licenses</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="state_not_set_up">Not set up</string>
+    <string name="more_row_description">%1$s. %2$s</string>
+    <string name="more_row_description_state">%1$s: %3$s. %2$s</string>
+
+    <!-- Settings: "Correct the value" was a button on the Home screen until 4.0 -->
+    <string name="settings_correction_note">For values from a scan or over Bluetooth: if they differ from your meter, type the number of the meter here, and the app learns the difference. Values from LibreLinkUp are never changed.</string>
+    <string name="settings_correction_open">Set it up</string>
+</resources>

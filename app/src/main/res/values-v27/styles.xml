@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The strip with the buttons of the phone gets the colour of the bar above it. -->
+    <style name="AppTheme" parent="AppThemeColors">
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
