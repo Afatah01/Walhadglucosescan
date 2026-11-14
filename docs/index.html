@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Walhad Glucose Scan — Your Glucose. Your Health. Always Within Reach.</title>
-<meta name="description" content="Walhad Glucose Scan is a free Android application for FreeStyle Libre users: scan your sensor, follow glucose trends, receive timely alerts and generate PDF reports. No account, no advertisements.">
+<meta name="description" content="Walhad Glucose Scan is an Android application for FreeStyle Libre users: scan your sensor, follow glucose trends, receive timely alerts and generate PDF reports. No account, no advertisements.">
 <meta name="theme-color" content="#101D32">
 <meta name="author" content="Abdifatah Elmi">
 <link rel="canonical" href="https://github.com/Afatah01/Walhadglucosescan">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Walhad Glucose Scan">
-<meta property="og:description" content="A free Android application for FreeStyle Libre users: scan, follow trends, receive alerts and share PDF reports.">
+<meta property="og:description" content="An Android application for FreeStyle Libre users: scan, follow trends, receive alerts and share PDF reports.">
 <meta property="og:image" content="https://raw.githubusercontent.com/Afatah01/Walhadglucosescan/main/docs/brand/social-preview.png">
 <meta property="og:url" content="https://github.com/Afatah01/Walhadglucosescan">
 <meta name="twitter:card" content="summary_large_image">
@@ -181,6 +181,7 @@ p{margin:0}
 
 /* ======================= features ======================= */
 .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:38px}
+.cards .card:last-child:nth-child(3n+1){grid-column:2/3}
 .card{
   position:relative; overflow:hidden; background:var(--white); border:1px solid var(--line);
   border-radius:var(--r-l); padding:28px 26px 26px; box-shadow:var(--shadow-s);
@@ -501,14 +502,14 @@ footer .fbottom b{color:#fff}
 <section class="hero" id="overview">
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">Free Android application</span>
+      <span class="eyebrow">Android application</span>
       <h1>Your Glucose. Your Health.<br><em>Always Within Reach.</em></h1>
       <p class="lead">Monitor your FreeStyle Libre glucose readings, receive timely alerts, explore
         glucose trends, and share meaningful health information — all from your Android phone.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.2.1/Walhad-GlucoseScan-v4.2.apk">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="M7 12l5 5 5-5"/><path d="M4 21h16"/></svg>
-          Download Free for Android
+          Download for Android
         </a>
         <a class="btn btn-ghost" href="#features">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
@@ -516,7 +517,7 @@ footer .fbottom b{color:#fff}
         </a>
       </div>
       <ul class="ticks">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Free Android application</li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Android application</li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Android 6.0+</li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Lightweight 1.7 MB</li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> No account required</li>
@@ -607,6 +608,12 @@ footer .fbottom b{color:#fff}
         <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div>
         <h3>Professional PDF Reports</h3>
         <p>Generate structured PDF reports containing glucose readings, trends, and useful statistics to share with healthcare professionals.</p>
+      </article>
+      <article class="card reveal">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M18 15.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/><path d="M5 14l.7 1.6 1.6.7-1.6.7L5 18.6l-.7-1.6-1.6-.7 1.6-.7z"/></svg></div>
+        <h3>Built-in AI Analysis</h3>
+        <p>The Analysis screen has an AI built in: ask it to explain your glucose patterns in plain
+          language, in English, Somali or Arabic. It uses your own key and stays switched off until you set it up.</p>
       </article>
       <article class="card reveal">
         <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 3.5v6c0 5-3.4 9-8 10.5-4.6-1.5-8-5.5-8-10.5v-6z"/><path d="M9 12l2 2 4-4"/></svg></div>
@@ -709,7 +716,7 @@ footer .fbottom b{color:#fff}
         </div>
         <div class="spec">
           <div class="box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <div><b>FreeStyle Libre 2 Plus (European type)</b><span>Supported sensor generation and region</span></div>
+          <div><b>FreeStyle Libre 2 Plus</b><span>Supported sensor generation</span></div>
         </div>
         <div class="spec">
           <div class="box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
@@ -779,10 +786,6 @@ footer .fbottom b{color:#fff}
     </div>
     <ul class="privacy reveal">
       <li><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
-        <div><b>No account required</b><span>Install it and use it. There is nothing to sign up for.</span></div></li>
-      <li><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
-        <div><b>No advertisements</b><span>The application shows no ads and sells nothing.</span></div></li>
-      <li><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
         <div><b>No tracking</b><span>No analytics and no advertising identifiers are built in.</span></div></li>
       <li><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></span>
         <div><b>Data stored locally by default</b><span>Your readings live in the application's own storage on the phone.</span></div></li>
@@ -800,7 +803,7 @@ footer .fbottom b{color:#fff}
       <span class="glow a"></span><span class="glow b"></span>
       <div class="grid">
         <div>
-          <span class="eyebrow" style="background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.2); color:#8FE6DA">Free download</span>
+          <span class="eyebrow" style="background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.2); color:#8FE6DA">Download</span>
           <h2 style="margin-top:16px">Take Control of Your<br>Glucose Information</h2>
           <p class="lead">Discover a simpler way to view, understand, and monitor your glucose readings.</p>
           <a class="btn btn-teal" href="https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.2.1/Walhad-GlucoseScan-v4.2.apk">
@@ -808,7 +811,7 @@ footer .fbottom b{color:#fff}
             Download Walhad Glucose Scan
           </a>
           <div class="meta">
-            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Free Android application</span>
+            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Android application</span>
             <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> 1.7 MB</span>
             <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Android 6.0+</span>
           </div>
@@ -835,9 +838,9 @@ footer .fbottom b{color:#fff}
     </div>
     <div class="faq reveal">
       <details open><summary>What is Walhad Glucose Scan?</summary>
-        <div class="answer">A free Android application that reads a FreeStyle Libre sensor with the phone (NFC), shows the glucose value with its trend, keeps 14 days of history, warns before a low and can produce a PDF report. It is open source.</div></details>
+        <div class="answer">An Android application that reads a FreeStyle Libre sensor with the phone (NFC), shows the glucose value with its trend, keeps 14 days of history, warns before a low and can produce a PDF report. It is open source.</div></details>
       <details><summary>Which FreeStyle Libre sensors are supported?</summary>
-        <div class="answer">FreeStyle Libre 1, FreeStyle Libre 2 and FreeStyle Libre 2 Plus (European type). No other sensor or regional version is claimed.</div></details>
+        <div class="answer">FreeStyle Libre 1, FreeStyle Libre 2 and FreeStyle Libre 2 Plus. No other sensor is claimed.</div></details>
       <details><summary>Does the application require an account?</summary>
         <div class="answer">No. There is no sign-up. An account of your own is needed only if you switch on one of the optional online features (LibreLinkUp, an AI service, or your own database).</div></details>
       <details><summary>Does it work on Android?</summary>
@@ -929,7 +932,7 @@ footer .fbottom b{color:#fff}
     <img src="brand/walhad-logo.png" alt="">
     <div>
       <b>Walhad Glucose Scan</b>
-      <small>Free · 1.7 MB · Android 6.0+</small>
+      <small>1.7 MB · Android 6.0+</small>
     </div>
   </div>
   <a class="btn btn-primary btn-sm" href="https://github.com/Afatah01/Walhadglucosescan/releases/download/v4.2.1/Walhad-GlucoseScan-v4.2.apk">
