@@ -24,6 +24,8 @@ import com.glucosescan.app.core.Analysis
 import com.glucosescan.app.core.AnalysisCalculator
 import com.glucosescan.app.core.FindingLevel
 import com.glucosescan.app.core.Forecaster
+import com.glucosescan.app.core.OutlookConfidence
+import com.glucosescan.app.core.OutlookDirection
 import com.glucosescan.app.core.OutlookRisk
 import com.glucosescan.app.core.Outlooks
 import com.glucosescan.app.core.GlucoseUnit
@@ -292,8 +294,41 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
             return
         }
         val at = now + Forecaster.HORIZON_MINUTES * 60_000L
+        val outlook = Outlooks.of(forecast, now, current.shown?.readableValue ?: 0, settings.lowLimit, settings.highLimit)
         findViewById<TextView>(R.id.outlookText).text = Texts.unbroken(getString(R.string.outlook_line, FindingTexts.forecast(this, forecast.valueAt(at), unit), Texts.timeOfDay(this, at)))
         findViewById<TextView>(R.id.outlookNote).text = getString(R.string.outlook_note, forecast.spanMinutes)
+
+        // both estimates, with the time each is for
+        if (outlook == null) {
+            findViewById<View>(R.id.outlook15).visibility = View.GONE
+            findViewById<View>(R.id.outlook15Time).visibility = View.GONE
+            findViewById<View>(R.id.outlook30).visibility = View.GONE
+            findViewById<View>(R.id.outlook30Time).visibility = View.GONE
+            findViewById<View>(R.id.outlookConfidence).visibility = View.GONE
+            findViewById<View>(R.id.outlookDirection).visibility = View.GONE
+        } else {
+            val at15 = now + 15 * 60_000L
+            findViewById<TextView>(R.id.outlook15).text = FindingTexts.forecast(this, outlook.value15, unit)
+            findViewById<TextView>(R.id.outlook15Time).text = Texts.timeOfDay(this, outlook.at15)
+            findViewById<TextView>(R.id.outlook30).text = FindingTexts.forecast(this, outlook.value, unit)
+            findViewById<TextView>(R.id.outlook30Time).text = Texts.timeOfDay(this, outlook.at)
+            findViewById<TextView>(R.id.outlookConfidence).text = getString(
+                when (outlook.confidence) {
+                    OutlookConfidence.GOOD -> R.string.outlook_confidence_good
+                    OutlookConfidence.FAIR -> R.string.outlook_confidence_fair
+                    OutlookConfidence.LOW -> R.string.outlook_confidence_low
+                }
+            )
+            // and which way it is going, with the rate
+            val perMinute = FindingTexts.glucose(Math.round(Math.abs(outlook.perMinute)).toInt(), unit)
+            findViewById<TextView>(R.id.outlookDirection).text = Texts.unbroken(
+                when (outlook.direction) {
+                    OutlookDirection.RISING -> getString(R.string.outlook_direction_rising, perMinute)
+                    OutlookDirection.FALLING -> getString(R.string.outlook_direction_falling, perMinute)
+                    OutlookDirection.STEADY -> getString(R.string.outlook_direction_steady, perMinute)
+                }
+            )
+        }
 
         val minutes = current.minutesUntilBelowTarget(now)
         val warning = findViewById<TextView>(R.id.outlookWarning)
@@ -314,7 +349,6 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
         card.visibility = View.VISIBLE
 
         // what to do about it, said on the phone, without any network
-        val outlook = Outlooks.of(forecast, now, current.shown?.readableValue ?: 0, settings.lowLimit, settings.highLimit)
         val advice = findViewById<TextView>(R.id.outlookAdvice)
         if (outlook == null) {
             advice.visibility = View.GONE

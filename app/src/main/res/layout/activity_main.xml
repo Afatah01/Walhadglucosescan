@@ -149,9 +149,67 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/outlook_in_15" />
+
+                    <TextView
+                        android:id="@+id/outlook15"
+                        style="@style/TileValue" />
+
+                    <TextView
+                        android:id="@+id/outlook15Time"
+                        style="@style/NoteText" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/outlook_in_30" />
+
+                    <TextView
+                        android:id="@+id/outlook30"
+                        style="@style/TileValue" />
+
+                    <TextView
+                        android:id="@+id/outlook30Time"
+                        style="@style/NoteText" />
+                </LinearLayout>
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/outlookText"
-                style="@style/BodyText" />
+                style="@style/BodyText"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/outlookDirection"
+                style="@style/BodyText"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/outlookConfidence"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp" />
 
             <TextView
                 android:id="@+id/outlookAdvice"

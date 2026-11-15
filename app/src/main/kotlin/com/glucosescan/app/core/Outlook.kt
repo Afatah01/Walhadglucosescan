@@ -28,6 +28,28 @@ class Outlook(
     /** Whole minutes until the line is under the low limit, or null. */
     val minutesUntilLow: Int?
 ) {
+
+    /** When the fifteen-minute estimate is for. */
+    val at15: Long
+        get() = at - 15 * 60_000L
+
+    /** Where the line is at [at15], mg/dL. */
+    val value15: Int
+        get() = forecast.valueAt(at15)
+
+    /**
+     * How much the guess is to be trusted.
+     *
+     * It comes from how tightly the last values lie around the line, not from
+     * how many there are alone: a line through values that jump about is a poor
+     * guide however many of them there were. The card says so in words.
+     */
+    val confidence: OutlookConfidence
+        get() = when {
+            forecast.scatter <= Outlooks.FAIR_SCATTER && forecast.count >= Outlooks.GOOD_COUNT -> OutlookConfidence.GOOD
+            forecast.scatter <= Outlooks.LOW_SCATTER -> OutlookConfidence.FAIR
+            else -> OutlookConfidence.LOW
+        }
     /** How much the line climbs or falls each minute, mg/dL. */
     val perMinute: Double
         get() = forecast.slope
@@ -54,6 +76,18 @@ enum class OutlookDirection {
     RISING,
     FALLING,
     STEADY
+}
+
+/** How much the guess is to be trusted. */
+enum class OutlookConfidence {
+    /** The values lie close to the line. */
+    GOOD,
+
+    /** Some spread, but the line is a fair guide. */
+    FAIR,
+
+    /** The values jump about: treat the number with care. */
+    LOW
 }
 
 /** What the number calls for. Ordered from the most urgent. */
@@ -119,4 +153,13 @@ object Outlooks {
 
     /** Slower than this (mg/dL a minute) is called steady: near a limit it would come and go. */
     private const val MIN_SLOPE = 0.5
+
+    /** How far the values may lie from the line and still count as a fair guide. */
+    const val FAIR_SCATTER = 3.0
+
+    /** Beyond this the values jump about too much for the number to be worth much. */
+    const val LOW_SCATTER = 6.0
+
+    /** How many values the line needs before the guess is called good. */
+    const val GOOD_COUNT = 10
 }
