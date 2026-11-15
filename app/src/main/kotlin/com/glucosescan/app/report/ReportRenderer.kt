@@ -16,6 +16,7 @@ import android.text.TextPaint
 import android.text.format.DateFormat
 import com.glucosescan.app.R
 import com.glucosescan.app.core.DailyReport
+import com.glucosescan.app.core.Episode
 import com.glucosescan.app.core.FindingLevel
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.StatisticsCalculator
@@ -71,10 +72,10 @@ class ReportRenderer(
     /** @param page 0 or 1 */
     fun draw(canvas: Canvas, page: Int) {
         canvas.drawColor(Color.WHITE)
-        if (page == 0) {
-            firstPage(canvas)
-        } else {
-            secondPage(canvas)
+        when (page) {
+            0 -> firstPage(canvas)
+            1 -> secondPage(canvas)
+            else -> thirdPage(canvas)
         }
         footer(canvas, page)
     }
@@ -531,6 +532,152 @@ class ReportRenderer(
         }
     }
 
+
+    // ------------------------------------------------------------------ page 3
+
+    /**
+     * The page a doctor or diabetes nurse reaches for: how steady the values were, every low
+     * and every high with the time it began and how long it lasted, and what is worth raising
+     * at the appointment.
+     *
+     * Nothing here is a diagnosis and nothing here names a dose. The last block says so in as
+     * many words, because a report that looks clinical can otherwise be read as instruction.
+     */
+    private fun thirdPage(canvas: Canvas) {
+        fill(canvas, 0f, 0f, WIDTH, 40f, BLUE)
+        text(canvas, "Daily glucose report", MARGIN, 25f, 12f, Color.WHITE, bold = true)
+        text(canvas, shortDay.format(Date(report.dayStart)), WIDTH - MARGIN, 25f, 11f, Color.WHITE, align = Paint.Align.RIGHT)
+
+        val stats = report.span.stats
+        var y = 64f
+
+        // ---- D. how steady the values were
+        sectionTitle(canvas, "How steady the values were", y)
+        y += 16f
+        val cv = stats.cv
+        val rows = listOf(
+            "Spread around the average (CV)" to (cv?.let { String.format(Locale.US, "%.0f %%", it) } ?: "\u2013"),
+            "Standard deviation (SD)" to (stats.sd?.let { value(it) + " " + unit.label } ?: "\u2013"),
+            "Estimated HbA1c (GMI)" to (stats.gmi?.let { String.format(Locale.US, "%.1f %%", it) } ?: "\u2013"),
+            "Values present" to (stats.coveragePercent.toString() + " % of the time"),
+            "Lowest single value" to ((stats.lowest?.let { value(it) } ?: "\u2013") + " " + unit.label),
+            "Highest single value" to ((stats.highest?.let { value(it) } ?: "\u2013") + " " + unit.label)
+        )
+        for ((label, number) in rows) {
+            text(canvas, label, MARGIN + 8f, y + 10f, 9.5f, TEXT)
+            text(canvas, number, WIDTH - MARGIN, y + 10f, 9.5f, TEXT, bold = true, align = Paint.Align.RIGHT)
+            line(canvas, MARGIN, y + 15f, WIDTH - MARGIN, y + 15f, GRID, 0.5f)
+            y += 17.5f
+        }
+        val cvWords = if (cv == null) {
+            "Not enough values to say how steady they are."
+        } else when {
+            cv < 20.0 -> "Steady. Under 20 % is what is aimed for in someone who does not inject insulin."
+            cv < 36.0 -> "Steady enough. The aim is under 36 %."
+            else -> "Not steady. Over 36 % means the values swing a lot over the day, and that is worth raising."
+        }
+        text(canvas, cvWords, MARGIN + 8f, y + 11f, 9f, GREY)
+        y += 30f
+
+        // ---- E. every low and every high
+        sectionTitle(canvas, "Every low and high", y)
+        text(
+            canvas,
+            "An event is 15 minutes or longer under " + value(StatisticsCalculator.LOW_BELOW) +
+                " or over " + value(StatisticsCalculator.HIGH_ABOVE) + " " + unit.label + ".",
+            WIDTH - MARGIN, y, 8.5f, GREY, align = Paint.Align.RIGHT
+        )
+        y += 14f
+        y = eventTable(canvas, "Low", report.span.lows, y, RED)
+        y += 10f
+        y = eventTable(canvas, "High", report.span.highs, y, AMBER)
+        y += 16f
+
+        // ---- H. what to raise at the appointment
+        sectionTitle(canvas, "For the appointment", y)
+        y += 10f
+        val points = medicalPoints()
+        for (point in points) {
+            fill(canvas, MARGIN, y + 4.2f, MARGIN + 3.2f, y + 7.4f, BLUE, 1.6f)
+            y += paragraph(canvas, point, MARGIN + 10f, y, WIDTH - 2 * MARGIN - 10f, 9.5f, TEXT) + 5f
+        }
+    }
+
+    /** One table of events: when it began, how long it lasted, and its lowest (or highest) value. */
+    private fun eventTable(canvas: Canvas, kind: String, episodes: List<Episode>, top: Float, accent: Int): Float {
+        val columns = floatArrayOf(MARGIN + 8f, MARGIN + 132f, MARGIN + 232f, WIDTH - MARGIN - 8f)
+        val rowHeight = 13.5f
+        var y = top
+        fill(canvas, MARGIN, y, WIDTH - MARGIN, y + rowHeight, 0xFFE3EEFD.toInt(), 3f)
+        text(canvas, kind, columns[0], y + 9.6f, 8.5f, BLUE, bold = true)
+        text(canvas, "Began", columns[1], y + 9.6f, 8.5f, BLUE, bold = true)
+        text(canvas, "How long", columns[2], y + 9.6f, 8.5f, BLUE, bold = true)
+        text(canvas, kind, columns[3], y + 9.6f, 8.5f, BLUE, bold = true, align = Paint.Align.RIGHT)
+        y += rowHeight
+        if (episodes.isEmpty()) {
+            text(canvas, "None on this day.", columns[0], y + 10f, 9f, GREY)
+            return y + rowHeight
+        }
+        for ((index, episode) in episodes.withIndex()) {
+            if (index % 2 == 1) {
+                fill(canvas, MARGIN, y, WIDTH - MARGIN, y + rowHeight, 0xFFF6F8FC.toInt())
+            }
+            text(canvas, kind + " " + (index + 1), columns[0], y + 9.8f, 9f, accent, bold = true)
+            text(canvas, time(episode.start), columns[1], y + 9.8f, 9f, TEXT)
+            text(canvas, GlucoseFormat.duration(episode.minutes), columns[2], y + 9.8f, 9f, TEXT)
+            text(canvas, value(episode.extreme) + " " + unit.label, columns[3], y + 9.8f, 9f, TEXT, bold = true, align = Paint.Align.RIGHT)
+            y += rowHeight
+        }
+        return y
+    }
+
+    /**
+     * What is worth saying out loud at the appointment. Each line is drawn only from numbers
+     * that are actually on this page. No line names a dose, a medicine or a diagnosis.
+     */
+    private fun medicalPoints(): List<String> {
+        val stats = report.span.stats
+        val points = ArrayList<String>()
+        val inRange = stats.rangePercents[2]
+        points.add(
+            "Time in range was " + inRange + " %. The aim agreed internationally is more than 70 % of the time between " +
+                value(StatisticsCalculator.LOW_BELOW) + " and " + value(StatisticsCalculator.HIGH_ABOVE) + " " + unit.label + "."
+        )
+        val veryLow = stats.rangePercents[0] + stats.rangePercents[1]
+        if (veryLow > 0) {
+            points.add(
+                "Time below " + value(StatisticsCalculator.LOW_BELOW) + " " + unit.label + " was " + veryLow + " %" +
+                    (if (stats.rangePercents[0] > 0) ", of which " + stats.rangePercents[0] + " % was under " + value(StatisticsCalculator.VERY_LOW_BELOW) + " " + unit.label else "") +
+                    ". The aim is less than 4 % below range, and less than 1 % below " + value(StatisticsCalculator.VERY_LOW_BELOW) + " " + unit.label + "."
+            )
+        } else {
+            points.add("There was no time below " + value(StatisticsCalculator.LOW_BELOW) + " " + unit.label + " on this day.")
+        }
+        val lowsAtNight = report.span.lows.count { hourOfDay(it.start) in 0..5 || hourOfDay(it.start) >= 23 }
+        if (lowsAtNight > 0) {
+            points.add(lowsAtNight.toString() + " of the lows began between 11 at night and 6 in the morning. Night lows are the ones most worth discussing.")
+        }
+        val cv = stats.cv
+        if (cv != null && cv >= 36.0) {
+            points.add("The values swing widely (CV " + String.format(Locale.US, "%.0f %%", cv) + "). The aim is under 36 %.")
+        }
+        stats.gmi?.let {
+            points.add("The estimated HbA1c from these values (GMI) is " + String.format(Locale.US, "%.1f %%", it) + ". A laboratory HbA1c can differ from it.")
+        }
+        if (stats.coveragePercent < 80) {
+            points.add("Only " + stats.coveragePercent + " % of the day has values. Every number here is counted from what is there, so gaps make the picture less certain.")
+        }
+        points.add("This report describes what the sensor measured. It is not a diagnosis, and nothing in it is a dose, a medicine or a change to one. Any change to treatment is for the doctor or diabetes nurse to decide.")
+        return points
+    }
+
+    /** The hour of the day (0 to 23) at which a moment falls, on the clock of the phone. */
+    private fun hourOfDay(moment: Long): Int {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.timeInMillis = moment
+        return calendar.get(java.util.Calendar.HOUR_OF_DAY)
+    }
+
     /** A bar for each of the 24 hours of the day. */
     private fun hourBars(canvas: Canvas, left: Float, top: Float, right: Float, bottom: Float) {
         val max = chartMax()
@@ -568,7 +715,7 @@ class ReportRenderer(
 
         const val PAGE_WIDTH = 595
         const val PAGE_HEIGHT = 842
-        const val PAGES = 2
+        const val PAGES = 3
 
         private const val WIDTH = 595f
         private const val MARGIN = 36f
