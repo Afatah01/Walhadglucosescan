@@ -181,7 +181,6 @@ p{margin:0}
 
 /* ======================= features ======================= */
 .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:38px}
-.cards .card:last-child:nth-child(3n+1){grid-column:2/3}
 .card{
   position:relative; overflow:hidden; background:var(--white); border:1px solid var(--line);
   border-radius:var(--r-l); padding:28px 26px 26px; box-shadow:var(--shadow-s);
@@ -422,18 +421,26 @@ footer .fbottom b{color:#fff}
   .download .meta{justify-content:center}
   .download .phone{margin:0 auto}
   footer .cols{grid-template-columns:1fr 1fr}
-  .f-reading{left:-2%} .f-chart{left:-4%} .f-trend{right:-2%} .f-note{right:-2%}
+  .f-reading{left:1%} .f-chart{left:0} .f-trend{right:1%} .f-note{right:0}
 }
 @media (max-width:860px){
   body{padding-bottom:86px}
   .nav-links, .nav-cta{display:none}
   .burger{display:flex}
-  .stats{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .steps{grid-template-columns:1fr}
   .step::after{display:none}
   .langs{grid-template-columns:1fr}
   .privacy{grid-template-columns:1fr}
   .section{padding:64px 0}
+}
+/* A card that is alone in the last row is centred. The rule has to know how many
+   columns there are: a column that does not exist is made anyway, and squeezes the rest. */
+@media (min-width:1081px){
+  .cards .card:last-child:nth-child(3n+1){grid-column:2/3}
+}
+@media (min-width:561px) and (max-width:1080px){
+  .cards .card:last-child:nth-child(2n+1){grid-column:1/-1; justify-self:center; width:calc(50% - 10px)}
 }
 @media (max-width:560px){
   body{font-size:16px}
@@ -450,6 +457,7 @@ footer .fbottom b{color:#fff}
   .dock .btn{padding:11px 16px}
   footer .cols{grid-template-columns:1fr; gap:26px}
   .stat b{font-size:1.7rem}
+  .stat{min-width:0; overflow-wrap:anywhere}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important; transition:none !important; scroll-behavior:auto !important}
@@ -944,7 +952,7 @@ footer .fbottom b{color:#fff}
 <!-- ============================ lightbox ============================ -->
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot preview">
   <button class="close" id="lightboxClose" aria-label="Close preview">✕</button>
-  <img id="lightboxImg" src="" alt="">
+  <img id="lightboxImg" alt="">
 </div>
 
 <script>
