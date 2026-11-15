@@ -65,15 +65,54 @@ class AiInsightsActivity : BaseActivity() {
         Thread(work, "ai-question").apply { start() }
     }
 
-    /** The questions that are ready to press, in the order they are shown. */
+    /**
+     * The questions that are ready to press, in the order they are shown.
+     *
+     * The first seven are the ones that were there from the start; the rest were added so that
+     * the things people actually ask are one press away instead of having to be typed. Every one
+     * of them is answered from the readings of the stretch chosen above, and none of them is
+     * answered without them.
+     */
     private val readyQuestions = listOf(
+        // the seven that were there first
         R.string.q_overall,
         R.string.q_lows,
         R.string.q_highs,
         R.string.q_night,
         R.string.q_pattern,
         R.string.q_compare,
-        R.string.q_doctor
+        R.string.q_doctor,
+        // the numbers themselves
+        R.string.q_average,
+        R.string.q_highest,
+        R.string.q_lowest,
+        R.string.q_time_in_range,
+        R.string.q_time_outside,
+        R.string.q_key_findings,
+        // when, and why
+        R.string.q_when_low,
+        R.string.q_when_high,
+        R.string.q_why_fall,
+        R.string.q_why_rise,
+        R.string.q_early_morning,
+        R.string.q_steadiest_hours,
+        R.string.q_wildest_hours,
+        R.string.q_common_patterns,
+        // how often, and is it changing
+        R.string.q_hypo_how_often,
+        R.string.q_hyper_how_often,
+        R.string.q_swings,
+        R.string.q_compare_7,
+        R.string.q_compare_30,
+        R.string.q_compare_90,
+        // right now, and what to do
+        R.string.q_trend_now,
+        R.string.q_forecast_15,
+        R.string.q_forecast_30,
+        R.string.q_risk_soon,
+        R.string.q_what_to_do_falling,
+        R.string.q_what_to_do_rising,
+        R.string.q_events_to_watch
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

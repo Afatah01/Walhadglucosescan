@@ -247,6 +247,33 @@
     <string name="q_pattern">Is there a pattern to my days?</string>
     <string name="q_compare">Is this getting better or worse?</string>
     <string name="q_doctor">What should I tell my doctor?</string>
+    <string name="q_average">What is my average glucose?</string>
+    <string name="q_highest">When was my highest reading, and what was it?</string>
+    <string name="q_lowest">When was my lowest reading, and what was it?</string>
+    <string name="q_when_low">When do I usually go low?</string>
+    <string name="q_when_high">When do I usually go high?</string>
+    <string name="q_why_fall">Why does my glucose tend to drop?</string>
+    <string name="q_why_rise">Why does my glucose tend to rise?</string>
+    <string name="q_early_morning">What is my pattern in the early morning?</string>
+    <string name="q_steadiest_hours">Which hours are steadiest?</string>
+    <string name="q_wildest_hours">Which hours swing the most?</string>
+    <string name="q_time_in_range">How much time do I spend in range?</string>
+    <string name="q_time_outside">How much time below and above range?</string>
+    <string name="q_hypo_how_often">How often do I go low?</string>
+    <string name="q_hyper_how_often">How often do I go high?</string>
+    <string name="q_swings">Am I swinging up and down a lot?</string>
+    <string name="q_compare_7">Compare my last 7 days with the 7 before.</string>
+    <string name="q_compare_30">Compare my last 30 days with the 30 before.</string>
+    <string name="q_compare_90">Compare my last 90 days with the 90 before.</string>
+    <string name="q_common_patterns">What are my most common patterns?</string>
+    <string name="q_trend_now">Where is my glucose heading right now?</string>
+    <string name="q_forecast_15">What will it likely be in 15 minutes?</string>
+    <string name="q_forecast_30">What will it likely be in 30 minutes?</string>
+    <string name="q_risk_soon">Am I at risk of going low or high soon?</string>
+    <string name="q_what_to_do_falling">What should I do when it is falling?</string>
+    <string name="q_what_to_do_rising">What should I do when it is rising?</string>
+    <string name="q_events_to_watch">Which events should I pay attention to?</string>
+    <string name="q_key_findings">What are the most important findings?</string>
     <string name="tab_more">More</string>
 
     <!-- More -->
@@ -414,6 +441,11 @@
         <item quantity="other">It may go below your target range (%1$s) in about %2$d minutes.</item>
     </plurals>
     <string name="outlook_note">A guess from the values of the last %1$d minutes. Food, medicine and movement change it.</string>
+    <string name="outlook_in_15">In 15 minutes</string>
+    <string name="outlook_in_30">In 30 minutes</string>
+    <string name="outlook_confidence_good">Fairly confident: your last readings have been steady.</string>
+    <string name="outlook_confidence_fair">Somewhat uncertain: your readings have moved around a little.</string>
+    <string name="outlook_confidence_low">Not very certain: your readings have been jumping about.</string>
     <string name="outlook_headline">If the current trend continues: approximately %1$s at %2$s.</string>
     <string name="outlook_direction_rising">It is rising by about %1$s each minute.</string>
     <string name="outlook_direction_falling">It is falling by about %1$s each minute.</string>
@@ -608,6 +640,7 @@
     <string name="report_period_days_90">90 days</string>
     <string name="report_page_3">Page 3 of the report</string>
     <string name="report_page_4">Page four: the same numbers by the hour and by the day</string>
+    <string name="report_page_5">Page five: against the stretch before, the night, and what the phone reads</string>
     <string name="report_arrow_before">‹</string>
     <string name="report_arrow_after">›</string>
     <string name="report_day_before">The day before</string>
