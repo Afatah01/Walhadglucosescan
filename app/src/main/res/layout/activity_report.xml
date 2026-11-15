@@ -193,6 +193,18 @@
             android:padding="1dp"
             android:scaleType="fitCenter" />
 
+        <ImageView
+            android:id="@+id/page5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/paper"
+            android:contentDescription="@string/report_page_5"
+            android:elevation="3dp"
+            android:padding="1dp"
+            android:scaleType="fitCenter" />
+
         <TextView
             style="@style/NoteText"
             android:layout_marginEnd="4dp"

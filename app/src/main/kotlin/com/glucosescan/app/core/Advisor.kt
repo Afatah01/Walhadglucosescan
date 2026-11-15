@@ -517,7 +517,7 @@ internal abstract class Words {
                     facts.goals.map { goal ->
                         format(
                             goalLine,
-                            goalName(goal.kind),
+                            goalName(goal.kind) { amount -> value(amount) },
                             percent(goal.percent),
                             goal.limit.toString() + " %",
                             if (goal.met) goalMet else goalMissed
@@ -614,12 +614,16 @@ internal abstract class Words {
         DayPart.EVENING -> partEvening
     }
 
-    private fun goalName(kind: GoalKind): String = when (kind) {
+    /**
+     * The name of a goal. The four that name a number take it in the unit the person reads, so
+     * that somebody reading mmol/L is not told about mg/dL.
+     */
+    private fun goalName(kind: GoalKind, value: (Int) -> String): String = when (kind) {
         GoalKind.IN_RANGE -> goalInRange
-        GoalKind.LOW -> goalLow
-        GoalKind.VERY_LOW -> goalVeryLow
-        GoalKind.HIGH -> goalHigh
-        GoalKind.VERY_HIGH -> goalVeryHigh
+        GoalKind.LOW -> format(goalLow, value(StatisticsCalculator.LOW_BELOW))
+        GoalKind.VERY_LOW -> format(goalVeryLow, value(StatisticsCalculator.VERY_LOW_BELOW))
+        GoalKind.HIGH -> format(goalHigh, value(StatisticsCalculator.HIGH_ABOVE))
+        GoalKind.VERY_HIGH -> format(goalVeryHigh, value(StatisticsCalculator.VERY_HIGH_ABOVE))
         GoalKind.VARIATION -> goalVariation
     }
 

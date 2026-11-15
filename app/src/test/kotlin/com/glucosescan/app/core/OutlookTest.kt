@@ -51,6 +51,31 @@ class OutlookTest {
     }
 
     @Test
+    fun itSaysBothEstimatesWithTheTimeEachIsFor() {
+        val outlook = outlook(100, -1.0)!!
+        assertEquals(now + 15 * minute, outlook.at15)
+        assertEquals(now + 30 * minute, outlook.at)
+        assertEquals(85, outlook.value15)
+        assertEquals(70, outlook.value)
+    }
+
+    @Test
+    fun howMuchTheGuessIsToBeTrustedComesFromHowSteadyTheValuesWere() {
+        // a straight line lies exactly on the values: nothing scatters
+        assertEquals(OutlookConfidence.GOOD, outlook(100, -1.0)!!.confidence)
+
+        // values that jump about make for a poor guide
+        val jumpy = (0 until 16).map { k ->
+            Glucose(now - k * minute, if (k % 2 == 0) 100 else 112, null, true, "A")
+        }
+        val forecast = Forecaster.of(jumpy, now)
+        if (forecast != null) {
+            val outlook = Outlooks.of(forecast, now, 100, low, high)!!
+            assertEquals(OutlookConfidence.LOW, outlook.confidence)
+        }
+    }
+
+    @Test
     fun aRiseIsCarriedForwardToo() {
         val outlook = outlook(120, 2.0)!!
         assertEquals(180, outlook.value)

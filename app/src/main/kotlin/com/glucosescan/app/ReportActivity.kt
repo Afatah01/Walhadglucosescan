@@ -367,7 +367,7 @@ class ReportActivity : BaseActivity() {
     companion object {
 
         /** The image views of the pages, in order. Keep in step with ReportRenderer.PAGES. */
-        private val PAGES_OF_REPORT = intArrayOf(R.id.page1, R.id.page2, R.id.page3, R.id.page4)
+        private val PAGES_OF_REPORT = intArrayOf(R.id.page1, R.id.page2, R.id.page3, R.id.page4, R.id.page5)
 
         private const val KEY_DAY = "day"
         private const val REQUEST_SAVE = 8

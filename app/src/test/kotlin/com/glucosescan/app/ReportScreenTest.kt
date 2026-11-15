@@ -484,7 +484,7 @@ class ReportScreenTest {
         for (expected in listOf("There were low values (under 3.9 mmol/L).", "6.6", "3.3 mmol/L", "11.1 mmol/L", "3.9 to 10.0 mmol/L", "Low: 3.0 to under 3.9")) {
             assertTrue(expected + " in\n" + all, words.contains(expected))
         }
-        assertFalse(all.contains("mg/dL"))
+        assertFalse("mg/dL should not appear in a mmol/L report:\n" + all, all.contains("mg/dL"))
     }
 
     @Test

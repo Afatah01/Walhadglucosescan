@@ -15,11 +15,14 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.format.DateFormat
 import com.glucosescan.app.R
+import com.glucosescan.app.core.Advisor
+import com.glucosescan.app.core.AnswerLanguage
 import com.glucosescan.app.core.DailyReport
 import com.glucosescan.app.core.Episode
 import com.glucosescan.app.core.FindingLevel
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.HourSummary
+import com.glucosescan.app.core.Statistics
 import com.glucosescan.app.core.StatisticsCalculator
 import com.glucosescan.app.core.Verdict
 import com.glucosescan.app.ui.FindingTexts
@@ -33,6 +36,7 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * Draws the report of one day: two pages of A4 paper. The same drawing makes the picture on
@@ -78,7 +82,8 @@ class ReportRenderer(
             0 -> firstPage(canvas)
             1 -> secondPage(canvas)
             2 -> thirdPage(canvas)
-            else -> fourthPage(canvas)
+            3 -> fourthPage(canvas)
+            else -> fifthPage(canvas)
         }
         footer(canvas, page)
     }
@@ -785,6 +790,194 @@ class ReportRenderer(
         }
     }
 
+    /**
+     * The fifth page: the stretch against the one before it, the night, and what the phone
+     * itself makes of all of it. The reading is counted on the phone by fixed rules and is
+     * labelled as the phone's, never as an AI's.
+     */
+    private fun fifthPage(canvas: Canvas) {
+        fill(canvas, 0f, 0f, WIDTH, 40f, BLUE)
+        text(canvas, "Daily glucose report", MARGIN, 25f, 12f, Color.WHITE, bold = true)
+        text(canvas, periodName(), WIDTH - MARGIN, 25f, 11f, Color.WHITE, align = Paint.Align.RIGHT)
+
+        var y = 62f
+
+        // ---- J. against the stretch before
+        sectionTitle(canvas, "Against the stretch before", y)
+        y += 16f
+        y = comparisonTable(canvas, y)
+
+        // ---- K. overnight and early morning
+        y += 14f
+        sectionTitle(canvas, "Overnight and early morning", y)
+        text(canvas, "00:00 to 06:00, by the clock of the phone.", WIDTH - MARGIN, y, 8.5f, GREY, align = Paint.Align.RIGHT)
+        y += 16f
+        y = overnightBlock(canvas, y)
+
+        // ---- L. what the phone reads
+        if (y < 660f) {
+            y += 14f
+            sectionTitle(canvas, "What the phone reads", y)
+            text(canvas, "Counted on the phone, by fixed rules. No AI.", WIDTH - MARGIN, y, 8.5f, GREY, align = Paint.Align.RIGHT)
+            y += 16f
+            y = readingBlock(canvas, y)
+        }
+    }
+
+    /** This stretch next to the one before it. Says plainly when there is nothing to compare. */
+    private fun comparisonTable(canvas: Canvas, top: Float): Float {
+        val now = report.span.stats
+        val before = report.previous
+        val columns = floatArrayOf(MARGIN + 8f, MARGIN + 190f, MARGIN + 300f, WIDTH - MARGIN - 8f)
+        var y = top
+
+        for ((index, head) in arrayOf("", "This stretch", "The one before").withIndex()) {
+            val align = if (index == 0) Paint.Align.LEFT else Paint.Align.RIGHT
+            text(canvas, head, columns[index], y + 8f, 8f, GREY, bold = true, align = align)
+        }
+        line(canvas, MARGIN, y + 12f, WIDTH - MARGIN, y + 12f, AXIS, 0.7f)
+        y += 15f
+
+        if (before == null) {
+            text(
+                canvas,
+                "Not enough values in the " + periodName() + " before this one to compare " +
+                    "(" + report.previousValues + " values). A comparison drawn from too little would mislead.",
+                MARGIN + 8f, y + 8f, 9f, GREY
+            )
+            return y + 20f
+        }
+
+        val rows = listOf(
+            "Average" to averagePair(now, before),
+            "In range" to percentPair(now.inTargetPercent, before.inTargetPercent, true),
+            "Below range" to percentPair(now.rangePercents[0] + now.rangePercents[1], before.rangePercents[0] + before.rangePercents[1], false),
+            "Above range" to percentPair(now.rangePercents[3] + now.rangePercents[4], before.rangePercents[3] + before.rangePercents[4], false),
+            "Spread (CV)" to cvPair(now, before)
+        )
+        for ((label, pair) in rows) {
+            text(canvas, label, columns[0], y + 8f, 9f, TEXT)
+            text(canvas, pair.first, columns[1], y + 8f, 9f, TEXT, bold = true, align = Paint.Align.RIGHT)
+            text(canvas, pair.second, columns[2], y + 8f, 9f, GREY, align = Paint.Align.RIGHT)
+            val change = changeOf(label, now, before)
+            if (change.isNotEmpty()) {
+                text(canvas, change, columns[3], y + 8f, 8.5f, if (change.startsWith("+")) GREEN_TEXT else RED, align = Paint.Align.RIGHT)
+            }
+            line(canvas, MARGIN, y + 12f, WIDTH - MARGIN, y + 12f, GRID, 0.4f)
+            y += 15f
+        }
+        return y
+    }
+
+    private fun averagePair(now: Statistics, before: Statistics): Pair<String, String> =
+        (now.mean?.let { value(it) } ?: "\u2013") to (before.mean?.let { value(it) } ?: "\u2013")
+
+    private fun cvPair(now: Statistics, before: Statistics): Pair<String, String> =
+        (now.cv?.let { String.format(Locale.US, "%.0f %%", it) } ?: "\u2013") to
+            (before.cv?.let { String.format(Locale.US, "%.0f %%", it) } ?: "\u2013")
+
+    private fun percentPair(nowValue: Int, beforeValue: Int, higherIsBetter: Boolean): Pair<String, String> =
+        (nowValue.toString() + " %") to (beforeValue.toString() + " %")
+
+    /** How it moved, in words: only where the two numbers are far enough apart to mean anything. */
+    private fun changeOf(label: String, now: Statistics, before: Statistics): String {
+        val better: Boolean
+        val difference: Int
+        when (label) {
+            "Average" -> {
+                val a = now.mean
+                val b = before.mean
+                if (a == null || b == null) return ""
+                difference = Math.round(a - b).toInt()
+                if (Math.abs(difference) < 5) return ""
+                // a lower average is better, but not if it only came from more lows
+                better = difference < 0 && now.rangePercents[0] + now.rangePercents[1] <= before.rangePercents[0] + before.rangePercents[1]
+            }
+            "In range" -> {
+                difference = now.inTargetPercent - before.inTargetPercent
+                if (Math.abs(difference) < 3) return ""
+                better = difference > 0
+            }
+            "Below range", "Above range" -> {
+                val nowPercent = if (label == "Below range") now.rangePercents[0] + now.rangePercents[1] else now.rangePercents[3] + now.rangePercents[4]
+                val beforePercent = if (label == "Below range") before.rangePercents[0] + before.rangePercents[1] else before.rangePercents[3] + before.rangePercents[4]
+                difference = nowPercent - beforePercent
+                if (Math.abs(difference) < 3) return ""
+                better = difference < 0
+            }
+            "Spread (CV)" -> {
+                val a = now.cv
+                val b = before.cv
+                if (a == null || b == null) return ""
+                difference = Math.round(a - b).toInt()
+                if (Math.abs(difference) < 3) return ""
+                better = difference < 0
+            }
+            else -> return ""
+        }
+        val sign = if (difference > 0) "+" else "\u2212"
+        return sign + Math.abs(difference) + if (better) " better" else " worse"
+    }
+
+    /** The small hours: how they were, and whether lows happened in them. */
+    private fun overnightBlock(canvas: Canvas, top: Float): Float {
+        val zone = TimeZone.getDefault()
+        val night = report.values.filter { hourOfDay(it.timestamp) < 6 }
+        var y = top
+        if (night.isEmpty()) {
+            text(canvas, "No values between midnight and six in the morning.", MARGIN + 8f, y + 8f, 9f, GREY)
+            return y + 20f
+        }
+        val stats = StatisticsCalculator.compute(night, report.dayStart, report.dayEnd, report.lowLimit, report.highLimit, zone)
+        val lows = report.span.lows.count { hourOfDay(it.start) < 6 }
+        val rows = listOf(
+            "Average overnight" to (stats.mean?.let { value(it) + " " + unit.label } ?: "\u2013"),
+            "In range overnight" to (stats.inTargetPercent.toString() + " %"),
+            "Lowest overnight" to ((stats.lowest?.let { value(it) } ?: "\u2013") + " " + unit.label),
+            "Highest overnight" to ((stats.highest?.let { value(it) } ?: "\u2013") + " " + unit.label),
+            "Lows that began overnight" to lows.toString()
+        )
+        for ((label, number) in rows) {
+            text(canvas, label, MARGIN + 8f, y + 8f, 9f, TEXT)
+            text(canvas, number, WIDTH - MARGIN, y + 8f, 9f, TEXT, bold = true, align = Paint.Align.RIGHT)
+            line(canvas, MARGIN, y + 12f, WIDTH - MARGIN, y + 12f, GRID, 0.4f)
+            y += 15f
+        }
+        text(
+            canvas,
+            "The app does not know when you sleep. These are the hours, not a time in your night.",
+            MARGIN + 8f, y + 10f, 8.5f, GREY
+        )
+        return y + 22f
+    }
+
+    /** The phone's own reading of the numbers: the same engine as the Analysis screen. */
+    private fun readingBlock(canvas: Canvas, top: Float): Float {
+        val blocks = Advisor.tell(
+            Advisor.facts(report.values, report.dayStart, report.until, report.lowLimit, report.highLimit, unit, TimeZone.getDefault()),
+            AnswerLanguage.ENGLISH
+        )
+        var y = top
+        if (blocks.isEmpty()) {
+            text(canvas, "Not enough values for the phone to say anything.", MARGIN + 8f, y + 8f, 9f, GREY)
+            return y + 20f
+        }
+        for (block in blocks) {
+            if (y > 790f) {
+                break
+            }
+            y = paragraph(canvas, block.title, MARGIN + 8f, y, WIDTH - 2 * MARGIN - 8f, 9.5f, BLUE, bold = true) + 2f
+            for (line in block.lines) {
+                if (y > 800f) {
+                    break
+                }
+                y = paragraph(canvas, line.trim(), MARGIN + 8f, y, WIDTH - 2 * MARGIN - 8f, 9f, TEXT) + 2f
+            }
+            y += 5f
+        }
+        return y
+    }
+
     /** One table of events: when it began, how long it lasted, and its lowest (or highest) value. */
     private fun eventTable(canvas: Canvas, kind: String, episodes: List<Episode>, top: Float, accent: Int): Float {
         val columns = floatArrayOf(MARGIN + 8f, MARGIN + 132f, MARGIN + 232f, WIDTH - MARGIN - 8f)
@@ -897,7 +1090,7 @@ class ReportRenderer(
 
         const val PAGE_WIDTH = 595
         const val PAGE_HEIGHT = 842
-        const val PAGES = 4
+        const val PAGES = 5
 
         private const val WIDTH = 595f
         private const val MARGIN = 36f

@@ -28,7 +28,15 @@ class DailyReport(
     val week: List<DaySummary>,
     /** The target range of the user (mg/dL). */
     val lowLimit: Int,
-    val highLimit: Int
+    val highLimit: Int,
+    /**
+     * The same stretch of days immediately before this one, or null when there are not enough
+     * values to compare. It is what lets a report say "better than the fortnight before"
+     * instead of only "this is how it was".
+     */
+    val previous: Statistics? = null,
+    /** How many values the stretch before had. */
+    val previousValues: Int = 0
 ) {
     /**
      * What stands out on the day, for the report. While the day runs, "more (or less) time in
@@ -86,6 +94,9 @@ object PeriodReports {
     /** The stretches a report can cover. 1 is the same as the one-day report. */
     val LENGTHS = intArrayOf(1, 7, 14, 30, 90)
 
+    /** Fewer values than this in the stretch before, and no comparison is drawn. */
+    private const val MINIMUM_TO_COMPARE = 20
+
     /**
      * @param values the values as the app shows them, in any order; they should reach back at
      *               least [days] days
@@ -103,6 +114,16 @@ object PeriodReports {
         val end = now
         val start = if (days <= 1) AnalysisCalculator.dayStart(now, zone) else AnalysisCalculator.addDays(end, -days, zone)
         val ofPeriod = values.filter { it.timestamp >= start && it.timestamp <= end }.sortedBy { it.timestamp }
+
+        // The same stretch again, ending where this one begins. Without enough values there is
+        // nothing to compare, and a comparison drawn from three readings would be a lie.
+        val beforeEnd = start
+        val beforeStart = AnalysisCalculator.addDays(start, -days, zone)
+        val ofBefore = values.filter { it.timestamp >= beforeStart && it.timestamp < beforeEnd }
+        val previous = if (ofBefore.size < MINIMUM_TO_COMPARE) null else {
+            StatisticsCalculator.compute(ofBefore, beforeStart, beforeEnd, lowLimit, highLimit, zone)
+        }
+
         return DailyReport(
             dayStart = start,
             dayEnd = end,
@@ -114,7 +135,9 @@ object PeriodReports {
             values = ofPeriod,
             week = AnalysisCalculator.days(values, start, Math.min(days, 30), end, lowLimit, highLimit, zone),
             lowLimit = lowLimit,
-            highLimit = highLimit
+            highLimit = highLimit,
+            previous = previous,
+            previousValues = ofBefore.size
         )
     }
 }
