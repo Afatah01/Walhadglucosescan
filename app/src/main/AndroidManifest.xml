@@ -101,12 +101,16 @@
 
         <!-- Lets the phone open the app when it touches a sensor. Switched off until the user
              switches it on in the settings, so that installing the app changes nothing for
-             other apps that read the sensor. -->
+             other apps that read the sensor.
+
+             It opens the scan screen, not the Home screen, so that the person sees the sensor
+             being read. This only works while the screen is on and the phone is unlocked:
+             Android does not read NFC while the screen is off, and no app can change that. -->
         <activity-alias
             android:name=".SensorTouchAlias"
             android:enabled="false"
             android:exported="true"
-            android:targetActivity=".MainActivity">
+            android:targetActivity=".ScanSensorActivity">
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
@@ -114,6 +118,13 @@
                 android:name="android.nfc.action.TECH_DISCOVERED"
                 android:resource="@xml/nfc_tech_filter" />
         </activity-alias>
+
+        <activity
+            android:name=".ScanSensorActivity"
+            android:exported="false"
+            android:label="@string/scan_screen_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.Main" />
 
         <activity
             android:name=".WelcomeActivity"

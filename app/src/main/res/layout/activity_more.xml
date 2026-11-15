@@ -18,6 +18,10 @@
             android:layout_marginTop="8dp">
 
             <include
+                android:id="@+id/buttonScanSensor"
+                layout="@layout/row_nav" />
+
+            <include
                 android:id="@+id/buttonLinkUp"
                 layout="@layout/row_nav" />
 

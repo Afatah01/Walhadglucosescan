@@ -132,6 +132,7 @@ class MoreActivity : BaseActivity() {
 
     companion object {
         private val ENTRIES = listOf(
+            Entry(R.id.buttonScanSensor, R.drawable.ic_nfc, R.string.scan_screen_title, R.string.more_note_scan, ScanSensorActivity::class.java),
             Entry(R.id.buttonLinkUp, R.drawable.ic_cloud, R.string.linkup_title, R.string.more_note_linkup, LinkUpActivity::class.java),
             Entry(R.id.buttonLive, R.drawable.ic_bluetooth, R.string.more_bluetooth, R.string.more_note_live, LiveActivity::class.java),
             Entry(R.id.buttonAlarms, R.drawable.ic_bell, R.string.alarms_title, R.string.more_note_alarms, AlarmsActivity::class.java),

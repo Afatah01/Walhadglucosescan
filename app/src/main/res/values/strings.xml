@@ -93,6 +93,22 @@
     <string name="state_failure">Failed</string>
     <string name="state_unknown">Unknown</string>
 
+    <!-- The screen for scanning the sensor -->
+    <string name="scan_screen_title">Scan Glucose Sensor</string>
+    <string name="scan_sensor_image">The glucose sensor</string>
+    <string name="scan_prompt">Hold your phone against the sensor</string>
+    <string name="scan_hint">Keep the phone still until it vibrates. Reading takes about a second.</string>
+    <string name="scan_reading">Reading the sensor…</string>
+    <string name="scan_sensor_card">The sensor</string>
+    <string name="scan_result_card">Last scan</string>
+    <string name="scan_help_card">Getting a good scan</string>
+    <string name="scan_number_none">Not available</string>
+    <string name="scan_number_waiting">No sensor has been scanned on this phone yet.</string>
+    <string name="scan_number_note">The number this sensor itself gave when it was read. This app never invents it.</string>
+    <string name="scan_help">The reading point is usually at the back of the phone, near the top. Move the phone slowly over the sensor until it reads.\n\n• Hold the phone still on the sensor until it vibrates.\n• A phone case rarely matters, but metal or a very thick one can.\n• The screen must be on and the phone unlocked. Android does not read NFC while the screen is off, and no app can change that.\n• A Libre 3 sensor has no NFC at all — it sends its values over Bluetooth. Use Live values for that sensor.</string>
+    <string name="nfc_open_settings">Open NFC settings</string>
+    <string name="more_note_scan">Read the sensor and see its number</string>
+
     <!-- Main screen: the corrected value -->
     <string name="corrected_note">Corrected · sensor value: %s</string>
     <string name="two_lines">%1$s\n%2$s</string>
