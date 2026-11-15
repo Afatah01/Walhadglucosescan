@@ -44,12 +44,27 @@ enum class AiProblem {
     SERVER
 }
 
+/** Where the words came from. The screen always shows this, so nothing is ever passed off as more than it is. */
+enum class AiSource {
+    /** An AI service answered. */
+    AI,
+
+    /** The phone answered, from its own rules (see core/Advisor.kt). */
+    PHONE
+}
+
 /** The answer of the AI, or why there is none. */
 class AiAnswer(
     val text: String,
     val problem: AiProblem?,
     /** Short words of the service about the problem (English), or "". */
-    val detail: String = ""
+    val detail: String = "",
+    /**
+     * Who wrote [text]. When this is [AiSource.PHONE] and [problem] is set, the AI could not be
+     * reached and the phone answered instead: the screen says both things, and never shows the
+     * phone's words as if an AI had written them.
+     */
+    val source: AiSource = AiSource.AI
 ) {
     val isOk: Boolean
         get() = problem == null

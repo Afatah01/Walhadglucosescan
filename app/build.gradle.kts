@@ -12,9 +12,44 @@ if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
+// Where the AI door is. See supabase/README.md.
+//
+// These two values are baked into the app, so that nobody has to type a key or
+// choose a provider. They live in secrets.properties, which is NOT in the
+// repository — see secrets.properties.example for the shape of the file.
+//
+// Without the file the app still builds and works: it simply has no address to
+// call, so every answer comes from the rules engine on the phone instead.
+val secretsPropertiesFile = rootProject.file("secrets.properties")
+val secretsProperties = Properties()
+if (secretsPropertiesFile.exists()) {
+    secretsPropertiesFile.inputStream().use { secretsProperties.load(it) }
+}
+// Where the AI door is, baked in so that a fresh clone works with nothing to fill in.
+//
+// Neither of these is a secret. Both end up inside the APK, and anyone who decompiles it can
+// read them. The one value that would cost money if it leaked — the Google Gemini key — lives
+// only on the server and is never compiled into the app. That is the whole reason for the door.
+//
+// secrets.properties overrides these two, for somebody building their own copy.
+val DEFAULT_AI_URL = "https://lhrocwxukovudxmjbaiy.supabase.co/functions/v1/walhad-ai"
+val DEFAULT_AI_SECRET = "a274936ddec05a084677d6f1d6fe501328044569820fc4e88716887741a65d65"
+
+/** The value for [name] if secrets.properties sets one, otherwise [fallback]. */
+fun secretValue(name: String, fallback: String): String {
+    // A clean value: no quotes or backslashes that could break the generated code.
+    val own = (secretsProperties.getProperty(name) ?: "").trim().replace("\"", "").replace("\\", "")
+    return own.ifEmpty { fallback }
+}
+
 android {
     namespace = "com.glucosescan.app"
     compileSdk = 35
+
+    // BuildConfig.WALHAD_AI_URL and BuildConfig.WALHAD_AI_SECRET above.
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.glucosescan.app"
@@ -22,6 +57,10 @@ android {
         targetSdk = 34
         versionCode = 10
         versionName = "4.3.0"
+
+        // The AI door. Already filled in: the app asks nothing of the person using it.
+        buildConfigField("String", "WALHAD_AI_URL", "\"${secretValue("walhad.ai.url", DEFAULT_AI_URL)}\"")
+        buildConfigField("String", "WALHAD_AI_SECRET", "\"${secretValue("walhad.ai.secret", DEFAULT_AI_SECRET)}\"")
     }
 
     signingConfigs {
