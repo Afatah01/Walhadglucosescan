@@ -219,6 +219,33 @@
     <string name="tab_home">Home</string>
     <string name="tab_analysis">Analysis</string>
     <string name="tab_report">Report</string>
+    <string name="tab_insights">Insights</string>
+
+    <!-- Insights: the screen that reads a stretch of days and answers questions about it -->
+    <string name="insights_title">Insights</string>
+    <string name="insights_period">How far back</string>
+    <string name="insights_days">%d days</string>
+    <string name="insights_answer">The answer</string>
+    <string name="insights_ask">Ask about it</string>
+    <string name="insights_own_question">Or write your own question</string>
+    <string name="insights_ask_button">Ask</string>
+    <string name="insights_reading">What your phone reads</string>
+    <string name="insights_reading_note">Counted on this phone from your own values. No internet, no AI.</string>
+    <string name="insights_no_values">There are no values yet. Scan the sensor, and they will appear here.</string>
+    <string name="insights_from_ai">AI</string>
+    <string name="insights_from_phone">Phone</string>
+    <string name="insights_no_ai">The AI could not be reached, so this is what your phone makes of the same numbers.</string>
+    <string name="insights_ai_off">This build has no AI address. These are the words of the app itself.</string>
+    <string name="insights_limit">The daily number of questions is used up. This is what your phone makes of the numbers.</string>
+    <string name="insights_thinking">Asking…</string>
+    <string name="insights_questions_title">Good questions to start with</string>
+    <string name="q_overall">How have my numbers been overall?</string>
+    <string name="q_lows">Why do I go low, and when?</string>
+    <string name="q_highs">What is behind my highs?</string>
+    <string name="q_night">What happens overnight?</string>
+    <string name="q_pattern">Is there a pattern to my days?</string>
+    <string name="q_compare">Is this getting better or worse?</string>
+    <string name="q_doctor">What should I tell my doctor?</string>
     <string name="tab_more">More</string>
 
     <!-- More -->

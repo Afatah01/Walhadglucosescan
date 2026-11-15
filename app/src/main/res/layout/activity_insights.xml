@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Insights: what the numbers say over a stretch of days, and a place to ask
+     about them. The reading from the phone is always there. The AI answer is
+     added above it when the AI can be reached, and is always marked as such. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="28dp">
+
+        <!-- How far back to look. -->
+        <LinearLayout
+            style="@style/Card"
+            android:layout_marginTop="0dp">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/insights_period" />
+
+            <LinearLayout
+                android:id="@+id/periodChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/period7"
+                    style="@style/Chip" />
+
+                <TextView
+                    android:id="@+id/period14"
+                    style="@style/Chip" />
+
+                <TextView
+                    android:id="@+id/period30"
+                    style="@style/Chip" />
+
+                <TextView
+                    android:id="@+id/period90"
+                    style="@style/Chip" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/periodNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_tertiary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- What the AI said, when it could be reached. -->
+        <LinearLayout
+            android:id="@+id/answerCard"
+            style="@style/Card"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/CardTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/insights_answer" />
+
+                <!-- Says where the words came from. Never blank, never guessed. -->
+                <TextView
+                    android:id="@+id/answerSource"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/pill_state_off"
+                    android:paddingBottom="3dp"
+                    android:paddingEnd="9dp"
+                    android:paddingStart="9dp"
+                    android:paddingTop="3dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/answerProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/answerText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="3dp"
+                android:textColor="@color/text"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/answerNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_tertiary"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Ask about it: ready-made questions, or one of your own. -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/insights_ask" />
+
+            <LinearLayout
+                android:id="@+id/questionChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical" />
+
+            <EditText
+                android:id="@+id/ownQuestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:autofillHints=""
+                android:hint="@string/insights_own_question"
+                android:imeOptions="actionSend"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLength="500"
+                android:maxLines="3"
+                android:textColor="@color/text"
+                android:textColorHint="@color/text_tertiary"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/askButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/insights_ask_button" />
+        </LinearLayout>
+
+        <!-- What the phone itself reads from the numbers. Always there. -->
+        <LinearLayout
+            android:id="@+id/readingCard"
+            style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/insights_reading" />
+
+            <TextView
+                android:id="@+id/readingNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/insights_reading_note"
+                android:textColor="@color/text_tertiary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/readingBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

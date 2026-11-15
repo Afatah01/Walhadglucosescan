@@ -19,11 +19,12 @@ import com.glucosescan.app.nfc.ScanRunner
  * the four main screens (Home, Analysis, Report, More) have the bar at the bottom.
  */
 abstract class BaseActivity : Activity(), NfcAdapter.ReaderCallback {
-    /** The four main screens, as they stand in the bar at the bottom. */
+    /** The five main screens, as they stand in the bar at the bottom. */
     enum class Tab(val viewId: Int) {
         HOME(R.id.tabHome),
         ANALYSIS(R.id.tabAnalysis),
         REPORT(R.id.tabReport),
+        INSIGHTS(R.id.tabInsights),
         MORE(R.id.tabMore)
     }
 
@@ -133,6 +134,7 @@ object BottomBar {
             BaseActivity.Tab.HOME -> MainActivity::class.java
             BaseActivity.Tab.ANALYSIS -> AnalysisActivity::class.java
             BaseActivity.Tab.REPORT -> ReportActivity::class.java
+            BaseActivity.Tab.INSIGHTS -> AiInsightsActivity::class.java
             BaseActivity.Tab.MORE -> MoreActivity::class.java
         }
         // The Home screen stays under the others, so that "back" always ends there.

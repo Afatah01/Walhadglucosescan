@@ -318,6 +318,23 @@ class Settings(context: Context) {
             editor.apply()
         }
 
+    /**
+     * A random id for this install, made once and then kept. It is sent with a question to the
+     * AI service so that it can count how many questions one phone asks in a day, and the
+     * service keeps only a hash of it. It names nobody: it is not an account, not an email, and
+     * not the id Android uses for advertising. Wiping the app's data makes a new one.
+     */
+    val installId: String
+        get() {
+            val saved = prefs.getString("install_id", null)
+            if (!saved.isNullOrBlank()) {
+                return saved
+            }
+            val made = java.util.UUID.randomUUID().toString()
+            prefs.edit().putString("install_id", made).apply()
+            return made
+        }
+
     var lastOutcome: ScanOutcome?
         get() {
             val message = try {

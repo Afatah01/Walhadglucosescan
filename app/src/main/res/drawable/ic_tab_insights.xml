@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Insights tab: a spark over a line, the mark used for the AI analysis. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M4,15 L4,15 L8,15 L12,8 L16,18 L20,11"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="2.4" />
+    <path
+        android:pathData="M18.5,3.5 L19.2,5.6 L21.3,6.3 L19.2,7 L18.5,9.1 L17.8,7 L15.7,6.3 L17.8,5.6 Z"
+        android:fillColor="#FFFFFF" />
+</vector>

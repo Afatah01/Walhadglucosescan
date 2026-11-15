@@ -127,6 +127,14 @@
             android:theme="@style/AppTheme.Main" />
 
         <activity
+            android:name=".AiInsightsActivity"
+            android:exported="false"
+            android:label="@string/insights_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.Main"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
             android:name=".WelcomeActivity"
             android:exported="false" />
         <activity

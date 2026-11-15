@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One of the four main screens: its own layout on top, the bar with the four screens under it. -->
+<!-- One of the five main screens: its own layout on top, the bar with the five screens under it. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -104,6 +104,12 @@
             style="@style/TabButton"
             android:drawableTop="@drawable/ic_tab_report"
             android:text="@string/tab_report" />
+
+        <TextView
+            android:id="@+id/tabInsights"
+            style="@style/TabButton"
+            android:drawableTop="@drawable/ic_tab_insights"
+            android:text="@string/tab_insights" />
 
         <TextView
             android:id="@+id/tabMore"
