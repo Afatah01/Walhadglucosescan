@@ -19,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.glucosescan.app.core.AnalysisCalculator
 import com.glucosescan.app.core.DailyReport
+import com.glucosescan.app.core.PeriodReports
 import com.glucosescan.app.core.DailyReports
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.StatisticsCalculator
@@ -54,6 +55,10 @@ class ReportActivity : BaseActivity() {
     /** True while a file is written: a second tap on the button must not write a second file. */
     private var saving = false
 
+    /** How many days the report reaches back. 1 is the single-day report. */
+    internal var period: Int = 1
+        private set
+
     /** What the screen shows now. For tests. */
     internal var report: DailyReport? = null
         private set
@@ -69,6 +74,18 @@ class ReportActivity : BaseActivity() {
         day = savedInstanceState?.getLong(KEY_DAY, 0L) ?: 0L
         if (day == 0L) {
             day = AnalysisCalculator.dayStart(AppClock.now())
+        }
+        for (length in PeriodReports.LENGTHS) {
+            val chip = findViewById<TextView>(chipId(length))
+            chip.text = periodName(length)
+            chip.setOnClickListener {
+                if (period != length) {
+                    period = length
+                    savedUri = null
+                    findViewById<View>(R.id.reportMessage).visibility = View.GONE
+                    render()
+                }
+            }
         }
         findViewById<View>(R.id.dayBefore).setOnClickListener { move(-1) }
         findViewById<View>(R.id.dayAfter).setOnClickListener { move(1) }
@@ -88,6 +105,22 @@ class ReportActivity : BaseActivity() {
         if (ready) {
             render()
         }
+    }
+
+    private fun chipId(length: Int): Int = when (length) {
+        1 -> R.id.period1
+        7 -> R.id.period7
+        14 -> R.id.period14
+        30 -> R.id.period30
+        else -> R.id.period90
+    }
+
+    private fun periodName(length: Int): String = when (length) {
+        1 -> getString(R.string.report_period_one_1)
+        7 -> getString(R.string.report_period_days_7)
+        14 -> getString(R.string.report_period_days_14)
+        30 -> getString(R.string.report_period_days_30)
+        else -> getString(R.string.report_period_days_90)
     }
 
     private fun move(days: Int) {
@@ -116,26 +149,45 @@ class ReportActivity : BaseActivity() {
         findViewById<View>(R.id.dayAfter).isEnabled = day < today
         findViewById<TextView>(R.id.dayLabel).text = AnalysisActivity.dayName(this, day, today)
 
-        // the day, the six days before it for the table, and one more day for "than the day before"
-        val from = AnalysisCalculator.addDays(day, -DailyReports.WEEK_DAYS)
-        val to = AnalysisCalculator.addDays(day, 1)
-        val values = settings.correction.applyAll(store.between(from, to))
-        val built = DailyReports.build(values, day, now, settings.lowLimit, settings.highLimit)
+        // how far back the report reaches decides which card is used to choose
+        val single = period <= 1
+        findViewById<View>(R.id.dayCard).visibility = if (single) View.VISIBLE else View.GONE
+        for (length in PeriodReports.LENGTHS) {
+            val chip = findViewById<TextView>(chipId(length))
+            val chosen = length == period
+            chip.isSelected = chosen
+            chip.isActivated = chosen
+        }
+
+        val values = settings.correction.applyAll(
+            store.between(
+                if (single) AnalysisCalculator.addDays(day, -DailyReports.WEEK_DAYS) else AnalysisCalculator.addDays(now, -period),
+                if (single) AnalysisCalculator.addDays(day, 1) else now
+            )
+        )
+        val built = if (single) {
+            DailyReports.build(values, day, now, settings.lowLimit, settings.highLimit)
+        } else {
+            PeriodReports.build(values, period, now, settings.lowLimit, settings.highLimit)
+        }
         report = built
 
         val summary = findViewById<TextView>(R.id.daySummary)
         val page1 = findViewById<ImageView>(R.id.page1)
         val page2 = findViewById<ImageView>(R.id.page2)
+        val page3 = findViewById<ImageView>(R.id.page3)
         val has = built.hasValues
         findViewById<View>(R.id.reportEmpty).visibility = if (has) View.GONE else View.VISIBLE
         findViewById<View>(R.id.savePdf).isEnabled = has && !saving
         findViewById<View>(R.id.savedButtons).visibility = if (has && savedUri != null) View.VISIBLE else View.GONE
         page1.visibility = if (has) View.VISIBLE else View.GONE
         page2.visibility = if (has) View.VISIBLE else View.GONE
+        page3.visibility = if (has) View.VISIBLE else View.GONE
         if (!has) {
             summary.visibility = View.GONE
             page1.setImageDrawable(null)
             page2.setImageDrawable(null)
+            page3.setImageDrawable(null)
             return
         }
         var line = getString(R.string.report_day_values, built.span.stats.coveragePercent.toString() + " %")
@@ -151,10 +203,12 @@ class ReportActivity : BaseActivity() {
         val renderer = ReportRenderer(this, built, unit(), now, appVersion(), settings.linkUpEnabled)
         page1.setImageBitmap(ReportRenderer.picture(renderer, 0, width))
         page2.setImageBitmap(ReportRenderer.picture(renderer, 1, width))
+        page3.setImageBitmap(ReportRenderer.picture(renderer, 2, width))
     }
 
     private fun fileName(report: DailyReport): String {
-        return "walhad-glucose-report-" + SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(report.dayStart)) + ".pdf"
+        return "walhad-glucose-report-" + SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(report.dayStart)) +
+            (if (period > 1) "-" + period + "d" else "") + ".pdf"
     }
 
     /**

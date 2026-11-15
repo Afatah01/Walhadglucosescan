@@ -73,3 +73,48 @@ object DailyReports {
         )
     }
 }
+
+/**
+ * A report over several days instead of one.
+ *
+ * It is the same shape as [DailyReport], so the same drawing makes it: the stretch simply runs
+ * from the first day to now instead of from midnight to midnight. The hours are the hours of the
+ * day added up over the whole stretch, so "hour by hour" still reads as a normal day.
+ */
+object PeriodReports {
+
+    /** The stretches a report can cover. 1 is the same as the one-day report. */
+    val LENGTHS = intArrayOf(1, 7, 14, 30, 90)
+
+    /**
+     * @param values the values as the app shows them, in any order; they should reach back at
+     *               least [days] days
+     * @param days how many days back the report reaches, 1 or more
+     * @param now the time now; values after it are not counted
+     */
+    fun build(
+        values: List<Glucose>,
+        days: Int,
+        now: Long,
+        lowLimit: Int,
+        highLimit: Int,
+        zone: TimeZone = TimeZone.getDefault()
+    ): DailyReport {
+        val end = now
+        val start = if (days <= 1) AnalysisCalculator.dayStart(now, zone) else AnalysisCalculator.addDays(end, -days, zone)
+        val ofPeriod = values.filter { it.timestamp >= start && it.timestamp <= end }.sortedBy { it.timestamp }
+        return DailyReport(
+            dayStart = start,
+            dayEnd = end,
+            until = end,
+            running = true,
+            span = AnalysisCalculator.span(ofPeriod, start, end, lowLimit, highLimit, zone),
+            analysis = AnalysisCalculator.compute(values, start, end, lowLimit, highLimit, zone),
+            hours = AnalysisCalculator.hours(ofPeriod, start, end, zone),
+            values = ofPeriod,
+            week = AnalysisCalculator.days(values, start, Math.min(days, 30), end, lowLimit, highLimit, zone),
+            lowLimit = lowLimit,
+            highLimit = highLimit
+        )
+    }
+}

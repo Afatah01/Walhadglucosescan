@@ -308,10 +308,11 @@ class ReportScreenTest {
         return Pair(built, ReportRenderer(app, built, unit, now, "4.0.0"))
     }
 
-    /** All the words of both pages. */
+    /** All the words of every page. */
     private fun words(renderer: ReportRenderer): List<String> {
-        ReportRenderer.picture(renderer, 0, 600)
-        ReportRenderer.picture(renderer, 1, 600)
+        for (page in 0 until ReportRenderer.PAGES) {
+            ReportRenderer.picture(renderer, page, 600)
+        }
         return renderer.words.map { plain(it) }
     }
 
@@ -405,7 +406,7 @@ class ReportScreenTest {
     // ------------------------------------------------------------ what the pages say
 
     @Test
-    fun whatTheTwoPagesSay() {
+    fun whatThePagesSay() {
         val (built, renderer) = report()
         val words = words(renderer)
         val all = words.joinToString("\n")
@@ -450,10 +451,11 @@ class ReportScreenTest {
         assertTrue(words.contains("The sentences on page 1 are made by fixed rules from these numbers. They describe what happened. They are not advice."))
 
         // each page ends with who made it and what it is not
-        assertEquals(2, words.count { it.startsWith("Walhad Glucose Scan 4.0.0. This app is not a medical device") })
-        assertTrue(words.contains("Page 1 of 2"))
-        assertTrue(words.contains("Page 2 of 2"))
-        assertEquals("the name of the maker stands at the bottom of both pages", 2, words.count { it == ReportRenderer.CREDIT })
+        assertEquals(ReportRenderer.PAGES, words.count { it.startsWith("Walhad Glucose Scan 4.0.0. This app is not a medical device") })
+        for (page in 1..ReportRenderer.PAGES) {
+            assertTrue(words.contains("Page $page of ${ReportRenderer.PAGES}"))
+        }
+        assertEquals("the name of the maker stands at the bottom of every page", ReportRenderer.PAGES, words.count { it == ReportRenderer.CREDIT })
         assertEquals("Powered by: Abdifatah Elmi", ReportRenderer.CREDIT)
 
         // nothing about the person is on the paper
@@ -538,7 +540,7 @@ class ReportScreenTest {
                     "them over the internet. They are the numbers of Abbott's own program; the app has not changed them."
             )
         )
-        assertEquals(2, words.count { it.startsWith("Walhad Glucose Scan 4.0.0. This app is not a medical device. The values come from LibreLinkUp. Show the report") })
+        assertEquals(ReportRenderer.PAGES, words.count { it.startsWith("Walhad Glucose Scan 4.0.0. This app is not a medical device. The values come from LibreLinkUp. Show the report") })
         assertFalse(all.contains("can differ from FreeStyle LibreLink"))
         assertFalse(all.contains("with your correction"))
 
@@ -574,7 +576,7 @@ class ReportScreenTest {
     // ------------------------------------------------------------ the PDF file
 
     @Test
-    fun theFileIsARealPdfWithBothPages() {
+    fun theFileIsARealPdfWithEveryPage() {
         val (_, renderer) = report()
         val out = ByteArrayOutputStream()
         val kind = ReportRenderer.writePdf(renderer, out)
@@ -582,11 +584,11 @@ class ReportScreenTest {
         val pdf = ReportTesting.Pdf(out.toByteArray())
         File(ReportTesting.folder(), "sample-report.pdf").writeBytes(pdf.bytes)
 
-        assertEquals(9, pdf.objects.size)
+        assertEquals(12, pdf.objects.size)
         assertTrue(pdf.head(1).contains("/Type /Catalog /Pages 2 0 R"))
-        assertTrue(pdf.head(2).contains("/Type /Pages /Kids [4 0 R 7 0 R] /Count 2"))
+        assertTrue(pdf.head(2).contains("/Type /Pages /Kids [4 0 R 7 0 R 10 0 R] /Count 3"))
         assertTrue(pdf.head(3), pdf.head(3).contains("/Title (Daily glucose report 2026-11-10) /Producer (Walhad Glucose Scan 4.0.0) /CreationDate (D:20261110143220+03'00')"))
-        for (page in 0..1) {
+        for (page in 0..2) {
             val number = 4 + 3 * page
             assertTrue(pdf.head(number), pdf.head(number).contains("/Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im$page ${number + 2} 0 R >> >> /Contents ${number + 1} 0 R"))
             assertEquals("q\n595 0 0 842 0 0 cm\n/Im$page Do\nQ\n", String(pdf.stream(number + 1), Charsets.US_ASCII))
@@ -670,7 +672,7 @@ class ReportScreenTest {
         // the file was written, and then shown to the user and to other apps
         val written = (file as ByteArrayOutputStream).toByteArray()
         val pdf = ReportTesting.Pdf(written)
-        assertEquals(9, pdf.objects.size)
+        assertEquals(12, pdf.objects.size)
         assertEquals(PdfKind.PICTURES, ReportActivity.lastKind)
         assertEquals(1, downloads.updates.size)
         assertEquals(uri, downloads.updates[0].first)
@@ -871,7 +873,7 @@ class ReportOnOldAndroidTest {
         assertEquals(chosen, screen.savedUri)
         assertEquals(View.VISIBLE, screen.findViewById<View>(R.id.savedButtons).visibility)
         val pdf = ReportTesting.Pdf(file.toByteArray())
-        assertEquals("two pages", 9, pdf.objects.size)
+        assertEquals("three pages", 12, pdf.objects.size)
         assertTrue(downloads.inserted.isEmpty())
     }
 }

@@ -851,8 +851,14 @@ class ScreensTest {
         // the corner of the picture is see-through, its middle is not; the plate is blue all over
         assertEquals(0, Color.alpha(foreground.getPixel(1, 1)))
         assertEquals(255, Color.alpha(foreground.getPixel(foreground.width / 2, foreground.height / 2)))
+        // the plate is white: the picture carries its own light ground, and a coloured plate
+        // behind it would fight with the coloured band along the bottom of the design
         val plate = background.getPixel(1, 1)
-        assertTrue(Color.blue(plate) > 200 && Color.red(plate) < 20)
+        assertTrue("the plate should be white, was $plate", Color.red(plate) > 240 && Color.green(plate) > 240 && Color.blue(plate) > 240)
+        // the picture is put inside the safe zone, so no round mask can cut it: a point just
+        // inside the corner of the safe zone is still empty, the middle is not
+        val safe = foreground.width / 4
+        assertEquals(0, Color.alpha(foreground.getPixel(safe / 3, safe / 3)))
     }
 
     @Test

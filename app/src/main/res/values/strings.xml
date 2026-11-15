@@ -578,6 +578,13 @@
 
     <!-- Report -->
     <string name="report_title">Daily report</string>
+    <string name="report_period">How far back</string>
+    <string name="report_period_one_1">1 day</string>
+    <string name="report_period_days_7">7 days</string>
+    <string name="report_period_days_14">14 days</string>
+    <string name="report_period_days_30">30 days</string>
+    <string name="report_period_days_90">90 days</string>
+    <string name="report_page_3">Page 3 of the report</string>
     <string name="report_arrow_before">‹</string>
     <string name="report_arrow_after">›</string>
     <string name="report_day_before">The day before</string>
