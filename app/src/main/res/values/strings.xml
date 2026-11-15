@@ -230,6 +230,7 @@
     <string name="insights_own_question">Or write your own question</string>
     <string name="insights_ask_button">Ask</string>
     <string name="insights_reading">What your phone reads</string>
+    <string name="insights_counting">Reading your values…</string>
     <string name="insights_reading_note">Counted on this phone from your own values. No internet, no AI.</string>
     <string name="insights_no_values">There are no values yet. Scan the sensor, and they will appear here.</string>
     <string name="insights_from_ai">AI</string>
@@ -694,15 +695,6 @@
     <string name="ai_setup_title">AI</string>
     <string name="ai_setup_what">The app can ask an AI over the internet to explain your numbers. It sends the text that \"Show the text\" shows on the Analysis screen: your glucose numbers, not your name. The answer comes back into the app.\n\nFor this you need a key of an AI service. A key is like a password: the service counts what is asked with it.</string>
     <string name="ai_provider_label">AI service</string>
-    <string name="ai_provider_gemini">Gemini</string>
-    <string name="ai_provider_openai">OpenAI</string>
-    <string name="ai_help_gemini">Google Gemini, built in and free. Press "Get a free key", sign in with a
-        Google account on aistudio.google.com/apikey, press "Create API key", copy the key and paste it
-        above. Google may use what you send to make its own products better. 500 questions a day, no card,
-        nothing to pay.</string>
-    <string name="ai_help_openai">OpenAI, built in. Press "Get a free key" and make a key on
-        platform.openai.com. OpenAI charges for each question; one question here costs a small fraction of
-        a cent, and you choose how much credit to put on the account.</string>
     <string name="ai_key_label">Key</string>
     <string name="ai_key_hint">Paste the key here</string>
     <string name="ai_key_saved">A key is saved on this phone. Leave the field empty to keep it, or paste a new one.</string>
@@ -710,10 +702,6 @@
     <string name="ai_url_hint">https://…/v1</string>
     <string name="ai_model_label">Model</string>
     <string name="ai_model_hint">Name of the model</string>
-    <string name="ai_get_key">Get a free key</string>
-    <string name="ai_help_gemini_short">Google Gemini, free. Press the button, sign in with a
-        Google account, press "Create API key", copy the key and paste it above. Nothing is
-        paid, and nothing has to be paid for later.</string>
     <string name="ai_key_open_failed">No browser on this phone. Open %1$s yourself.</string>
     <string name="ai_find_models">Find models</string>
     <string name="ai_finding_models">Asking the service…</string>

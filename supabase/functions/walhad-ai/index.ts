@@ -1,9 +1,14 @@
 // Walhad Glucose Scan — the AI door.
 //
-//   phone  ->  this function  ->  Google Gemini
+//   phone  ->  this function  ->  OpenAI
 //
-// The provider key lives here and nowhere else: not in the app, not on GitHub.
-// The app only knows the address of this function and one shared secret.
+// The provider key lives here and nowhere else: not in the app, not on GitHub,
+// not in any file of this repository. It is put in place with
+//
+//     supabase secrets set OPENAI_API_KEY=sk-...
+//
+// and is read out of the environment at run time. The app only knows the
+// address of this function and one shared secret.
 //
 // If this function cannot be reached, the app does not stop: it answers with
 // its own rules engine on the phone (core/Advisor.kt) and says plainly that the
@@ -21,7 +26,10 @@ const CORS = {
 };
 
 /** The model that answers. Change it here; the app is not touched. */
-const MODEL = Deno.env.get("WALHAD_AI_MODEL") ?? "gemini-2.5-flash";
+const MODEL = Deno.env.get("WALHAD_AI_MODEL") ?? "gpt-4o-mini";
+
+/** The address of the OpenAI chat API. */
+const OPENAI_URL = Deno.env.get("OPENAI_BASE_URL") ?? "https://api.openai.com/v1";
 
 /** Questions one install may ask per day. This is what actually caps the bill. */
 const DAILY_LIMIT = Number(Deno.env.get("WALHAD_DAILY_LIMIT") ?? "20");
@@ -29,6 +37,9 @@ const DAILY_LIMIT = Number(Deno.env.get("WALHAD_DAILY_LIMIT") ?? "20");
 const MAX_REPORT = 20_000;
 const MAX_QUESTION = 500;
 const MAX_HISTORY = 6; // three exchanges of follow-up
+
+/** How long we wait for OpenAI before giving up and letting the phone answer. */
+const TIMEOUT_MS = 45_000;
 
 type Turn = { q?: unknown; a?: unknown };
 type Payload = {
@@ -50,11 +61,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method !== "POST") return json({ ok: false, problem: "server", detail: "use POST" }, 405);
 
   const secret = Deno.env.get("WALHAD_APP_SECRET");
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
 
   if (!secret || !apiKey) {
     // Nothing is set up yet. The app must fall back to its own engine.
-    return json({ ok: false, problem: "server", detail: "the AI service is not set up yet" }, 503);
+    return json(
+      { ok: false, problem: "server", detail: "OPENAI_API_KEY is not set on the server" },
+      503,
+    );
   }
 
   // 1. Is it our app?
@@ -125,44 +139,64 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   let answer = "";
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
-      {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(`${OPENAI_URL}/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemText(language) }] },
-          contents,
-          generationConfig: { temperature: 0.4, maxOutputTokens: 2048 },
+          model: MODEL,
+          temperature: 0.4,
+          max_tokens: 1200,
+          messages: [
+            { role: "system", content: systemText(language) },
+            ...history.flatMap((turn) => [
+              { role: "user", content: str(turn.q, MAX_QUESTION) },
+              { role: "assistant", content: str(turn.a, 4000) },
+            ]),
+            { role: "user", content: userText(report, question) },
+          ],
         }),
-      },
-    );
+        signal: controller.signal,
+      });
+    } catch (error) {
+      clearTimeout(timer);
+      const timedOut = String(error).includes("Abort");
+      return json(
+        {
+          ok: false,
+          problem: timedOut ? "server" : "no_internet",
+          detail: timedOut ? "the AI service did not answer in time" : String(error).slice(0, 300),
+        },
+        timedOut ? 504 : 502,
+      );
+    }
+    clearTimeout(timer);
 
     if (response.status === 429) {
-      return json({ ok: false, problem: "limit", detail: "the AI provider is rate limited" }, 429);
+      return json({ ok: false, problem: "limit", detail: "OpenAI is rate limited" }, 429);
     }
     if (response.status === 401 || response.status === 403) {
-      return json({ ok: false, problem: "key", detail: "the provider refused the key" }, 502);
+      return json({ ok: false, problem: "key", detail: "OpenAI refused the key" }, 502);
     }
     if (!response.ok) {
       const detail = (await response.text()).slice(0, 300);
       return json({ ok: false, problem: "server", detail }, 502);
     }
 
-    const body = (await response.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
-    };
-    const candidate = body.candidates?.[0];
-    answer = (candidate?.content?.parts ?? [])
-      .map((part) => part.text ?? "")
-      .join("")
-      .trim();
+    // The whole body is read as unknown and picked apart by hand: a field that
+    // is missing must not throw, and a throw here would reach the phone as a
+    // crash rather than as a message.
+    const body: unknown = await response.json().catch(() => null);
+    answer = pickText(body);
 
     if (!answer) {
-      const reason = candidate?.finishReason;
-      if (reason && reason !== "STOP" && reason !== "MAX_TOKENS") {
-        return json({ ok: false, problem: "blocked", detail: reason }, 422);
-      }
       return json({ ok: false, problem: "empty", detail: "the AI answered nothing" }, 502);
     }
   } catch (error) {
@@ -243,6 +277,20 @@ function looksLikeDose(text: string): boolean {
   const instruction =
     /\b(increase|decrease|reduce|raise|lower|change|adjust|start|stop|take|inject|give|administer)\b[^.]{0,60}\b(dose|dosage|insulin|basal|bolus|injection|units?|medication|medicine|pump)\b/i;
   return amount.test(text) || instruction.test(text);
+}
+
+/**
+ * Pulls the answer out of an OpenAI response without trusting its shape. Every
+ * step is guarded: a different shape returns "" and the caller falls back.
+ */
+function pickText(body: unknown): string {
+  if (typeof body !== "object" || body === null) return "";
+  const choices = (body as { choices?: unknown }).choices;
+  if (!Array.isArray(choices) || choices.length === 0) return "";
+  const message = (choices[0] as { message?: unknown }).message;
+  if (typeof message !== "object" || message === null) return "";
+  const content = (message as { content?: unknown }).content;
+  return typeof content === "string" ? content.trim() : "";
 }
 
 function str(value: unknown, max: number): string {

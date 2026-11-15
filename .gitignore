@@ -11,3 +11,9 @@ keystore/
 
 # Where the AI door is. Never share it.
 secrets.properties
+
+# The provider key, for putting it on the server. Never commit it.
+.env
+.env.*
+supabase/.env
+supabase/.env.*

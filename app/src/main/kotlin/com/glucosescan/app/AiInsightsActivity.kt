@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.glucosescan.app.ai.AiAnswer
 import com.glucosescan.app.ai.AiProblem
 import com.glucosescan.app.ai.AiQuestion
 import com.glucosescan.app.ai.AiSource
@@ -54,6 +55,10 @@ class AiInsightsActivity : BaseActivity() {
 
     /** The last exchanges, so that "and at night?" has something to hang on to. */
     private val history = ArrayList<AiTurn>()
+
+    /** True while an answer is on its way, so that pressing twice does not ask twice. */
+    @Volatile
+    private var busy = false
 
     /** Runs the question that waits for the internet. Tests replace it with one that runs at once. */
     private var background: java.util.concurrent.Executor = Executors.newSingleThreadExecutor { work ->
@@ -115,30 +120,68 @@ class AiInsightsActivity : BaseActivity() {
         }
     }
 
-    /** The reading from the phone: the same engine as the Analysis screen, over [days] days. */
+    /**
+     * The reading from the phone: the same engine as the Analysis screen, over [days] days.
+     *
+     * It is counted off the main thread. Ninety days is a hundred thousand measurements and
+     * more; on the main thread that is a screen that stops answering, which is what a person
+     * sees as a crash.
+     */
     private fun renderReading(now: Long) {
         val box = findViewById<LinearLayout>(R.id.readingBox)
-        box.removeAllViews()
-        val values = store.since(now - days * DAY_MILLIS)
         val note = findViewById<TextView>(R.id.periodNote)
+        box.removeAllViews()
+        note.text = getString(R.string.insights_days, days)
+        add(box, getString(R.string.insights_counting))
 
-        if (values.isEmpty()) {
-            note.text = getString(R.string.insights_no_values)
-            add(box, getString(R.string.insights_no_values))
-            return
-        }
+        val days = this.days
         val unit = settings.unit ?: GlucoseUnit.MGDL
-        val from = now - days * DAY_MILLIS
-        val facts = Advisor.facts(values, from, now, settings.lowLimit, settings.highLimit, unit, TimeZone.getDefault())
-        note.text = getString(R.string.insights_days, days) + " · " + values.size + " values"
+        val language = settings.answerLanguage
+        val low = settings.lowLimit
+        val high = settings.highLimit
+        val readings = store
 
-        for (block in Advisor.tell(facts, settings.answerLanguage)) {
-            addTitle(box, block.title)
-            for (line in block.lines) {
-                add(box, line)
+        background.execute {
+            val result = try {
+                val from = AppClock.now() - days * DAY_MILLIS
+                val values = readings.since(from)
+                if (values.isEmpty()) {
+                    Reading(null, getString(R.string.insights_no_values), emptyList())
+                } else {
+                    val facts = Advisor.facts(values, from, AppClock.now(), low, high, unit, TimeZone.getDefault())
+                    Reading(values.size, null, Advisor.tell(facts, language))
+                }
+            } catch (e: Exception) {
+                Reading(null, getString(R.string.insights_no_values), emptyList())
+            }
+            handler.post {
+                if (isFinishing || isDestroyed) {
+                    return@post
+                }
+                box.removeAllViews()
+                if (result.empty != null) {
+                    note.text = result.empty
+                    add(box, result.empty)
+                    return@post
+                }
+                note.text = getString(R.string.insights_days, days) + " · " + result.size + " values"
+                for (block in result.blocks) {
+                    addTitle(box, block.title)
+                    for (line in block.lines) {
+                        add(box, line)
+                    }
+                }
             }
         }
     }
+
+    /** What the background found for the reading: how many values, and what the phone makes of them. */
+    private class Reading(
+        val size: Int?,
+        /** Set when there is nothing to read. */
+        val empty: String?,
+        val blocks: List<AdvisorBlock>
+    )
 
     /** The ready-made questions, as wide buttons that ask the moment they are pressed. */
     private fun renderQuestions() {
@@ -202,37 +245,61 @@ class AiInsightsActivity : BaseActivity() {
     // ------------------------------------------------------------------ asking
 
     private fun ask(question: String = findViewById<EditText>(R.id.ownQuestion).text.toString().trim()) {
-        val now = AppClock.now()
-        val unit = settings.unit ?: GlucoseUnit.MGDL
-        val values = store.since(now - days * DAY_MILLIS)
-        if (values.isEmpty()) {
+        // One question at a time. Without this guard every extra tap started another walk
+        // through three months of values, and two or three of those at once were enough to
+        // run the phone out of memory.
+        if (busy) {
             return
         }
-        val from = now - days * DAY_MILLIS
-        val zone = TimeZone.getDefault()
-        val analysis = AnalysisCalculator.compute(values, from, now, settings.lowLimit, settings.highLimit, zone)
-        val hours = AnalysisCalculator.hours(values, from, now, zone)
-        val report = AiReport.build(
-            analysis, hours, emptyList(), unit, settings.lowLimit, settings.highLimit,
-            settings.answerLanguage, zone, settings.linkUpEnabled
-        )
+        busy = true
+        setAskEnabled(false)
+
+        val days = this.days
+        val unit = settings.unit ?: GlucoseUnit.MGDL
+        val language = settings.answerLanguage
+        val low = settings.lowLimit
+        val high = settings.highLimit
+        val fromLinkUp = settings.linkUpEnabled
+        val readings = store
+        val asked = history.toList()
 
         showThinking()
-        val request = AiQuestion(
-            report = report,
-            question = question,
-            language = settings.answerLanguage,
-            history = history.toList(),
-            fallback = Advisor.tell(
-                Advisor.facts(values, from, now, settings.lowLimit, settings.highLimit, unit, zone),
-                settings.answerLanguage
-            )
-        )
-        val ai = WalhadAi(Net.transport, install = settings.installId)
         background.execute {
-            val answer = ai.ask(request)
+            // Nothing in here may reach the person as a crash, and none of it runs on the main
+            // thread: walking three months of measurements is far too much work for a screen.
+            val answer = try {
+                val now = AppClock.now()
+                val from = now - days * DAY_MILLIS
+                val values = readings.since(from)
+                if (values.isEmpty()) {
+                    AiAnswer("", null, "", AiSource.PHONE)
+                } else {
+                    val zone = TimeZone.getDefault()
+                    val analysis = AnalysisCalculator.compute(values, from, now, low, high, zone)
+                    val hours = AnalysisCalculator.hours(values, from, now, zone)
+                    val report = AiReport.build(
+                        analysis, hours, emptyList(), unit, low, high, language, zone, fromLinkUp
+                    )
+                    val request = AiQuestion(
+                        report = report,
+                        question = question,
+                        language = language,
+                        history = asked,
+                        fallback = Advisor.tell(Advisor.facts(values, from, now, low, high, unit, zone), language)
+                    )
+                    WalhadAi(Net.transport, install = settings.installId).ask(request)
+                }
+            } catch (e: Exception) {
+                AiAnswer("", AiProblem.SERVER, Net.words(e), AiSource.PHONE)
+            }
             handler.post {
+                busy = false
                 if (isFinishing || isDestroyed) {
+                    return@post
+                }
+                setAskEnabled(true)
+                if (answer.text.isEmpty()) {
+                    showAnswer(getString(R.string.insights_no_values), AiSource.PHONE, answer.problem)
                     return@post
                 }
                 if (answer.source == AiSource.AI) {
@@ -241,6 +308,12 @@ class AiInsightsActivity : BaseActivity() {
                 showAnswer(answer.text, answer.source, answer.problem)
             }
         }
+    }
+
+    /** The button and the box are switched off while an answer is on its way. */
+    private fun setAskEnabled(enabled: Boolean) {
+        findViewById<View>(R.id.askButton).isEnabled = enabled
+        findViewById<View>(R.id.ownQuestion).isEnabled = enabled
     }
 
     private fun showThinking() {

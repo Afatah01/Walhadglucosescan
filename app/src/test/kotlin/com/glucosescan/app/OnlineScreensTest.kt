@@ -18,7 +18,6 @@ import android.widget.TextView
 import com.glucosescan.app.core.AnswerLanguage
 import com.glucosescan.app.core.Glucose
 import com.glucosescan.app.core.GlucoseUnit
-import com.glucosescan.app.data.AiProvider
 import com.glucosescan.app.data.GlucoseStore
 import com.glucosescan.app.data.LinkUpState
 import com.glucosescan.app.data.ScanMessage
@@ -256,7 +255,6 @@ class OnlineScreensTest {
         }
 
         settings.linkUpEnabled = true
-        settings.aiKey = "KEY-123"
         settings.backupEnabled = true
         val later = open(MoreActivity::class.java)
         assertEquals("LibreLinkUp: On", row(later, R.id.buttonLinkUp))

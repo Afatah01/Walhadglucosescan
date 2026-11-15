@@ -1,12 +1,12 @@
 # The AI door — deploy it once
 
-This is the small server the app talks to. It is the only place the Google
-Gemini key lives. The address and the shared secret are already baked into the
+This is the small server the app talks to. It is the only place the
+OpenAI key lives. The address and the shared secret are already baked into the
 app, so **nobody using it ever types a key or picks a provider** — there is
 nothing to fill in.
 
 ```
-phone  ->  Supabase Edge Function "walhad-ai"  ->  Google Gemini
+phone  ->  Supabase Edge Function "walhad-ai"  ->  OpenAI
               (the provider key stays here)
 ```
 
@@ -28,8 +28,10 @@ to touch the app at all.
 
 ## What you still need to do (once)
 
-You need a **Google Gemini API key** — free from
-<https://aistudio.google.com/apikey> — and to run these commands.
+You need an **OpenAI API key** — from <https://platform.openai.com/api-keys> —
+and to run these commands. Your key is already written to `supabase/.env`,
+which git keeps out of the repository, so step 4 can read it from there
+instead of your typing it again.
 
 ```bash
 # 1. install the Supabase command line (once, ever)
@@ -43,7 +45,8 @@ supabase link --project-ref lhrocwxukovudxmjbaiy
 supabase db push
 
 # 4. put the two secrets in — the app secret is already chosen, use it exactly
-supabase secrets set GEMINI_API_KEY=your-gemini-key-here
+#    (the key is read from supabase/.env, which is never committed)
+supabase secrets set --env-file supabase/.env
 supabase secrets set WALHAD_APP_SECRET=a274936ddec05a084677d6f1d6fe501328044569820fc4e88716887741a65d65
 
 # 5. ship it
@@ -56,11 +59,22 @@ If `supabase db push` gives you trouble, you can instead open
 
 That is it. The next scan with the app gets AI analysis.
 
+Then delete `supabase/.env`: the key lives on the server now, and the file on
+your machine has served its purpose.
+
+## Keep the key out of the app
+
+The key is never in the Android source, never in `secrets.properties`, and never
+in the APK. It is read at run time out of the server's environment, by a
+function that runs on Supabase. Somebody who takes the APK apart finds only the
+address of that function and a shared secret that lets it through the door —
+and even that is capped at `WALHAD_DAILY_LIMIT` questions a day per install.
+
 ## Optional settings
 
 | Secret | Default | What it does |
 |---|---|---|
-| `WALHAD_AI_MODEL` | `gemini-2.5-flash` | Which model answers. Change it here; the app is not rebuilt. |
+| `WALHAD_AI_MODEL` | `gpt-4o-mini` | Which model answers. Change it here; the app is not rebuilt. |
 | `WALHAD_DAILY_LIMIT` | `20` | Questions per install per day. This is what caps the bill. |
 
 ```bash
@@ -79,14 +93,14 @@ supabase functions deploy walhad-ai
 
 then put the new value in `secrets.properties` (see
 `secrets.properties.example`) and rebuild the app. Old builds stop working. The
-Gemini key was never exposed either way, so there is nothing else to change.
+OpenAI key was never exposed either way, so there is nothing else to change.
 
 ## Being straight about the security
 
 The shared secret is compiled into the app. Someone who decompiles the APK can
 read it. It is a **deterrent, not a guarantee**. What actually protects you:
 
-- the Gemini key is only ever on the server, so an attacker never gets it;
+- the OpenAI key is only ever on the server, so an attacker never gets it;
 - every install is capped at `WALHAD_DAILY_LIMIT` questions a day;
 - the payload is size-limited (20 kB of numbers, 500 characters of question);
 - no glucose value, question or answer is ever stored;
@@ -116,7 +130,7 @@ curl -i https://lhrocwxukovudxmjbaiy.supabase.co/functions/v1/walhad-ai \
 You should get back:
 
 ```json
-{"ok":true,"answer":"...","model":"gemini-2.5-flash","source":"ai"}
+{"ok":true,"answer":"...","model":"gpt-4o-mini","source":"ai"}
 ```
 
 Before step 5 it returns `404` — that just means the function is not deployed.

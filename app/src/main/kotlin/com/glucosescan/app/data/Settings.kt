@@ -181,40 +181,6 @@ enum class LinkUpState {
  * address and the model are filled in by themselves, so the user only has to paste a key.
  * Gemini has a free level; OpenAI is paid, but a question here costs a fraction of a cent.
  */
-enum class AiProvider(
-    val code: String,
-    val defaultUrl: String,
-    val defaultModel: String,
-    /** The page where the user makes a key for this service. */
-    val keyPage: String,
-    /** True: the service answers without paying, at least up to a daily number of questions. */
-    val free: Boolean,
-    /** Models of this service that are known to answer, the free ones first. */
-    val knownModels: List<String>,
-    /** How many of [knownModels] are free of charge. Zero if the service is paid. */
-    val freeModels: Int
-) {
-    /** Google Gemini. gemini-3.5-flash-lite is free of charge and takes 500 questions a day. */
-    GEMINI(
-        "gemini", "https://generativelanguage.googleapis.com/v1beta", "gemini-3.5-flash-lite",
-        "https://aistudio.google.com/apikey", true,
-        listOf("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"), 3
-    ),
-
-    /** OpenAI. gpt-5-mini is the cheapest model that answers well; the user pays per question. */
-    OPENAI(
-        "openai", "https://api.openai.com/v1", "gpt-5-mini",
-        "https://platform.openai.com/api-keys", false,
-        listOf("gpt-5-nano", "gpt-5-mini", "gpt-4o-mini"), 0
-    );
-
-    /** True if [model] is one of the models of this service that are free of charge. */
-    fun isFreeModel(model: String): Boolean = knownModels.take(freeModels).any { it == model.trim() }
-
-    companion object {
-        fun of(code: String?): AiProvider = values().firstOrNull { it.code == code } ?: GEMINI
-    }
-}
 
 /** The settings of the app. They are kept on the phone only. */
 class Settings(context: Context) {
@@ -677,34 +643,9 @@ class Settings(context: Context) {
 
     // ------------------------------------------------------------------ AI
 
-    var aiProvider: AiProvider
-        get() = AiProvider.of(prefs.getString("ai_provider", null))
-        set(value) = prefs.edit().putString("ai_provider", value.code).apply()
-
-    /** The key of the AI service. Saved locked (see [Secrets]). */
-    var aiKey: String
-        get() = Secrets.open(prefs.getString("ai_key", null))
-        set(value) = prefs.edit().putString("ai_key", Secrets.lock(value.trim())).apply()
-
-    /** The name of the model, or "" for the one the app suggests for the service. */
-    var aiModel: String
-        get() = prefs.getString("ai_model", "") ?: ""
-        set(value) = prefs.edit().putString("ai_model", value.trim()).apply()
-
-    /** The address of the service, or "" for the usual one. */
-    var aiUrl: String
-        get() = prefs.getString("ai_url", "") ?: ""
-        set(value) = prefs.edit().putString("ai_url", value.trim()).apply()
-
-    /** True if the app can ask an AI: there is a key, a model and an address. */
-    val aiReady: Boolean
-        get() = aiKey.isNotEmpty() && aiModelInUse.isNotEmpty() && aiUrlInUse.startsWith("https://")
-
-    val aiModelInUse: String
-        get() = aiModel.ifEmpty { aiProvider.defaultModel }
-
-    val aiUrlInUse: String
-        get() = aiUrl.ifEmpty { aiProvider.defaultUrl }.trimEnd('/')
+    // There is no key, no provider and no model to set: the AI is built in, and everything
+    // that selects one lives on the server (see supabase/README.md). Nothing of it is stored
+    // on the phone, and nothing of it is asked of the person using the app.
 
     /** The last answer of the AI, so that it is still there when the screen is opened again. */
     var aiAnswer: String
