@@ -83,6 +83,18 @@
         <item name="android:textColor">@color/text</item>
     </style>
 
+    <!-- The headings and the sentences of the app's own analysis. -->
+    <style name="AdvisorTitle" parent="BodyText">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
+
+    <style name="AdvisorLine" parent="BodyText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
     <style name="NoteText" parent="BodyText">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text_secondary</item>

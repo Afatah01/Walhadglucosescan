@@ -276,6 +276,30 @@
                     android:layout_marginTop="6dp" />
             </LinearLayout>
 
+            <!-- The app's own analysis: no key, nothing to fill in, works from the first value -->
+            <LinearLayout
+                android:id="@+id/advisorCard"
+                style="@style/Card">
+
+                <TextView
+                    style="@style/CardTitle"
+                    android:drawableStart="@drawable/ic_spark"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/advisor_title" />
+
+                <TextView
+                    style="@style/BodyText"
+                    android:text="@string/advisor_text" />
+
+                <LinearLayout
+                    android:id="@+id/advisorBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
             <!-- Ask an AI: the numbers as a text with a question, for an AI app of the user -->
             <LinearLayout
                 android:id="@+id/aiCard"

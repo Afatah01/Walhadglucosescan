@@ -478,6 +478,9 @@
     </plurals>
     <string name="analysis_lows_note">A low event is a time under %1$s that lasts 15 minutes or longer.</string>
 
+    <string name="advisor_title">What the app says</string>
+    <string name="advisor_text">The app reads your values and writes down what it sees, in the language you choose below. Nothing to fill in and nothing to pay: it works from the first value onwards, and it never leaves the phone. It is written by fixed rules, not by a doctor.</string>
+
     <string name="ai_title">Ask an AI</string>
     <string name="ai_text">An AI can explain your numbers in your language. The app writes them as a text with a question. Either the app asks an AI over the internet and shows the answer here, or you give the text to an AI app on your phone yourself.</string>
     <string name="ai_language">The AI shall answer in</string>

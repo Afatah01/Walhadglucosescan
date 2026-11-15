@@ -22,9 +22,11 @@ import com.glucosescan.app.core.AnalysisCalculator
 import com.glucosescan.app.core.AnswerLanguage
 import com.glucosescan.app.core.DayPart
 import com.glucosescan.app.core.FindingLevel
+import com.glucosescan.app.core.Advisor
 import com.glucosescan.app.core.Forecaster
 import com.glucosescan.app.core.Goal
 import com.glucosescan.app.core.GoalKind
+import com.glucosescan.app.core.Glucose
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.Span
 import com.glucosescan.app.core.StatisticsCalculator
@@ -375,8 +377,11 @@ class AnalysisActivity : BaseActivity() {
         }
         findViewById<TextView>(R.id.lowsNote).text = getString(R.string.analysis_lows_note, FindingTexts.glucose(StatisticsCalculator.LOW_BELOW, unit))
 
-        // the text for an AI app
+        // what the app itself says about the period: always there, in the language below
         val language = settings.answerLanguage
+        showAdvisor(values, from, to, low, high, unit, language)
+
+        // the text for an AI app
         for ((id, value) in LANGUAGES) {
             findViewById<View>(id).isSelected = value == language
         }
@@ -507,6 +512,38 @@ class AnalysisActivity : BaseActivity() {
         val row = LayoutInflater.from(this).inflate(R.layout.row_sentence, box, false)
         row.findViewById<TextView>(R.id.text).text = Texts.unbroken(words)
         box.addView(row)
+    }
+
+    /**
+     * Writes what the app says about the period into the card above the AI. The sentences
+     * are made by [Advisor] from the values on the phone: no internet, no key, no setup.
+     */
+    private fun showAdvisor(values: List<Glucose>, from: Long, to: Long, low: Int, high: Int, unit: GlucoseUnit, language: AnswerLanguage) {
+        val box = findViewById<LinearLayout>(R.id.advisorBox)
+        box.removeAllViews()
+        val facts = Advisor.facts(values, from, to, low, high, unit)
+        for (block in Advisor.tell(facts, language)) {
+            box.addView(
+                TextView(this).apply {
+                    setTextAppearance(R.style.AdvisorTitle)
+                    text = block.title
+                    layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                        topMargin = (12 * resources.displayMetrics.density).toInt()
+                    }
+                }
+            )
+            for (line in block.lines) {
+                box.addView(
+                    TextView(this@AnalysisActivity).apply {
+                        setTextAppearance(R.style.AdvisorLine)
+                        text = line
+                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                            topMargin = (4 * resources.displayMetrics.density).toInt()
+                        }
+                    }
+                )
+            }
+        }
     }
 
     private fun addFinding(box: LinearLayout, level: FindingLevel, words: String) {
