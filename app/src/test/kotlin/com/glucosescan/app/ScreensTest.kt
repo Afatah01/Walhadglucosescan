@@ -787,7 +787,7 @@ class ScreensTest {
         settings.lastScanDetails = "time: 2026-01-01 12:00:00 UTC\noutcome: OK\nserial: 3MH001HM1LM\n"
         val activity = Robolectric.buildActivity(AboutActivity::class.java).setup().get()
         assertEquals("Walhad Glucose Scan", text(activity, R.id.appName))
-        assertEquals("Version 4.2.0", text(activity, R.id.version))
+        assertEquals("Version 4.3.0", text(activity, R.id.version))
         assertEquals("Powered by Abdifatah Elmi", text(activity, R.id.madeBy))
         assertTrue(logoIsShown(activity))
         // the only credit on the screen is the maker of this app

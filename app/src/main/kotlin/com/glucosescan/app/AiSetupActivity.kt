@@ -69,7 +69,7 @@ class AiSetupActivity : BaseActivity() {
         super.onDestroy()
     }
 
-    /** Another service: its usual address and model go into the fields. */
+    /** The other service: its address and model are built in and go into the fields. */
     private fun choose(next: AiProvider) {
         if (next == provider) {
             return
@@ -94,19 +94,10 @@ class AiSetupActivity : BaseActivity() {
      * the moment somebody used it up.
      */
     private fun openKeyPage() {
-        val page = when (settings.aiProvider) {
-            AiProvider.GEMINI -> "https://aistudio.google.com/apikey"
-            AiProvider.OPENAI -> "https://platform.openai.com/api-keys"
-            AiProvider.OTHER -> null
-        }
-        if (page == null) {
-            say(getString(R.string.ai_help_other), false)
-            return
-        }
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(page)))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(provider.keyPage)))
         } catch (e: android.content.ActivityNotFoundException) {
-            say(getString(R.string.ai_key_open_failed), true)
+            say(getString(R.string.ai_key_open_failed, provider.keyPage), true)
         }
     }
 
@@ -160,6 +151,13 @@ class AiSetupActivity : BaseActivity() {
 
     private fun showModels(models: AiModels) {
         if (models.problem != null) {
+            // The service could not be reached at all (no internet, or it answered nonsense):
+            // the models that are built into the app are offered instead, so that the screen
+            // is still useful. A key that the service refuses is said out loud: no model helps.
+            if (models.problem == AiProblem.NO_INTERNET || models.problem == AiProblem.SERVER) {
+                showBuiltInModels()
+                return
+            }
             say(AiWords.problem(this, models.problem, models.detail), true)
             return
         }
@@ -167,11 +165,26 @@ class AiSetupActivity : BaseActivity() {
             say(getString(R.string.ai_models_none), true)
             return
         }
-        val names = models.names.toTypedArray()
+        // the free ones say so, also when the service itself named them
+        val names = models.names.map { it + if (provider.isFreeModel(it)) " — " + getString(R.string.ai_model_free) else "" }
+        choose(getString(R.string.ai_models_title), names) { name -> name.substringBefore(" — ").trim() }
+    }
+
+    /** The models the app knows for the service in use, with the free ones marked. */
+    private fun showBuiltInModels() {
+        say(getString(R.string.ai_models_builtin), false)
+        val names = provider.knownModels.map { it + if (provider.isFreeModel(it)) " — " + getString(R.string.ai_model_free) else "" }
+        choose(getString(R.string.ai_models_title_builtin), names) { name ->
+            name.substringBefore(" — ").trim()
+        }
+    }
+
+    private fun choose(title: String, names: List<String>, plain: (String) -> String = { it }) {
+        val items = names.toTypedArray()
         dialog?.dismiss()
         dialog = AlertDialog.Builder(this)
-            .setTitle(R.string.ai_models_title)
-            .setItems(names) { _, which -> findViewById<EditText>(R.id.aiModel).setText(names[which]) }
+            .setTitle(title)
+            .setItems(items) { _, which -> findViewById<EditText>(R.id.aiModel).setText(plain(items[which])) }
             .setNegativeButton(R.string.cancel, null)
             .show()
     }
@@ -219,11 +232,10 @@ class AiSetupActivity : BaseActivity() {
             when (provider) {
                 AiProvider.GEMINI -> R.string.ai_help_gemini
                 AiProvider.OPENAI -> R.string.ai_help_openai
-                AiProvider.OTHER -> R.string.ai_help_other
             }
         )
-        // the address is asked for only where the app cannot know it
-        val needsUrl = provider == AiProvider.OTHER
+        // both services are built in: their address is never asked for
+        val needsUrl = false
         findViewById<View>(R.id.aiUrlLabel).visibility = if (needsUrl) View.VISIBLE else View.GONE
         val urlField = findViewById<EditText>(R.id.aiUrl)
         urlField.visibility = if (needsUrl) View.VISIBLE else View.GONE
@@ -242,7 +254,7 @@ class AiSetupActivity : BaseActivity() {
 
     companion object {
         private const val STATE_PROVIDER = "provider"
-        private val PROVIDERS = mapOf(R.id.aiGemini to AiProvider.GEMINI, R.id.aiOpenAi to AiProvider.OPENAI, R.id.aiOther to AiProvider.OTHER)
+        private val PROVIDERS = mapOf(R.id.aiGemini to AiProvider.GEMINI, R.id.aiOpenAi to AiProvider.OPENAI)
     }
 }
 

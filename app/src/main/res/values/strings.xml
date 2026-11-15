@@ -621,10 +621,13 @@
     <string name="ai_provider_label">AI service</string>
     <string name="ai_provider_gemini">Gemini</string>
     <string name="ai_provider_openai">OpenAI</string>
-    <string name="ai_provider_other">Other</string>
-    <string name="ai_help_gemini">Google Gemini. To get a key: open aistudio.google.com/apikey in a browser, sign in with a Google account and press \"Create API key\". There is a free level. On the free level Google may use what you send to make its products better.</string>
-    <string name="ai_help_openai">OpenAI. To get a key: open platform.openai.com/api-keys. This costs money: OpenAI charges for each question.</string>
-    <string name="ai_help_other">Any service that understands the same questions as OpenAI (\"OpenAI-compatible\"), for example Groq, OpenRouter or Mistral. Type the address of the service; in most cases it ends with /v1. Then press \"Find models\".</string>
+    <string name="ai_help_gemini">Google Gemini, built in and free. Press "Get a free key", sign in with a
+        Google account on aistudio.google.com/apikey, press "Create API key", copy the key and paste it
+        above. Google may use what you send to make its own products better. 500 questions a day, no card,
+        nothing to pay.</string>
+    <string name="ai_help_openai">OpenAI, built in. Press "Get a free key" and make a key on
+        platform.openai.com. OpenAI charges for each question; one question here costs a small fraction of
+        a cent, and you choose how much credit to put on the account.</string>
     <string name="ai_key_label">Key</string>
     <string name="ai_key_hint">Paste the key here</string>
     <string name="ai_key_saved">A key is saved on this phone. Leave the field empty to keep it, or paste a new one.</string>
@@ -636,11 +639,13 @@
     <string name="ai_help_gemini_short">Google Gemini, free. Press the button, sign in with a
         Google account, press "Create API key", copy the key and paste it above. Nothing is
         paid, and nothing has to be paid for later.</string>
-    <string name="ai_key_open_failed">No browser on this phone. Open aistudio.google.com/apikey
-        yourself.</string>
+    <string name="ai_key_open_failed">No browser on this phone. Open %1$s yourself.</string>
     <string name="ai_find_models">Find models</string>
     <string name="ai_finding_models">Asking the service…</string>
     <string name="ai_models_title">Choose a model</string>
+    <string name="ai_models_title_builtin">Choose a model (from the app)</string>
+    <string name="ai_model_free">free</string>
+    <string name="ai_models_builtin">The service could not be asked. These are the models the app knows; the free ones say so.</string>
     <string name="ai_models_none">The service named no model.</string>
     <string name="ai_save">Save</string>
     <string name="ai_saved">Saved. Open Analysis and press \"Ask the AI now\".</string>

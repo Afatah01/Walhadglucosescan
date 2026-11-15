@@ -646,58 +646,80 @@ class OnlineScreensTest {
     }
 
     @Test
-    fun settingUpAnotherServiceAndFindingItsModels() {
+    fun bothServicesAreBuiltInAndOnlyTheKeyIsAskedFor() {
         val server = FakeServer()
         FakeServer.install(server)
-        server.answer = { HttpResponse(200, "{\"data\":[{\"id\":\"llama-big\"},{\"id\":\"llama-small\"},{\"id\":\"whisper-large\"}]}") }
+        server.answer = { HttpResponse(200, "{\"data\":[{\"id\":\"gpt-5-mini\"},{\"id\":\"gpt-5-nano\"},{\"id\":\"whisper-large\"}]}") }
         val screen = open(AiSetupActivity::class.java)
-        click(screen, R.id.aiOther)
-        assertTrue(screen.findViewById<View>(R.id.aiOther).isSelected)
-        assertTrue(isShown(screen, R.id.aiUrl))
-        assertEquals("", text(screen, R.id.aiUrl))
-        assertEquals("", text(screen, R.id.aiModel))
-        assertTrue(text(screen, R.id.aiHelp).contains("OpenAI-compatible"))
 
-        type(screen, R.id.aiKey, "gsk-999")
-        click(screen, R.id.aiFindModels)
-        assertEquals("Type the address of the service. It must start with https://", screen.lastMessage)
-        type(screen, R.id.aiUrl, "http://api.example.com/v1")
-        click(screen, R.id.aiFindModels)
-        assertEquals("no plain http: the key and the numbers would travel unprotected", 0, server.requests.size)
+        // Gemini: the address and the model are already there, nothing to look up
+        assertTrue(screen.findViewById<View>(R.id.aiGemini).isSelected)
+        assertFalse("Google's address is known: it is not asked for", isShown(screen, R.id.aiUrl))
+        assertEquals("gemini-3.5-flash-lite", text(screen, R.id.aiModel))
+        assertTrue(text(screen, R.id.aiHelp).contains("free"))
 
-        type(screen, R.id.aiUrl, "https://api.example.com/openai/v1/")
-        click(screen, R.id.aiSave)
-        assertEquals("Type the name of a model, or press \"Find models\".", screen.lastMessage)
+        // OpenAI: the same, one press away
+        click(screen, R.id.aiOpenAi)
+        assertTrue(screen.findViewById<View>(R.id.aiOpenAi).isSelected)
+        assertFalse("OpenAI's address is known too", isShown(screen, R.id.aiUrl))
+        assertEquals("gpt-5-mini", text(screen, R.id.aiModel))
+        assertTrue(text(screen, R.id.aiHelp).contains("OpenAI"))
 
+        type(screen, R.id.aiKey, "sk-999")
         click(screen, R.id.aiFindModels)
-        assertEquals("https://api.example.com/openai/v1/models", server.last.url)
-        assertEquals("Bearer gsk-999", server.last.headers["Authorization"])
+        assertEquals("https://api.openai.com/v1/models", server.last.url)
+        assertEquals("Bearer sk-999", server.last.headers["Authorization"])
         assertEquals("Choose a model", plain(shadowOf(dialog()).title))
-        assertEquals(listOf("llama-small", "llama-big"), shadowOf(dialog()).items.map { it.toString() })
-        shadowOf(dialog()).clickOnItem(1)
+        assertEquals(
+            "the models that answer with text, not the ones for speech",
+            setOf("gpt-5-mini", "gpt-5-nano"),
+            shadowOf(dialog()).items.map { it.toString() }.toSet()
+        )
+        shadowOf(dialog()).clickOnItem(0)
         idle()
-        assertEquals("llama-big", text(screen, R.id.aiModel))
 
         click(screen, R.id.aiSave)
-        assertEquals(AiProvider.OTHER, settings.aiProvider)
-        assertEquals("https://api.example.com/openai/v1", settings.aiUrlInUse)
-        assertEquals("llama-big", settings.aiModelInUse)
-        assertEquals("gsk-999", settings.aiKey)
+        assertEquals(AiProvider.OPENAI, settings.aiProvider)
+        assertEquals("https://api.openai.com/v1", settings.aiUrlInUse)
+        assertEquals(settings.aiModelInUse, text(screen, R.id.aiModel))
+        assertEquals("sk-999", settings.aiKey)
         assertTrue(settings.aiReady)
 
-        // the screen comes back with what was saved
+        // the screen comes back with what was saved, and Gemini is one press away again
         val again = open(AiSetupActivity::class.java)
-        assertTrue(again.findViewById<View>(R.id.aiOther).isSelected)
-        assertEquals("https://api.example.com/openai/v1", text(again, R.id.aiUrl))
-        assertEquals("llama-big", text(again, R.id.aiModel))
+        assertTrue(again.findViewById<View>(R.id.aiOpenAi).isSelected)
         assertEquals("", text(again, R.id.aiKey))
-
-        // OpenAI: its address is known
-        click(again, R.id.aiOpenAi)
-        assertFalse(isShown(again, R.id.aiUrl))
-        assertEquals("https://api.openai.com/v1", text(again, R.id.aiUrl))
+        click(again, R.id.aiGemini)
+        assertEquals("gemini-3.5-flash-lite", text(again, R.id.aiModel))
         click(again, R.id.aiFindModels)
         assertEquals("the key of the other service is not sent to this one", "Paste the key first.", again.lastMessage)
+    }
+
+    @Test
+    fun whenTheServiceCannotBeAskedTheFreeModelsOfTheAppAreOffered() {
+        val server = FakeServer()
+        FakeServer.install(server)
+        server.answer = { HttpResponse(500, "no") }
+        val screen = open(AiSetupActivity::class.java)
+        type(screen, R.id.aiKey, "KEY-1")
+        click(screen, R.id.aiFindModels)
+        assertEquals("Choose a model (from the app)", plain(shadowOf(dialog()).title))
+        assertEquals(
+            listOf("gemini-3.5-flash-lite — free", "gemini-3.1-flash-lite — free", "gemini-3.8-flash — free"),
+            shadowOf(dialog()).items.map { it.toString() }
+        )
+        shadowOf(dialog()).clickOnItem(2)
+        idle()
+        assertEquals("gemini-3.8-flash", text(screen, R.id.aiModel))
+
+        // OpenAI has no free model: the models it knows are offered without the word free
+        click(screen, R.id.aiOpenAi)
+        type(screen, R.id.aiKey, "sk-1")
+        click(screen, R.id.aiFindModels)
+        assertEquals(listOf("gpt-5-nano", "gpt-5-mini", "gpt-4o-mini"), shadowOf(dialog()).items.map { it.toString() })
+        shadowOf(dialog()).clickOnItem(0)
+        idle()
+        assertEquals("gpt-5-nano", text(screen, R.id.aiModel))
     }
 
     @Test

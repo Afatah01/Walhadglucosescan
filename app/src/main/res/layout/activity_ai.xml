@@ -40,11 +40,6 @@
                     android:id="@+id/aiOpenAi"
                     style="@style/RangeButton"
                     android:text="@string/ai_provider_openai" />
-
-                <TextView
-                    android:id="@+id/aiOther"
-                    style="@style/RangeButton"
-                    android:text="@string/ai_provider_other" />
             </LinearLayout>
 
             <TextView

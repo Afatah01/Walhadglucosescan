@@ -21,10 +21,17 @@ your values.
 with the real LibreLinkUp, AI or Supabase services — only with pretended ones.*
 
 An Android app for the **FreeStyle Libre 2** sensor (European type). It shows the glucose
-value in two ways: you **scan** the sensor with the phone (NFC), or the app **fetches the It shows the glucose
 value in two ways: you **scan** the sensor with the phone (NFC), or the app **fetches the
 values from LibreLinkUp** over the internet, one each minute, while the sensor stays
 connected to FreeStyle LibreLink.
+
+New in version 4.3: **the AI is built in, and there are two services to choose from:
+Google Gemini and OpenAI.** Both are filled in by the app — the address and the model are
+already there, so the only thing left is to paste a key. The button **Get a free key** opens
+the page where that key is made. **Find models** asks the service which models it has and
+marks the free ones; if the service cannot be reached, the models the app knows are offered
+instead, with "free" next to Gemini's. OpenAI has no free models: it charges a small fraction
+of a cent for one question here.
 
 New in version 4.2: **the app speaks with a man's voice, and no ringtone is played any
 more.** An alarm vibrates and *says* what it is about, every nine seconds, for half a
@@ -890,6 +897,20 @@ Android SDK, and `source tools/env.sh` sets the paths. On a machine with little 
     "Off", in place of eleven coloured buttons.
   - **Fields.** A field to type in has an edge that turns blue while it is in use.
   - The line "Powered by Abdifatah Elmi" stands at the end of Home and More, and on About.
+- Version 4.3 built the AI in. `data/Settings.kt` holds the two services in `AiProvider`:
+  `GEMINI` (free, `gemini-3.5-flash-lite`, 500 questions a day) and `OPENAI` (`gpt-5-mini`).
+  Each one knows its own address, its page for making a key, and the models it trusts. The
+  third kind of service ("OpenAI-compatible / Other") is gone, and with it the field for an
+  address: the address is never asked for, so it cannot be mistyped. `AiSetupActivity` shows
+  the two as two buttons, fills in the model by itself, and opens the right page for a key.
+  **Find models** asks the service and marks the free models; when the service cannot be
+  reached it offers the built-in ones instead — but a key the service refuses is still said
+  out loud, because no model helps then.
+  Checked in the finished APK as before (`tools/compare_dex.py`, 4.2 against 4.3): the
+  classes grow from 1527 to 1530, and every package is byte for byte the same as in 4.2 —
+  `core/` (77), `linkup/` (18), `nfc/` (19), `cloud/` (12), `net/` (8), `ai/` (7), `ble/`
+  (29), `report/` (8), `ui/` (41), `libre/` (26), `live/` (25). Only `AiSetupActivity` and
+  `AiProvider` differ, with the resources they name.
 - Version 4.2 changed the voice, the alarm sound, the end of the report and the AI:
   - **A man's voice.** `ui/VoiceChoice.kt` reads the names of the voices the phone offers and
     takes the best man's voice for the language in use (`ui/Speaker.kt`). If the phone has

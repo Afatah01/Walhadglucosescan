@@ -174,17 +174,42 @@ enum class LinkUpState {
         get() = this != OFF && this != STARTING && this != RECEIVING && this != NO_NEW_VALUE
 }
 
-/** Which kind of AI service the app talks to. The code is what is saved. */
-enum class AiProvider(val code: String, val defaultUrl: String, val defaultModel: String) {
-    /** Google Gemini, asked the way Google describes it. */
-    // gemini-3.5-flash-lite: free of charge, and it takes 500 questions a day
-    GEMINI("gemini", "https://generativelanguage.googleapis.com/v1beta", "gemini-3.5-flash-lite"),
+/**
+ * Which AI service the app talks to. The code is what is saved.
+ *
+ * There are two, and only two: Google Gemini and OpenAI. Both are built into the app — the
+ * address and the model are filled in by themselves, so the user only has to paste a key.
+ * Gemini has a free level; OpenAI is paid, but a question here costs a fraction of a cent.
+ */
+enum class AiProvider(
+    val code: String,
+    val defaultUrl: String,
+    val defaultModel: String,
+    /** The page where the user makes a key for this service. */
+    val keyPage: String,
+    /** True: the service answers without paying, at least up to a daily number of questions. */
+    val free: Boolean,
+    /** Models of this service that are known to answer, the free ones first. */
+    val knownModels: List<String>,
+    /** How many of [knownModels] are free of charge. Zero if the service is paid. */
+    val freeModels: Int
+) {
+    /** Google Gemini. gemini-3.5-flash-lite is free of charge and takes 500 questions a day. */
+    GEMINI(
+        "gemini", "https://generativelanguage.googleapis.com/v1beta", "gemini-3.5-flash-lite",
+        "https://aistudio.google.com/apikey", true,
+        listOf("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"), 3
+    ),
 
-    /** OpenAI (ChatGPT). */
-    OPENAI("openai", "https://api.openai.com/v1", ""),
+    /** OpenAI. gpt-5-mini is the cheapest model that answers well; the user pays per question. */
+    OPENAI(
+        "openai", "https://api.openai.com/v1", "gpt-5-mini",
+        "https://platform.openai.com/api-keys", false,
+        listOf("gpt-5-nano", "gpt-5-mini", "gpt-4o-mini"), 0
+    );
 
-    /** Any other service that understands the same questions as OpenAI ("OpenAI-compatible"). */
-    OTHER("other", "", "");
+    /** True if [model] is one of the models of this service that are free of charge. */
+    fun isFreeModel(model: String): Boolean = knownModels.take(freeModels).any { it == model.trim() }
 
     companion object {
         fun of(code: String?): AiProvider = values().firstOrNull { it.code == code } ?: GEMINI

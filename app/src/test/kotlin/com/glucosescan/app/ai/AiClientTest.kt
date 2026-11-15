@@ -181,10 +181,10 @@ class AiClientTest {
         assertEquals("THE QUESTION", messages.getJSONObject(1).getString("content"))
         assertEquals("only what every such service understands", setOf("model", "messages"), body.keys().asSequence().toSet())
 
-        // any address works, for example Gemini spoken to the OpenAI way
-        val other = AiConfig(AiProvider.OTHER, "https://generativelanguage.googleapis.com/v1beta/openai", "k", "gemini-4-hydrogen")
-        client.ask(other, "s", "u")
-        assertEquals("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", server.last.url)
+        // OpenAI is spoken to the way OpenAI describes it, at its own address
+        val openAiToo = AiConfig(AiProvider.OPENAI, "https://api.openai.com/v1", "k", "gpt-5-mini")
+        client.ask(openAiToo, "s", "u")
+        assertEquals("https://api.openai.com/v1/chat/completions", server.last.url)
     }
 
     @Test
