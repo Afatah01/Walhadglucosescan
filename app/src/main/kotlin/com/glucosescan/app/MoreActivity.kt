@@ -56,7 +56,8 @@ class MoreActivity : BaseActivity() {
             state(R.id.buttonLinkUp, settings.linkUpEnabled, R.string.state_on, R.string.state_off)
             state(R.id.buttonLive, settings.liveEnabled, R.string.state_on, R.string.state_off)
             state(R.id.buttonBackup, settings.backupEnabled, R.string.state_on, R.string.state_off)
-            state(R.id.buttonAi, settings.aiReady, R.string.state_ready, R.string.state_not_set_up)
+            // there is nothing to set up: the AI is built in
+        state(R.id.buttonAi, true, R.string.state_ready, R.string.state_ready)
         }
     }
 
@@ -141,7 +142,7 @@ class MoreActivity : BaseActivity() {
             Entry(R.id.buttonReadings, R.drawable.ic_list, R.string.readings, R.string.more_note_readings, ReadingsActivity::class.java),
             Entry(R.id.buttonExport, R.drawable.ic_save, R.string.export_title, R.string.more_note_export, null),
             Entry(R.id.buttonBackup, R.drawable.ic_cloud_up, R.string.backup_title, R.string.more_note_backup, BackupActivity::class.java),
-            Entry(R.id.buttonAi, R.drawable.ic_spark, R.string.ai_setup_title, R.string.more_note_ai, AiSetupActivity::class.java),
+            Entry(R.id.buttonAi, R.drawable.ic_spark, R.string.ai_setup_title, R.string.more_note_ai, AiInsightsActivity::class.java),
             Entry(R.id.buttonSettings, R.drawable.ic_settings, R.string.settings, R.string.more_note_settings, SettingsActivity::class.java),
             Entry(R.id.buttonAbout, R.drawable.ic_info, R.string.about, R.string.more_note_about, AboutActivity::class.java)
         )

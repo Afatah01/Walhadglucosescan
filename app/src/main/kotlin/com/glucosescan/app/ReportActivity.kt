@@ -173,21 +173,19 @@ class ReportActivity : BaseActivity() {
         report = built
 
         val summary = findViewById<TextView>(R.id.daySummary)
-        val page1 = findViewById<ImageView>(R.id.page1)
-        val page2 = findViewById<ImageView>(R.id.page2)
-        val page3 = findViewById<ImageView>(R.id.page3)
+        val pages = PAGES_OF_REPORT.map { findViewById<ImageView>(it) }
         val has = built.hasValues
         findViewById<View>(R.id.reportEmpty).visibility = if (has) View.GONE else View.VISIBLE
         findViewById<View>(R.id.savePdf).isEnabled = has && !saving
         findViewById<View>(R.id.savedButtons).visibility = if (has && savedUri != null) View.VISIBLE else View.GONE
-        page1.visibility = if (has) View.VISIBLE else View.GONE
-        page2.visibility = if (has) View.VISIBLE else View.GONE
-        page3.visibility = if (has) View.VISIBLE else View.GONE
+        for (page in pages) {
+            page.visibility = if (has) View.VISIBLE else View.GONE
+        }
         if (!has) {
             summary.visibility = View.GONE
-            page1.setImageDrawable(null)
-            page2.setImageDrawable(null)
-            page3.setImageDrawable(null)
+            for (page in pages) {
+                page.setImageDrawable(null)
+            }
             return
         }
         var line = getString(R.string.report_day_values, built.span.stats.coveragePercent.toString() + " %")
@@ -201,9 +199,9 @@ class ReportActivity : BaseActivity() {
         val metrics = resources.displayMetrics
         val width = Math.min(MAX_PICTURE_WIDTH, Math.max(320, metrics.widthPixels - (34 * metrics.density).toInt()))
         val renderer = ReportRenderer(this, built, unit(), now, appVersion(), settings.linkUpEnabled)
-        page1.setImageBitmap(ReportRenderer.picture(renderer, 0, width))
-        page2.setImageBitmap(ReportRenderer.picture(renderer, 1, width))
-        page3.setImageBitmap(ReportRenderer.picture(renderer, 2, width))
+        for ((index, page) in pages.withIndex()) {
+            page.setImageBitmap(ReportRenderer.picture(renderer, index, width))
+        }
     }
 
     private fun fileName(report: DailyReport): String {
@@ -367,6 +365,10 @@ class ReportActivity : BaseActivity() {
     }
 
     companion object {
+
+        /** The image views of the pages, in order. Keep in step with ReportRenderer.PAGES. */
+        private val PAGES_OF_REPORT = intArrayOf(R.id.page1, R.id.page2, R.id.page3, R.id.page4)
+
         private const val KEY_DAY = "day"
         private const val REQUEST_SAVE = 8
         private const val PDF = "application/pdf"

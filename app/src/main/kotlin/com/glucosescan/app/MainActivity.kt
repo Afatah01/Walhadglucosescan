@@ -24,6 +24,8 @@ import com.glucosescan.app.core.Analysis
 import com.glucosescan.app.core.AnalysisCalculator
 import com.glucosescan.app.core.FindingLevel
 import com.glucosescan.app.core.Forecaster
+import com.glucosescan.app.core.OutlookRisk
+import com.glucosescan.app.core.Outlooks
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.ScanStatus
 import com.glucosescan.app.core.StatisticsCalculator
@@ -310,6 +312,25 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
             title.compoundDrawableTintList = getColorStateList(R.color.blue)
         }
         card.visibility = View.VISIBLE
+
+        // what to do about it, said on the phone, without any network
+        val outlook = Outlooks.of(forecast, now, current.shown?.readableValue ?: 0, settings.lowLimit, settings.highLimit)
+        val advice = findViewById<TextView>(R.id.outlookAdvice)
+        if (outlook == null) {
+            advice.visibility = View.GONE
+        } else {
+            advice.visibility = View.VISIBLE
+            advice.text = Texts.unbroken(
+                when (outlook.risk) {
+                    OutlookRisk.SEVERE_LOW -> getString(R.string.outlook_advice_severe_low)
+                    OutlookRisk.LOW -> getString(R.string.outlook_advice_low)
+                    OutlookRisk.LOW_SOON -> if (minutes == null) getString(R.string.outlook_advice_none) else getString(R.string.outlook_advice_low_soon, minutes, FindingTexts.glucose(settings.lowLimit, unit))
+                    OutlookRisk.VERY_HIGH -> getString(R.string.outlook_advice_very_high)
+                    OutlookRisk.HIGH -> getString(R.string.outlook_advice_high)
+                    OutlookRisk.NONE -> getString(R.string.outlook_advice_none)
+                }
+            )
+        }
     }
 
     /** What the sign at the top says. For tests. */

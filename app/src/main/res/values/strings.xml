@@ -413,6 +413,22 @@
         <item quantity="other">It may go below your target range (%1$s) in about %2$d minutes.</item>
     </plurals>
     <string name="outlook_note">A guess from the values of the last %1$d minutes. Food, medicine and movement change it.</string>
+    <string name="outlook_headline">If the current trend continues: approximately %1$s at %2$s.</string>
+    <string name="outlook_direction_rising">It is rising by about %1$s each minute.</string>
+    <string name="outlook_direction_falling">It is falling by about %1$s each minute.</string>
+    <string name="outlook_direction_steady">It is holding steady: less than %1$s a minute either way.</string>
+    <string name="outlook_based_on">From %1$d readings over the last %2$d minutes.</string>
+    <string name="outlook_advice_title">What to do</string>
+    <string name="outlook_advice_none">Nothing special. Carry on, and look again in a few minutes.</string>
+    <string name="outlook_advice_low">Treat the low now, the way your own plan says: something fast-acting, wait 15 minutes, measure again. Do not drive.</string>
+    <string name="outlook_advice_severe_low">Treat this as a severe low. Follow your hypo plan now. Stay with somebody. Do not drive.</string>
+    <string name="outlook_advice_low_soon">It is heading under %2$s within about %1$d minutes. If you have no reason to expect that, have something fast-acting now and measure again in 15 minutes.</string>
+    <string name="outlook_advice_high">Drink water, and do not add carbohydrate now. If you use insulin, follow your own plan for a high value. Measure again in an hour.</string>
+    <string name="outlook_advice_very_high">This is a high value. Drink water and follow your own plan. If you feel sick, are vomiting, or it does not come down, contact your doctor or diabetes team today.</string>
+    <string name="outlook_safety_title">Get help now</string>
+    <string name="outlook_safety_severe">If the person is unconscious, having a seizure, or cannot swallow safely: call emergency services. Do not put food or drink in their mouth.</string>
+    <string name="outlook_estimate">This is an estimate from recent readings, not a measurement. Food, medicine, activity and illness can change the outcome.</string>
+    <string name="outlook_no_dose">This app never tells you how much insulin or medicine to take. That is for you and your doctor.</string>
     <string name="chart_forecast_legend">Dotted line: where the values head in the next 30 minutes. It is a guess.</string>
 
     <!-- Home: numbers of the last 24 hours -->
@@ -590,6 +606,7 @@
     <string name="report_period_days_30">30 days</string>
     <string name="report_period_days_90">90 days</string>
     <string name="report_page_3">Page 3 of the report</string>
+    <string name="report_page_4">Page four: the same numbers by the hour and by the day</string>
     <string name="report_arrow_before">‹</string>
     <string name="report_arrow_after">›</string>
     <string name="report_day_before">The day before</string>

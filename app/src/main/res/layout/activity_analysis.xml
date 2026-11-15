@@ -42,6 +42,75 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
+        <!-- Where it heads in the next half hour, and what to do about it -->
+        <LinearLayout
+            android:id="@+id/outlookCard"
+            style="@style/Card"
+            android:paddingBottom="12dp"
+            android:paddingTop="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/outlookTitle"
+                style="@style/CardTitle"
+                android:layout_marginBottom="4dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_outlook"
+                android:gravity="center_vertical"
+                android:text="@string/outlook_title" />
+
+            <TextView
+                android:id="@+id/outlookHeadline"
+                style="@style/BodyText"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/outlookDirection"
+                style="@style/BodyText"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/outlookWarning"
+                style="@style/BodyText"
+                android:layout_marginTop="6dp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/outlookSafety"
+                style="@style/BodyText"
+                android:layout_marginTop="6dp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/outlookAdviceTitle"
+                style="@style/SectionLabel"
+                android:layout_marginTop="10dp"
+                android:text="@string/outlook_advice_title" />
+
+            <TextView
+                android:id="@+id/outlookAdvice"
+                style="@style/BodyText" />
+
+            <TextView
+                android:id="@+id/outlookBasedOn"
+                style="@style/NoteText"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:id="@+id/outlookEstimate"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/outlook_estimate" />
+
+            <TextView
+                android:id="@+id/outlookNoDose"
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/outlook_no_dose" />
+        </LinearLayout>
+
         <!-- The last hours: how the glucose was, in words; then hour by hour -->
         <LinearLayout
             style="@style/Card"

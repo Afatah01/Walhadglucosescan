@@ -154,6 +154,12 @@
                 style="@style/BodyText" />
 
             <TextView
+                android:id="@+id/outlookAdvice"
+                style="@style/BodyText"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/outlookNote"
                 style="@style/NoteText"
                 android:layout_marginTop="4dp" />

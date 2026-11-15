@@ -584,11 +584,11 @@ class ReportScreenTest {
         val pdf = ReportTesting.Pdf(out.toByteArray())
         File(ReportTesting.folder(), "sample-report.pdf").writeBytes(pdf.bytes)
 
-        assertEquals(12, pdf.objects.size)
+        assertEquals(3 + 3 * ReportRenderer.PAGES, pdf.objects.size)
         assertTrue(pdf.head(1).contains("/Type /Catalog /Pages 2 0 R"))
-        assertTrue(pdf.head(2).contains("/Type /Pages /Kids [4 0 R 7 0 R 10 0 R] /Count 3"))
+        assertTrue(pdf.head(2).contains("/Count " + ReportRenderer.PAGES))
         assertTrue(pdf.head(3), pdf.head(3).contains("/Title (Daily glucose report 2026-11-10) /Producer (Walhad Glucose Scan 4.0.0) /CreationDate (D:20261110143220+03'00')"))
-        for (page in 0..2) {
+        for (page in 0 until ReportRenderer.PAGES) {
             val number = 4 + 3 * page
             assertTrue(pdf.head(number), pdf.head(number).contains("/Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im$page ${number + 2} 0 R >> >> /Contents ${number + 1} 0 R"))
             assertEquals("q\n595 0 0 842 0 0 cm\n/Im$page Do\nQ\n", String(pdf.stream(number + 1), Charsets.US_ASCII))
@@ -672,7 +672,7 @@ class ReportScreenTest {
         // the file was written, and then shown to the user and to other apps
         val written = (file as ByteArrayOutputStream).toByteArray()
         val pdf = ReportTesting.Pdf(written)
-        assertEquals(12, pdf.objects.size)
+        assertEquals(3 + 3 * ReportRenderer.PAGES, pdf.objects.size)
         assertEquals(PdfKind.PICTURES, ReportActivity.lastKind)
         assertEquals(1, downloads.updates.size)
         assertEquals(uri, downloads.updates[0].first)
@@ -873,7 +873,7 @@ class ReportOnOldAndroidTest {
         assertEquals(chosen, screen.savedUri)
         assertEquals(View.VISIBLE, screen.findViewById<View>(R.id.savedButtons).visibility)
         val pdf = ReportTesting.Pdf(file.toByteArray())
-        assertEquals("three pages", 12, pdf.objects.size)
+        assertEquals("one object for the catalog, one for the pages, three for every page", 3 + 3 * ReportRenderer.PAGES, pdf.objects.size)
         assertTrue(downloads.inserted.isEmpty())
     }
 }

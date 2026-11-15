@@ -25,17 +25,21 @@ import com.glucosescan.app.core.FindingLevel
 import com.glucosescan.app.core.Advisor
 import com.glucosescan.app.core.Forecaster
 import com.glucosescan.app.core.Goal
+import com.glucosescan.app.core.Outlook
+import com.glucosescan.app.core.OutlookDirection
+import com.glucosescan.app.core.OutlookRisk
+import com.glucosescan.app.core.Outlooks
 import com.glucosescan.app.core.GoalKind
 import com.glucosescan.app.core.Glucose
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.Span
 import com.glucosescan.app.core.StatisticsCalculator
 import com.glucosescan.app.core.Verdict
-import com.glucosescan.app.ai.AiAnswer
-import com.glucosescan.app.ai.AiClient
-import com.glucosescan.app.ai.AiConfig
 import com.glucosescan.app.ai.AiProblem
-import com.glucosescan.app.ai.AiPrompt
+import com.glucosescan.app.ai.AiWords
+import com.glucosescan.app.ai.AiQuestion
+import com.glucosescan.app.ai.AiSource
+import com.glucosescan.app.ai.WalhadAi
 import com.glucosescan.app.data.GlucoseStore
 import com.glucosescan.app.net.Net
 import com.glucosescan.app.data.Settings
@@ -83,6 +87,9 @@ class AnalysisActivity : BaseActivity() {
 
     /** The text for an AI app, as the screen would send it now. */
     internal var aiText: String = ""
+
+    /** Whether this visit has already read the numbers by itself. */
+    private var aiJustAsked = false
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -188,6 +195,80 @@ class AnalysisActivity : BaseActivity() {
             warning.visibility = View.VISIBLE
         }
         note.text = getString(R.string.outlook_note, forecast.spanMinutes)
+        renderOutlook(Outlooks.of(forecast, now, shown.readableValue, settings.lowLimit, settings.highLimit), unit)
+    }
+
+    /**
+     * The card "Next 30 minutes": where the value heads, why, what to do, and when to get help.
+     * Every word here is written on the phone. None of it names a dose.
+     */
+    private fun renderOutlook(outlook: Outlook?, unit: GlucoseUnit) {
+        val card = findViewById<View>(R.id.outlookCard)
+        if (outlook == null) {
+            card.visibility = View.GONE
+            return
+        }
+        card.visibility = View.VISIBLE
+
+        findViewById<TextView>(R.id.outlookHeadline).text = Texts.unbroken(
+            getString(
+                R.string.outlook_headline,
+                FindingTexts.glucose(outlook.value, unit),
+                Texts.timeOfDay(this, outlook.at)
+            )
+        )
+
+        val perMinute = FindingTexts.glucose(Math.round(Math.abs(outlook.perMinute)).toInt(), unit)
+        findViewById<TextView>(R.id.outlookDirection).text = when (outlook.direction) {
+            OutlookDirection.RISING -> getString(R.string.outlook_direction_rising, perMinute)
+            OutlookDirection.FALLING -> getString(R.string.outlook_direction_falling, perMinute)
+            OutlookDirection.STEADY -> getString(R.string.outlook_direction_steady, perMinute)
+        }
+
+        // a warning in the colour of what it is about: red for a low, orange for a high
+        val warning = findViewById<TextView>(R.id.outlookWarning)
+        val minutes = outlook.minutesUntilLow
+        val warningWords = when (outlook.risk) {
+            OutlookRisk.SEVERE_LOW -> getString(R.string.outlook_advice_severe_low)
+            OutlookRisk.LOW -> getString(R.string.outlook_advice_low)
+            OutlookRisk.LOW_SOON -> if (minutes == null) null else getString(R.string.outlook_advice_low_soon, minutes, FindingTexts.glucose(settings.lowLimit, unit))
+            OutlookRisk.VERY_HIGH -> getString(R.string.outlook_advice_very_high)
+            OutlookRisk.HIGH -> getString(R.string.outlook_advice_high)
+            OutlookRisk.NONE -> null
+        }
+        if (warningWords == null) {
+            warning.visibility = View.GONE
+        } else {
+            warning.visibility = View.VISIBLE
+            warning.text = Texts.unbroken(warningWords)
+            warning.setTextColor(
+                getColor(
+                    when {
+                        outlook.risk == OutlookRisk.SEVERE_LOW || outlook.risk == OutlookRisk.LOW || outlook.risk == OutlookRisk.LOW_SOON -> R.color.red
+                        else -> R.color.on_amber
+                    }
+                )
+            )
+        }
+
+        // when it is urgent the safety words come before everything else
+        val safety = findViewById<TextView>(R.id.outlookSafety)
+        if (outlook.isUrgent) {
+            safety.visibility = View.VISIBLE
+            safety.text = getString(R.string.outlook_safety_severe)
+            safety.setTextColor(getColor(R.color.red))
+        } else {
+            safety.visibility = View.GONE
+        }
+
+        findViewById<TextView>(R.id.outlookAdvice).text = Texts.unbroken(
+            when (outlook.risk) {
+                OutlookRisk.NONE -> getString(R.string.outlook_advice_none)
+                else -> warningWords ?: getString(R.string.outlook_advice_none)
+            }
+        )
+        findViewById<TextView>(R.id.outlookBasedOn).text =
+            getString(R.string.outlook_based_on, outlook.basedOn, outlook.spanMinutes)
     }
 
     // ---------------------------------------------------------------- the last hours
@@ -393,15 +474,16 @@ class AnalysisActivity : BaseActivity() {
         report.visibility = if (textShown) View.VISIBLE else View.GONE
         findViewById<Button>(R.id.aiShow).setText(if (textShown) R.string.ai_hide else R.string.ai_show)
         renderAi(now)
+        // the screen reads the numbers by itself: nothing to press, nothing to set up
+        askAiOnItsOwn(now)
     }
 
     /** The button that asks the AI, and its last answer. */
     private fun renderAi(now: Long) {
         val ask = findViewById<Button>(R.id.aiAsk)
-        val ready = settings.aiReady
-        ask.setText(if (ready) R.string.ai_ask else R.string.ai_set_up)
+        ask.setText(R.string.ai_ask)
         ask.isEnabled = !asking
-        findViewById<View>(R.id.aiQuestion).visibility = if (ready) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.aiQuestion).visibility = View.VISIBLE
 
         val state = findViewById<TextView>(R.id.aiAskState)
         when {
@@ -433,45 +515,72 @@ class AnalysisActivity : BaseActivity() {
     // ---------------------------------------------------------------- ask an AI
 
     /**
-     * Sends the text to the AI service the user has set up, and shows the answer. Without a
-     * key the button opens the screen where the service is set up.
+     * Reads the numbers on this screen and says what it sees.
+     *
+     * There is nothing to set up. The AI is built in: this build knows one address, and the key
+     * that costs money lives on that server, never in the app. If the service cannot be reached,
+     * is over its limit, or answers with something this app will not show, the phone reads the
+     * same numbers itself and says so. Either way the person gets an answer, and the answer
+     * always says where it came from.
      */
     private fun askAi() {
-        if (!settings.aiReady) {
-            startActivity(Intent(this, AiSetupActivity::class.java))
-            return
-        }
         if (asking || aiText.isEmpty()) {
             return
         }
-        val config = AiConfig(settings.aiProvider, settings.aiUrlInUse, settings.aiKey, settings.aiModelInUse)
-        val system = AiPrompt.system(settings.answerLanguage)
-        val user = AiPrompt.user(aiText, findViewById<EditText>(R.id.aiQuestion).text.toString())
-        val transport = Net.transport
+        val unit = settings.unit ?: GlucoseUnit.MGDL
+        val zone = java.util.TimeZone.getDefault()
+        val to = AppClock.now()
+        val from = to - settings.statisticsDays * StatisticsCalculator.DAY
+        val values = settings.correction.applyAll(store.between(from, to))
+        val request = AiQuestion(
+            report = aiText,
+            question = findViewById<EditText>(R.id.aiQuestion).text.toString(),
+            language = settings.answerLanguage,
+            history = emptyList(),
+            fallback = Advisor.tell(
+                Advisor.facts(values, from, to, settings.lowLimit, settings.highLimit, unit, zone),
+                settings.answerLanguage
+            )
+        )
+        val ai = WalhadAi(Net.transport, install = settings.installId)
         asking = true
         aiProblem = ""
+        aiJustAsked = true
         renderAi(AppClock.now())
         Net.patient.execute {
-            val answer = try {
-                AiClient(transport).ask(config, system, user)
-            } catch (e: Exception) {
-                AiAnswer("", AiProblem.SERVER, Net.words(e))
-            }
+            val answer = ai.ask(request)
             handler.post {
                 asking = false
-                val problem = answer.problem
-                if (problem == null) {
+                if (answer.text.isNotEmpty()) {
                     settings.aiAnswer = answer.text
                     settings.aiAnswerTime = AppClock.now()
-                    settings.aiAnswerModel = config.model
-                } else {
-                    aiProblem = AiWords.problem(this, problem, answer.detail)
+                    settings.aiAnswerModel =
+                        if (answer.source == AiSource.AI) getString(R.string.insights_from_ai)
+                        else getString(R.string.insights_from_phone)
                 }
+                aiProblem = if (answer.problem == null) "" else AiWords.problem(this, answer.problem, answer.detail)
                 if (!isDestroyed) {
                     renderAi(AppClock.now())
                 }
             }
         }
+    }
+
+    /**
+     * The analysis starts on its own. Nobody has to press anything to be told what their numbers
+     * say: the screen reads them as soon as it opens, and reads them again when there is new data
+     * and the last answer is more than a few hours old.
+     */
+    private fun askAiOnItsOwn(now: Long) {
+        if (aiJustAsked || asking || aiText.isEmpty()) {
+            return
+        }
+        val answer = settings.aiAnswer
+        val fresh = answer.isNotEmpty() && now - settings.aiAnswerTime < AUTO_ASK_MILLIS
+        if (fresh) {
+            return
+        }
+        askAi()
     }
 
     /** Hands the text to an app the user chooses. The app itself sends nothing anywhere. */
@@ -592,6 +701,9 @@ class AnalysisActivity : BaseActivity() {
         const val DAYS_SHOWN = 7
         private const val LOWS_SHOWN = 5
         private const val AI_DAYS = 14
+
+        /** How long an answer stays on the screen before the app reads the numbers again. */
+        private const val AUTO_ASK_MILLIS = 3 * 60 * 60_000L
 
         private val DAYS = mapOf(R.id.days1 to 1, R.id.days7 to 7, R.id.days14 to 14, R.id.days30 to 30, R.id.days90 to 90)
         private val HOURS = mapOf(R.id.hours3 to 3, R.id.hours6 to 6, R.id.hours12 to 12, R.id.hours24 to 24)

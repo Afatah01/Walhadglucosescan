@@ -19,6 +19,7 @@ import com.glucosescan.app.core.DailyReport
 import com.glucosescan.app.core.Episode
 import com.glucosescan.app.core.FindingLevel
 import com.glucosescan.app.core.GlucoseUnit
+import com.glucosescan.app.core.HourSummary
 import com.glucosescan.app.core.StatisticsCalculator
 import com.glucosescan.app.core.Verdict
 import com.glucosescan.app.ui.FindingTexts
@@ -65,6 +66,7 @@ class ReportRenderer(
     private val hourFormat = SimpleDateFormat(if (is24) "HH:mm" else "h a", Locale.getDefault())
     private val longDay = SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEEMMMMdyyyy"), Locale.getDefault())
     private val shortDay = SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEMMMd"), Locale.getDefault())
+    private val fullDay = SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEE d MMM"), Locale.getDefault())
 
     /** What the pages say, line by line. For tests: a picture cannot be read by a test, these words can. */
     val words = ArrayList<String>()
@@ -75,7 +77,8 @@ class ReportRenderer(
         when (page) {
             0 -> firstPage(canvas)
             1 -> secondPage(canvas)
-            else -> thirdPage(canvas)
+            2 -> thirdPage(canvas)
+            else -> fourthPage(canvas)
         }
         footer(canvas, page)
     }
@@ -603,6 +606,185 @@ class ReportRenderer(
         }
     }
 
+    /**
+     * The fourth page: the same numbers taken apart by the hour and by the day, so that a
+     * pattern in time can be seen. This is where "is it always bad after lunch?" is answered.
+     */
+    private fun fourthPage(canvas: Canvas) {
+        fill(canvas, 0f, 0f, WIDTH, 40f, BLUE)
+        text(canvas, "Daily glucose report", MARGIN, 25f, 12f, Color.WHITE, bold = true)
+        text(canvas, periodName(), WIDTH - MARGIN, 25f, 11f, Color.WHITE, align = Paint.Align.RIGHT)
+
+        var y = 62f
+
+        // ---- F. hour by hour
+        sectionTitle(canvas, "Hour by hour", y)
+        text(canvas, "What each hour of the day looks like over " + periodName().lowercase(Locale.US) + ".", WIDTH - MARGIN, y, 8.5f, GREY, align = Paint.Align.RIGHT)
+        y += 14f
+        y = hourTable(canvas, y)
+
+        // ---- G. day by day
+        y += 14f
+        sectionTitle(canvas, "Day by day", y)
+        text(canvas, "One line for every day of the stretch.", WIDTH - MARGIN, y, 8.5f, GREY, align = Paint.Align.RIGHT)
+        y += 14f
+        y = dayTable(canvas, y)
+
+        // ---- I. the numbers in full
+        if (y < 700f) {
+            y += 14f
+            sectionTitle(canvas, "The numbers in full", y)
+            y += 14f
+            numbersInFull(canvas, y)
+        }
+    }
+
+    /** What the stretch is called on the page: "one day", "the last 14 days". */
+    private fun periodName(): String {
+        val days = report.week.size
+        return when {
+            days <= 1 -> "one day"
+            else -> "the last $days days"
+        }
+    }
+
+    /** One line for every hour of the day, over the whole stretch. */
+    private fun hourTable(canvas: Canvas, top: Float): Float {
+        val byHour = Array<MutableList<HourSummary>>(24) { ArrayList() }
+        for (hour in report.hours) {
+            byHour[hour.hourOfDay].add(hour)
+        }
+        val columns = floatArrayOf(MARGIN + 8f, MARGIN + 74f, MARGIN + 142f, MARGIN + 210f, MARGIN + 278f, WIDTH - MARGIN - 8f)
+        val heads = arrayOf("Hour", "Average", "In range", "Lowest", "Highest", "Days")
+        val rowHeight = 12.2f
+        var y = top
+
+        for ((index, head) in heads.withIndex()) {
+            val align = if (index == 0) Paint.Align.LEFT else Paint.Align.RIGHT
+            text(canvas, head, columns[index], y + 8f, 8f, GREY, bold = true, align = align)
+        }
+        line(canvas, MARGIN, y + 12f, WIDTH - MARGIN, y + 12f, AXIS, 0.7f)
+        y += 15f
+
+        for (hour in 0..23) {
+            val hours = byHour[hour]
+            val withValues = hours.filter { it.mean != null }
+            val label = String.format(Locale.US, "%02d:00", hour)
+            text(canvas, label, columns[0], y + 8f, 8.5f, TEXT)
+            if (withValues.isEmpty()) {
+                text(canvas, "\u2013", columns[1], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+                text(canvas, "\u2013", columns[2], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+                text(canvas, "\u2013", columns[3], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+                text(canvas, "\u2013", columns[4], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+                text(canvas, "0", columns[5], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+            } else {
+                val mean = withValues.mapNotNull { it.mean }.average()
+                val lowest = withValues.mapNotNull { it.lowest }.minOrNull()
+                val highest = withValues.mapNotNull { it.highest }.maxOrNull()
+                val inRange = withValues.count { it.mean!! >= report.lowLimit && it.mean!! <= report.highLimit }
+                val percent = Math.round(100.0 * inRange / withValues.size).toInt()
+                text(canvas, value(mean) + " " + unit.label, columns[1], y + 8f, 8.5f, TEXT, bold = true, align = Paint.Align.RIGHT)
+                text(canvas, percent.toString() + " %", columns[2], y + 8f, 8.5f, rangeColor(mean), align = Paint.Align.RIGHT)
+                text(canvas, value(lowest!!), columns[3], y + 8f, 8.5f, TEXT, align = Paint.Align.RIGHT)
+                text(canvas, value(highest!!), columns[4], y + 8f, 8.5f, TEXT, align = Paint.Align.RIGHT)
+                text(canvas, withValues.size.toString(), columns[5], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+            }
+            line(canvas, MARGIN, y + 12f, WIDTH - MARGIN, y + 12f, GRID, 0.4f)
+            y += rowHeight
+        }
+        return y
+    }
+
+    /** One line for every day of the stretch. */
+    private fun dayTable(canvas: Canvas, top: Float): Float {
+        val days = report.week
+        if (days.isEmpty()) {
+            text(canvas, "No day of this stretch has values.", MARGIN + 8f, top + 10f, 9f, GREY)
+            return top + 20f
+        }
+        val columns = floatArrayOf(MARGIN + 8f, MARGIN + 92f, MARGIN + 160f, MARGIN + 220f, MARGIN + 288f, MARGIN + 356f, WIDTH - MARGIN - 8f)
+        val heads = arrayOf("Day", "Average", "In range", "Lowest", "Highest", "Lows", "Highs")
+        val rowHeight = 13.6f
+        var y = top
+
+        for ((index, head) in heads.withIndex()) {
+            val align = if (index == 0) Paint.Align.LEFT else Paint.Align.RIGHT
+            text(canvas, head, columns[index], y + 8f, 8f, GREY, bold = true, align = align)
+        }
+        line(canvas, MARGIN, y + 12f, WIDTH - MARGIN, y + 12f, AXIS, 0.7f)
+        y += 15f
+
+        for (day in days) {
+            if (y > 690f) {
+                text(canvas, "and " + (days.size - days.indexOf(day)) + " more days", columns[0], y + 8f, 8.5f, GREY)
+                y += rowHeight
+                break
+            }
+            text(canvas, fullDay.format(Date(day.start)), columns[0], y + 8f, 8.5f, TEXT)
+            if (!day.hasValues) {
+                text(canvas, "no values", columns[1], y + 8f, 8.5f, GREY, align = Paint.Align.RIGHT)
+                y += rowHeight
+                continue
+            }
+            val mean = day.stats.mean
+            text(canvas, (mean?.let { value(it) } ?: "\u2013") + " " + unit.label, columns[1], y + 8f, 8.5f, TEXT, bold = true, align = Paint.Align.RIGHT)
+            text(canvas, day.inRangePercent.toString() + " %", columns[2], y + 8f, 8.5f, rangeColor(mean ?: 0.0), align = Paint.Align.RIGHT)
+            text(canvas, day.stats.lowest?.let { value(it) } ?: "\u2013", columns[3], y + 8f, 8.5f, TEXT, align = Paint.Align.RIGHT)
+            text(canvas, day.stats.highest?.let { value(it) } ?: "\u2013", columns[4], y + 8f, 8.5f, TEXT, align = Paint.Align.RIGHT)
+            text(canvas, day.lows.toString(), columns[5], y + 8f, 8.5f, if (day.lows > 0) RED else GREY, align = Paint.Align.RIGHT)
+            text(canvas, day.highs.toString(), columns[6], y + 8f, 8.5f, if (day.highs > 0) AMBER else GREY, align = Paint.Align.RIGHT)
+            line(canvas, MARGIN, y + 12.5f, WIDTH - MARGIN, y + 12.5f, GRID, 0.4f)
+            y += rowHeight
+        }
+        return y
+    }
+
+    /** The rest of the numbers a doctor may ask for, in two columns. */
+    private fun numbersInFull(canvas: Canvas, top: Float) {
+        val stats = report.span.stats
+        val sorted = report.values.map { it.readableValue.toDouble() }.sorted()
+        fun at(p: Double): String =
+            if (sorted.isEmpty()) "\u2013" else value(StatisticsCalculator.percentile(sorted, p))
+
+        // time in the tight range, 70 to 140: a stricter aim than 70 to 180
+        val tight = if (sorted.isEmpty()) "\u2013" else {
+            val inside = sorted.count { it >= 70.0 && it <= 140.0 }
+            (Math.round(100.0 * inside / sorted.size).toInt()).toString() + " %"
+        }
+        val readings = sorted.size
+        val perDay = if (stats.days > 0 && readings > 0) {
+            String.format(Locale.US, "%.0f", readings.toDouble() / stats.days)
+        } else "\u2013"
+        val ea1c = stats.gmi?.let { gmi ->
+            val mmol = Math.round((gmi - 2.15) * 10.929).toInt()
+            String.format(Locale.US, "%.1f %%  (%d mmol/mol)", gmi, mmol)
+        } ?: "\u2013"
+
+        val pairs = listOf(
+            "Values in all" to readings.toString(),
+            "Values a day" to perDay,
+            "Days with values" to stats.days.toString(),
+            "10th percentile" to at(0.10),
+            "Median (50th)" to at(0.50),
+            "90th percentile" to at(0.90),
+            "Estimated HbA1c" to ea1c,
+            "In the tight range 70\u2013" + value(140) to tight,
+            "Very low (under " + value(StatisticsCalculator.VERY_LOW_BELOW) + ")" to stats.rangePercents[0].toString() + " %",
+            "Low (" + value(StatisticsCalculator.LOW_BELOW) + "\u2013" + value(report.lowLimit) + ")" to stats.rangePercents[1].toString() + " %",
+            "High (" + value(report.highLimit) + "\u2013" + value(StatisticsCalculator.HIGH_ABOVE) + ")" to stats.rangePercents[3].toString() + " %",
+            "Very high (over " + value(StatisticsCalculator.VERY_HIGH_ABOVE) + ")" to stats.rangePercents[4].toString() + " %"
+        )
+        val columnWidth = (WIDTH - 2 * MARGIN) / 2f
+        for ((index, pair) in pairs.withIndex()) {
+            val column = index % 2
+            val row = index / 2
+            val x = MARGIN + 8f + column * columnWidth
+            val y = top + row * 15f
+            text(canvas, pair.first, x, y + 8f, 8.5f, GREY)
+            text(canvas, pair.second, x + columnWidth - 16f, y + 8f, 8.5f, TEXT, bold = true, align = Paint.Align.RIGHT)
+        }
+    }
+
     /** One table of events: when it began, how long it lasted, and its lowest (or highest) value. */
     private fun eventTable(canvas: Canvas, kind: String, episodes: List<Episode>, top: Float, accent: Int): Float {
         val columns = floatArrayOf(MARGIN + 8f, MARGIN + 132f, MARGIN + 232f, WIDTH - MARGIN - 8f)
@@ -715,7 +897,7 @@ class ReportRenderer(
 
         const val PAGE_WIDTH = 595
         const val PAGE_HEIGHT = 842
-        const val PAGES = 3
+        const val PAGES = 4
 
         private const val WIDTH = 595f
         private const val MARGIN = 36f

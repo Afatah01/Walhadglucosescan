@@ -242,14 +242,14 @@ class OnlineScreensTest {
         val more = open(MoreActivity::class.java)
         assertEquals("LibreLinkUp: Off", row(more, R.id.buttonLinkUp))
         assertEquals("Bluetooth values: Off", row(more, R.id.buttonLive))
-        assertEquals("AI: Not set up", row(more, R.id.buttonAi))
+        assertEquals("there is nothing to set up: the AI is built in", "AI: Ready", row(more, R.id.buttonAi))
         assertEquals("Online copy: Off", row(more, R.id.buttonBackup))
         assertEquals("a row that is neither on nor off shows no state", "Alarms", row(more, R.id.buttonAlarms))
         assertEquals("Values over the internet", more.findViewById<View>(R.id.buttonLinkUp).findViewById<TextView>(R.id.navNote).text.toString())
         assertTrue(words(more).contains("LibreLinkUp, AI and the online copy use the internet. They are off until you set them up."))
         picture(more, "60-more")
 
-        val screens = mapOf(R.id.buttonLinkUp to LinkUpActivity::class.java, R.id.buttonAi to AiSetupActivity::class.java, R.id.buttonBackup to BackupActivity::class.java)
+        val screens = mapOf(R.id.buttonLinkUp to LinkUpActivity::class.java, R.id.buttonAi to AiInsightsActivity::class.java, R.id.buttonBackup to BackupActivity::class.java)
         for ((id, screen) in screens) {
             click(more, id)
             assertEquals(screen.name, shadowOf(more).nextStartedActivity.component!!.className)
@@ -603,165 +603,48 @@ class OnlineScreensTest {
         assertFalse(isShown(open(AlarmsActivity::class.java), R.id.alarmsNeedLive))
     }
 
-    // ------------------------------------------------------------ AI: setting it up
+    // ------------------------------------------------------------ AI: nothing to set up
 
     @Test
-    fun settingUpGemini() {
-        val screen = open(AiSetupActivity::class.java)
-        assertTrue(screen.findViewById<View>(R.id.aiGemini).isSelected)
-        assertEquals("gemini-3.5-flash-lite", text(screen, R.id.aiModel))
-        assertFalse("Google's address is known: it is not asked for", isShown(screen, R.id.aiUrl))
-        assertTrue(text(screen, R.id.aiHelp).contains("aistudio.google.com/apikey"))
-        assertFalse(isShown(screen, R.id.aiRemove))
-        picture(screen, "53-ai-setup")
-
-        click(screen, R.id.aiSave)
-        assertEquals("Paste the key first.", screen.lastMessage)
-        assertFalse(settings.aiReady)
-
-        type(screen, R.id.aiKey, "  KEY-123  ")
-        click(screen, R.id.aiSave)
-        assertEquals("Saved. Open Analysis and press \"Ask the AI now\".", screen.lastMessage)
-        assertTrue(settings.aiReady)
-        assertEquals(AiProvider.GEMINI, settings.aiProvider)
-        assertEquals("KEY-123", settings.aiKey)
-        assertEquals("gemini-3.5-flash-lite", settings.aiModelInUse)
-        assertEquals("https://generativelanguage.googleapis.com/v1beta", settings.aiUrlInUse)
-        assertEquals("the key does not stay on the screen", "", text(screen, R.id.aiKey))
-        assertTrue(isShown(screen, R.id.aiKeySaved))
-        assertTrue(isShown(screen, R.id.aiRemove))
-        for ((name, value) in app.getSharedPreferences("settings", 0).all) {
-            assertFalse("$name holds the key as it is", value.toString().contains("KEY-123"))
-        }
-
-        // another model, the key stays
-        type(screen, R.id.aiModel, "gemini-3.8-flash")
-        click(screen, R.id.aiSave)
-        assertEquals("gemini-3.8-flash", settings.aiModelInUse)
-        assertEquals("KEY-123", settings.aiKey)
-
-        click(screen, R.id.aiRemove)
-        assertEquals("The key was removed.", screen.lastMessage)
-        assertFalse(settings.aiReady)
+    fun thereIsNoScreenWhereAKeyIsTyped() {
+        // The AI is built in: no key, no provider, no address. So there is nowhere to type one,
+        // and the AI row of More leads to the insights rather than to a form.
+        val more = open(MoreActivity::class.java)
+        click(more, R.id.buttonAi)
+        assertEquals(AiInsightsActivity::class.java.name, shadowOf(more).nextStartedActivity.component!!.className)
+        assertEquals("AI: Ready", row(more, R.id.buttonAi))
     }
 
     @Test
-    fun bothServicesAreBuiltInAndOnlyTheKeyIsAskedFor() {
-        val server = FakeServer()
-        FakeServer.install(server)
-        server.answer = { HttpResponse(200, "{\"data\":[{\"id\":\"gpt-5-mini\"},{\"id\":\"gpt-5-nano\"},{\"id\":\"whisper-large\"}]}") }
-        val screen = open(AiSetupActivity::class.java)
-
-        // Gemini: the address and the model are already there, nothing to look up
-        assertTrue(screen.findViewById<View>(R.id.aiGemini).isSelected)
-        assertFalse("Google's address is known: it is not asked for", isShown(screen, R.id.aiUrl))
-        assertEquals("gemini-3.5-flash-lite", text(screen, R.id.aiModel))
-        assertTrue(text(screen, R.id.aiHelp).contains("free"))
-
-        // OpenAI: the same, one press away
-        click(screen, R.id.aiOpenAi)
-        assertTrue(screen.findViewById<View>(R.id.aiOpenAi).isSelected)
-        assertFalse("OpenAI's address is known too", isShown(screen, R.id.aiUrl))
-        assertEquals("gpt-5-mini", text(screen, R.id.aiModel))
-        assertTrue(text(screen, R.id.aiHelp).contains("OpenAI"))
-
-        type(screen, R.id.aiKey, "sk-999")
-        click(screen, R.id.aiFindModels)
-        assertEquals("https://api.openai.com/v1/models", server.last.url)
-        assertEquals("Bearer sk-999", server.last.headers["Authorization"])
-        assertEquals("Choose a model", plain(shadowOf(dialog()).title))
-        assertEquals(
-            "the models that answer with text, not the ones for speech",
-            setOf("gpt-5-mini", "gpt-5-nano"),
-            shadowOf(dialog()).items.map { it.toString() }.toSet()
-        )
-        shadowOf(dialog()).clickOnItem(0)
-        idle()
-
-        click(screen, R.id.aiSave)
-        assertEquals(AiProvider.OPENAI, settings.aiProvider)
-        assertEquals("https://api.openai.com/v1", settings.aiUrlInUse)
-        assertEquals(settings.aiModelInUse, text(screen, R.id.aiModel))
-        assertEquals("sk-999", settings.aiKey)
-        assertTrue(settings.aiReady)
-
-        // the screen comes back with what was saved, and Gemini is one press away again
-        val again = open(AiSetupActivity::class.java)
-        assertTrue(again.findViewById<View>(R.id.aiOpenAi).isSelected)
-        assertEquals("", text(again, R.id.aiKey))
-        click(again, R.id.aiGemini)
-        assertEquals("gemini-3.5-flash-lite", text(again, R.id.aiModel))
-        click(again, R.id.aiFindModels)
-        assertEquals("the key of the other service is not sent to this one", "Paste the key first.", again.lastMessage)
-    }
-
-    @Test
-    fun whenTheServiceCannotBeAskedTheFreeModelsOfTheAppAreOffered() {
-        val server = FakeServer()
-        FakeServer.install(server)
-        server.answer = { HttpResponse(500, "no") }
-        val screen = open(AiSetupActivity::class.java)
-        type(screen, R.id.aiKey, "KEY-1")
-        click(screen, R.id.aiFindModels)
-        assertEquals("Choose a model (from the app)", plain(shadowOf(dialog()).title))
-        assertEquals(
-            listOf("gemini-3.5-flash-lite — free", "gemini-3.1-flash-lite — free", "gemini-3.8-flash — free"),
-            shadowOf(dialog()).items.map { it.toString() }
-        )
-        shadowOf(dialog()).clickOnItem(2)
-        idle()
-        assertEquals("gemini-3.8-flash", text(screen, R.id.aiModel))
-
-        // OpenAI has no free model: the models it knows are offered without the word free
-        click(screen, R.id.aiOpenAi)
-        type(screen, R.id.aiKey, "sk-1")
-        click(screen, R.id.aiFindModels)
-        assertEquals(listOf("gpt-5-nano", "gpt-5-mini", "gpt-4o-mini"), shadowOf(dialog()).items.map { it.toString() })
-        shadowOf(dialog()).clickOnItem(0)
-        idle()
-        assertEquals("gpt-5-nano", text(screen, R.id.aiModel))
-    }
-
-    @Test
-    fun aKeyTheServiceDoesNotAccept() {
-        val server = FakeServer()
-        FakeServer.install(server)
-        server.answer = { HttpResponse(400, "{\"error\":{\"code\":400,\"message\":\"API key not valid. Please pass a valid API key.\",\"status\":\"INVALID_ARGUMENT\"}}") }
-        val screen = open(AiSetupActivity::class.java)
-        type(screen, R.id.aiKey, "wrong")
-        click(screen, R.id.aiFindModels)
-        assertEquals(
-            "The AI service does not accept the key. Check it under More, AI.\n\n(HTTP 400 API key not valid. Please pass a valid API key.)",
-            screen.lastMessage
-        )
-        assertEquals(app.getColor(R.color.red), screen.findViewById<TextView>(R.id.aiMessage).currentTextColor)
+    fun withoutAKeyTheNumbersAreStillRead() {
+        store.insert(twoWeeks(serial) + lastMinutes(104, serial))
+        val screen = open(AnalysisActivity::class.java)
+        assertEquals("Ask the AI now", text(screen, R.id.aiAsk))
+        assertTrue("the box for an own question is there even without a key", isShown(screen, R.id.aiQuestion))
+        // it read the numbers on its own, and said something
+        assertTrue(isShown(screen, R.id.aiAnswerBox))
+        assertTrue(text(screen, R.id.aiAnswer).length > 40)
     }
 
     // ------------------------------------------------------------ AI: asking
 
-    private fun geminiAnswers(server: FakeServer, words: String) {
-        server.answer = {
-            HttpResponse(200, JSONObject().put("candidates", org.json.JSONArray().put(JSONObject().put("content", JSONObject().put("parts", org.json.JSONArray().put(JSONObject().put("text", words)))))).toString())
-        }
+    /** What the built-in server answers with. */
+    private fun walhadAnswers(server: FakeServer, words: String) {
+        server.answer = { HttpResponse(200, JSONObject().put("ok", true).put("answer", words).toString()) }
     }
 
-    @Test
-    fun withoutAKeyTheButtonLeadsToTheSetUp() {
-        store.insert(twoWeeks(serial) + lastMinutes(104, serial))
-        val screen = open(AnalysisActivity::class.java)
-        assertEquals("Set up the AI", text(screen, R.id.aiAsk))
-        assertFalse(isShown(screen, R.id.aiQuestion))
-        assertFalse(isShown(screen, R.id.aiAnswerBox))
-        click(screen, R.id.aiAsk)
-        assertEquals(AiSetupActivity::class.java.name, shadowOf(screen).nextStartedActivity.component!!.className)
+    /** What the built-in server says when it cannot answer. */
+    private fun walhadProblem(server: FakeServer, problem: String, detail: String = "") {
+        server.answer = {
+            HttpResponse(200, JSONObject().put("ok", false).put("problem", problem).put("detail", detail).toString())
+        }
     }
 
     @Test
     fun theAiIsAskedAndItsAnswerIsShown() {
         val server = FakeServer()
         FakeServer.install(server)
-        geminiAnswers(server, "Your glucose was in range most of the time.\n\n- After lunch it goes up to 200 mg/dL.\n- Ask your doctor about the afternoon.\n\nThis is not medical advice.")
-        settings.aiKey = "KEY-123"
+        walhadAnswers(server, "Your glucose was in range most of the time.\n\n- After lunch it goes up to 200 mg/dL.\n- Ask your doctor about the afternoon.\n\nThis is not medical advice.")
         settings.answerLanguage = AnswerLanguage.SOMALI
         store.insert(twoWeeks(serial) + lastMinutes(104, serial))
         val screen = open(AnalysisActivity::class.java)
@@ -770,24 +653,23 @@ class OnlineScreensTest {
         type(screen, R.id.aiQuestion, "Why is it high after lunch?")
         click(screen, R.id.aiAsk)
 
-        // what went to the service
+        // what went to the built-in server
         val request = server.last
-        assertEquals("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", request.url)
-        assertEquals("KEY-123", request.headers["x-goog-api-key"])
+        assertEquals("https://lhrocwxukovudxmjbaiy.supabase.co/functions/v1/walhad-ai", request.url)
         val body = JSONObject(request.body!!)
-        val rules = body.getJSONObject("system_instruction").getJSONArray("parts").getJSONObject(0).getString("text")
-        assertTrue(rules.contains("Answer in Somali."))
-        assertTrue(rules.contains("Never give a dose of insulin"))
-        val question = body.getJSONArray("contents").getJSONObject(0).getJSONArray("parts").getJSONObject(0).getString("text")
-        assertEquals("the same text that \"Show the text\" shows, and the own question", text(screen, R.id.aiReport).trimEnd() + "\n\nMY OWN QUESTION\nWhy is it high after lunch?\n", question)
-        assertTrue(question.contains("TIME IN RANGES"))
-        assertTrue(question.contains("made them from the raw data of the sensor"))
-        assertFalse("no serial number of the sensor", question.contains(serial))
+        assertEquals("so", body.getString("language"))
+        assertEquals("Why is it high after lunch?", body.getString("question"))
+        val report = body.getString("report")
+        assertEquals("the same text that \"Show the text\" shows", text(screen, R.id.aiReport).trimEnd(), report.trimEnd())
+        assertTrue(report.contains("TIME IN RANGES"))
+        assertTrue(report.contains("made them from the raw data of the sensor"))
+        assertFalse("no serial number of the sensor", report.contains(serial))
+        assertFalse("no key of any kind is in the app", request.headers.values.any { it == "KEY-123" })
 
         // the answer
         assertTrue(isShown(screen, R.id.aiAnswerBox))
         assertTrue(text(screen, R.id.aiAnswer).startsWith("Your glucose was in range most of the time."))
-        assertEquals("2:32 PM · gemini-3.5-flash-lite", text(screen, R.id.aiAnswerMeta))
+        assertEquals("2:32 PM · AI", text(screen, R.id.aiAnswerMeta))
         assertTrue(words(screen).contains("An AI can be wrong. Do not change insulin or medicine because of this. Ask your doctor."))
         assertFalse(isShown(screen, R.id.aiAskState))
         scrollTo(screen, R.id.aiCard, 150)
@@ -797,29 +679,28 @@ class OnlineScreensTest {
         now += 30 * minute
         val later = open(AnalysisActivity::class.java)
         assertTrue(isShown(later, R.id.aiAnswerBox))
-        assertEquals("2:32 PM · gemini-3.5-flash-lite", text(later, R.id.aiAnswerMeta))
+        assertEquals("2:32 PM · AI", text(later, R.id.aiAnswerMeta))
     }
 
     @Test
-    fun whenTheAiServiceHasAProblemTheOldAnswerStays() {
+    fun whenTheAiCannotAnswerThePhoneDoesAndSaysSo() {
         val server = FakeServer()
         FakeServer.install(server)
-        settings.aiKey = "KEY-123"
-        settings.aiAnswer = "An older answer."
-        settings.aiAnswerTime = now - 60 * minute
-        settings.aiAnswerModel = "gemini-4-hydrogen"
         store.insert(twoWeeks(serial) + lastMinutes(104, serial))
-        server.answer = { HttpResponse(429, "{\"error\":{\"code\":429,\"message\":\"You exceeded your current quota.\",\"status\":\"RESOURCE_EXHAUSTED\"}}") }
+
+        // over the limit: the phone reads the numbers itself and says why
+        walhadProblem(server, "limit", "daily limit reached")
         val screen = open(AnalysisActivity::class.java)
         click(screen, R.id.aiAsk)
         assertTrue(isShown(screen, R.id.aiAskState))
         assertEquals(
-            "The AI service says: too many questions, or the free amount is used up. Try again later.\n\n(HTTP 429 You exceeded your current quota.)",
+            "The AI service says: too many questions, or the free amount is used up. Try again later.\n\n(daily limit reached)",
             text(screen, R.id.aiAskState)
         )
-        assertEquals("An older answer.", text(screen, R.id.aiAnswer))
-        assertEquals("1:32 PM · gemini-4-hydrogen", text(screen, R.id.aiAnswerMeta))
+        assertTrue("the phone answered rather than leaving the card empty", text(screen, R.id.aiAnswer).length > 40)
+        assertEquals("2:32 PM · Phone", text(screen, R.id.aiAnswerMeta))
 
+        // and with no internet at all, the same
         server.offline = true
         click(screen, R.id.aiAsk)
         assertEquals("No answer from the AI service. Is the internet on?", text(screen, R.id.aiAskState))

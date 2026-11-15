@@ -198,12 +198,6 @@
             android:parentActivityName=".MoreActivity" />
 
         <activity
-            android:name=".AiSetupActivity"
-            android:exported="false"
-            android:label="@string/ai_setup_title"
-            android:parentActivityName=".MoreActivity"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
             android:name=".BackupActivity"
             android:exported="false"
             android:label="@string/backup_title"
