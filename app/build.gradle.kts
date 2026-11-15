@@ -55,8 +55,8 @@ android {
         applicationId = "com.glucosescan.app"
         minSdk = 23
         targetSdk = 34
-        versionCode = 10
-        versionName = "4.3.0"
+        versionCode = 11
+        versionName = "5.0.0"
 
         // The AI door. Already filled in: the app asks nothing of the person using it.
         buildConfigField("String", "WALHAD_AI_URL", "\"${secretValue("walhad.ai.url", DEFAULT_AI_URL)}\"")

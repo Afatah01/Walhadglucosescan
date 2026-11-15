@@ -393,6 +393,19 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
         findViewById<TextView>(R.id.tileAverage).text = if (mean != null) FindingTexts.glucose(mean, unit) else none
         findViewById<TextView>(R.id.tileLowest).text = if (lowest != null) FindingTexts.glucose(lowest, unit) else none
         findViewById<TextView>(R.id.tileHighest).text = if (highest != null) FindingTexts.glucose(highest, unit) else none
+
+        // five more, so that the screen answers the questions people actually ask
+        val percents = stats.rangePercents
+        findViewById<TextView>(R.id.tileTimeLow).text = if (stats.hasValues) (percents[0] + percents[1]).toString() + " %" else none
+        findViewById<TextView>(R.id.tileTimeHigh).text = if (stats.hasValues) (percents[3] + percents[4]).toString() + " %" else none
+        val cv = stats.cv
+        findViewById<TextView>(R.id.tileVariation).text = if (cv != null) Math.round(cv).toString() + " %" else none
+        val gmi = stats.gmi
+        findViewById<TextView>(R.id.tileGmi).text = if (gmi != null) String.format(java.util.Locale.US, "%.1f %%", gmi) else none
+        // an event is 15 minutes or longer below or above the range
+        val span = AnalysisCalculator.span(values, from, to, settings.lowLimit, settings.highLimit)
+        val events = if (stats.hasValues) span.lows.size.toString() + " / " + span.highs.size.toString() else none
+        findViewById<TextView>(R.id.tileEvents).text = events
     }
 
     /** The analysis of the last days. It is counted anew every 5 minutes and after a scan. */

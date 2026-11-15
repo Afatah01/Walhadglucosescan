@@ -336,7 +336,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Four numbers of the last 24 hours -->
+        <!-- Nine numbers of the last 24 hours -->
         <TextView
             style="@style/SectionLabel"
             android:text="@string/day_title" />
@@ -448,6 +448,145 @@
 
                     <TextView
                         android:id="@+id/tileHighest"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                style="@style/Tile">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_red" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_time_low" />
+
+                    <TextView
+                        android:id="@+id/tileTimeLow"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Tile"
+                android:layout_marginStart="10dp">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_amber" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_time_high" />
+
+                    <TextView
+                        android:id="@+id/tileTimeHigh"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Tile"
+                android:layout_marginStart="10dp">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_blue" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_variation" />
+
+                    <TextView
+                        android:id="@+id/tileVariation"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                style="@style/Tile">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_blue" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_gmi" />
+
+                    <TextView
+                        android:id="@+id/tileGmi"
+                        style="@style/TileValue" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Tile"
+                android:layout_marginStart="10dp">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/accent_red" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TileCaption"
+                        android:text="@string/day_events" />
+
+                    <TextView
+                        android:id="@+id/tileEvents"
                         style="@style/TileValue" />
                 </LinearLayout>
             </LinearLayout>

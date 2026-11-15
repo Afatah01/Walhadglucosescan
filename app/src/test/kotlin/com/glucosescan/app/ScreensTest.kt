@@ -26,6 +26,7 @@ import android.widget.ListView
 import android.widget.RadioButton
 import android.widget.Switch
 import android.widget.TextView
+import com.glucosescan.app.BuildConfig
 import com.glucosescan.app.core.Correction
 import com.glucosescan.app.core.Glucose
 import com.glucosescan.app.core.GlucoseUnit
@@ -787,7 +788,8 @@ class ScreensTest {
         settings.lastScanDetails = "time: 2026-01-01 12:00:00 UTC\noutcome: OK\nserial: 3MH001HM1LM\n"
         val activity = Robolectric.buildActivity(AboutActivity::class.java).setup().get()
         assertEquals("Walhad Glucose Scan", text(activity, R.id.appName))
-        assertEquals("Version 4.3.0", text(activity, R.id.version))
+        // read it from the build, so that raising the version does not break this test
+        assertEquals("Version " + BuildConfig.VERSION_NAME, text(activity, R.id.version))
         assertEquals("Powered by Abdifatah Elmi", text(activity, R.id.madeBy))
         assertTrue(logoIsShown(activity))
         // the only credit on the screen is the maker of this app

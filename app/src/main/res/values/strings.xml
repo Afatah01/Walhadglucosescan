@@ -421,6 +421,11 @@
     <string name="day_average">Average</string>
     <string name="day_lowest">Lowest</string>
     <string name="day_highest">Highest</string>
+    <string name="day_time_low">Time low</string>
+    <string name="day_time_high">Time high</string>
+    <string name="day_variation">Variation (CV)</string>
+    <string name="day_gmi">Est. HbA1c</string>
+    <string name="day_events">Lows / highs</string>
     <string name="day_none">–</string>
 
     <!-- Home: the offer of live values -->
