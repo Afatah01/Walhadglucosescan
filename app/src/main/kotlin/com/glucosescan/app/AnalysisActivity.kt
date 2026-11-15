@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import java.util.TimeZone
 import com.glucosescan.app.core.AiReport
 import com.glucosescan.app.core.Analysis
 import com.glucosescan.app.core.AnalysisCalculator
@@ -35,6 +36,7 @@ import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.Span
 import com.glucosescan.app.core.StatisticsCalculator
 import com.glucosescan.app.core.Verdict
+import com.glucosescan.app.ai.AiAnswer
 import com.glucosescan.app.ai.AiProblem
 import com.glucosescan.app.ai.AiWords
 import com.glucosescan.app.ai.AiQuestion
@@ -527,28 +529,47 @@ class AnalysisActivity : BaseActivity() {
         if (asking || aiText.isEmpty()) {
             return
         }
+        // Only the question is taken from the screen. Everything else, above all the walk
+        // through a month of stored values, happens off the main thread: on the main thread it
+        // is the one thing here heavy enough to make the screen stop answering.
+        val question = findViewById<EditText>(R.id.aiQuestion).text.toString()
+        val report = aiText
         val unit = settings.unit ?: GlucoseUnit.MGDL
-        val zone = java.util.TimeZone.getDefault()
-        val to = AppClock.now()
-        val from = to - settings.statisticsDays * StatisticsCalculator.DAY
-        val values = settings.correction.applyAll(store.between(from, to))
-        val request = AiQuestion(
-            report = aiText,
-            question = findViewById<EditText>(R.id.aiQuestion).text.toString(),
-            language = settings.answerLanguage,
-            history = emptyList(),
-            fallback = Advisor.tell(
-                Advisor.facts(values, from, to, settings.lowLimit, settings.highLimit, unit, zone),
-                settings.answerLanguage
-            )
-        )
-        val ai = WalhadAi(Net.transport, install = settings.installId)
+        val language = settings.answerLanguage
+        val low = settings.lowLimit
+        val high = settings.highLimit
+        val days = settings.statisticsDays
+        val correction = settings.correction
+        val readings = store
+
         asking = true
         aiProblem = ""
         aiJustAsked = true
         renderAi(AppClock.now())
         Net.patient.execute {
-            val answer = ai.ask(request)
+            // Nothing that happens in here may reach the person as a crash.
+            val answer = try {
+                val to = AppClock.now()
+                val from = to - days * StatisticsCalculator.DAY
+                val values = correction.applyAll(readings.between(from, to))
+                val request = AiQuestion(
+                    report = report,
+                    question = question,
+                    language = language,
+                    history = emptyList(),
+                    fallback = try {
+                        Advisor.tell(
+                            Advisor.facts(values, from, to, low, high, unit, TimeZone.getDefault()),
+                            language
+                        )
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                )
+                WalhadAi(Net.transport, install = settings.installId).ask(request)
+            } catch (e: Exception) {
+                AiAnswer("", AiProblem.SERVER, Net.words(e))
+            }
             handler.post {
                 asking = false
                 if (answer.text.isNotEmpty()) {
