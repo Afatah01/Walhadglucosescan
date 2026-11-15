@@ -842,4 +842,7 @@
     <!-- Settings: "Correct the value" was a button on the Home screen until 4.0 -->
     <string name="settings_correction_note">For values from a scan or over Bluetooth: if they differ from your meter, type the number of the meter here, and the app learns the difference. Values from LibreLinkUp are never changed.</string>
     <string name="settings_correction_open">Set it up</string>
+    <string name="about_crash_title">Share what went wrong</string>
+    <string name="about_crash_note">The app stopped the last time it ran. Send this so it can be fixed.</string>
+    <string name="about_crash_share">What went wrong</string>
 </resources>

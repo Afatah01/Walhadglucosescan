@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
@@ -43,6 +44,23 @@ class AboutActivity : BaseActivity() {
             clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.about_details_title), details))
             if (Build.VERSION.SDK_INT < 33) { // newer Android versions show their own note
                 Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // A crash of the last run, if there was one. Sharing it is how it gets fixed.
+        val crash = CrashLog.read(this)
+        val crashRow = findViewById<View>(R.id.crashReport)
+        if (crash == null) {
+            crashRow.visibility = View.GONE
+        } else {
+            crashRow.visibility = View.VISIBLE
+            crashRow.setOnClickListener {
+                startActivity(
+                    Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.about_crash_share))
+                        .putExtra(Intent.EXTRA_TEXT, crash)
+                )
             }
         }
 
