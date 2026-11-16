@@ -35,9 +35,9 @@ import java.util.concurrent.Executors
  *
  * Two answers are shown, and the screen always says which is which:
  *
- * - **What your phone reads** is counted on the phone itself, from the person's own values, by
+ * - What your phone reads is counted on the phone itself, from the person's own values, by
  *   fixed rules ([Advisor]). It needs no internet and no key, so it is always there.
- * - **The answer** comes from the AI service, when it can be reached, and is built only from the
+ * - The answer comes from the AI service, when it can be reached, and is built only from the
  *   numbers on this screen.
  *
  * If the AI cannot be reached, is over its daily limit, or answers with something this app will
@@ -60,10 +60,19 @@ class AiInsightsActivity : BaseActivity() {
     @Volatile
     private var busy = false
 
-    /** Runs the question that waits for the internet. Tests replace it with one that runs at once. */
-    private var background: java.util.concurrent.Executor = Executors.newSingleThreadExecutor { work ->
-        Thread(work, "ai-question").apply { start() }
-    }
+    /**
+     * Runs the question that waits for the internet. Tests replace it with one that runs at once.
+     *
+     * One daemon thread is shared by every Insights screen that ever opens. A per-instance
+     * executor was never shut down and never cancelled superseded work, so tapping through the
+     * periods stacked several walks over three months of values at once and rotating the phone
+     * leaked a thread each time — that is what ran the screen out of memory.
+     */
+    private var background: java.util.concurrent.Executor = SharedAiBackground.executor
+
+    /** Bumped when a newer job makes an older one pointless. An old job does nothing. */
+    @Volatile
+    private var generation = 0
 
     /**
      * The questions that are ready to press, in the order they are shown.
@@ -130,6 +139,7 @@ class AiInsightsActivity : BaseActivity() {
             chip.setOnClickListener {
                 days = PERIOD_DAYS[index]
                 history.clear()
+                generation++
                 render()
             }
         }
@@ -179,8 +189,13 @@ class AiInsightsActivity : BaseActivity() {
         val low = settings.lowLimit
         val high = settings.highLimit
         val readings = store
+        val gen = generation
 
         background.execute {
+            // A newer job makes this one pointless: it does nothing at all.
+            if (gen != generation) {
+                return@execute
+            }
             val result = try {
                 val from = AppClock.now() - days * DAY_MILLIS
                 val values = readings.since(from)
@@ -292,10 +307,12 @@ class AiInsightsActivity : BaseActivity() {
         }
         busy = true
         setAskEnabled(false)
+        val gen = ++generation
 
         val days = this.days
         val unit = settings.unit ?: GlucoseUnit.MGDL
-        val language = settings.answerLanguage
+        // English only: the AI door answers in English, whatever the settings say.
+        val language = AnswerLanguage.ENGLISH
         val low = settings.lowLimit
         val high = settings.highLimit
         val fromLinkUp = settings.linkUpEnabled
@@ -304,6 +321,10 @@ class AiInsightsActivity : BaseActivity() {
 
         showThinking()
         background.execute {
+            // A newer job makes this one pointless: it does nothing at all.
+            if (gen != generation) {
+                return@execute
+            }
             // Nothing in here may reach the person as a crash, and none of it runs on the main
             // thread: walking three months of measurements is far too much work for a screen.
             val answer = try {
@@ -316,8 +337,12 @@ class AiInsightsActivity : BaseActivity() {
                     val zone = TimeZone.getDefault()
                     val analysis = AnalysisCalculator.compute(values, from, now, low, high, zone)
                     val hours = AnalysisCalculator.hours(values, from, now, zone)
+                    // The last hour with its timestamps and arrows: a forecast question can
+                    // only be answered from real recent readings, never from summaries.
+                    val recentFrom = now - 60 * 60_000L
+                    val recent = values.filter { it.timestamp >= recentFrom }
                     val report = AiReport.build(
-                        analysis, hours, emptyList(), unit, low, high, language, zone, fromLinkUp
+                        analysis, hours, emptyList(), unit, low, high, language, zone, fromLinkUp, recent
                     )
                     val request = AiQuestion(
                         report = report,
@@ -412,5 +437,18 @@ class AiInsightsActivity : BaseActivity() {
         /** The language the screen answers in, for tests. */
         internal fun advisoryBlocks(values: List<com.glucosescan.app.core.Glucose>, from: Long, to: Long, low: Int, high: Int, unit: GlucoseUnit, language: AnswerLanguage): List<AdvisorBlock> =
             Advisor.tell(Advisor.facts(values, from, to, low, high, unit, TimeZone.getDefault()), language)
+    }
+}
+
+/**
+ * One executor for every Insights screen, alive for the whole process. Its thread is a daemon:
+ * it never keeps the app alive after the person leaves, and no screen makes its own.
+ */
+object SharedAiBackground {
+    val executor: java.util.concurrent.Executor = Executors.newSingleThreadExecutor { work ->
+        Thread(work, "ai-question").apply {
+            isDaemon = true
+            start()
+        }
     }
 }
