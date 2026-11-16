@@ -866,4 +866,11 @@
     <string name="about_crash_title">Share what went wrong</string>
     <string name="about_crash_note">The app stopped the last time it ran. Send this so it can be fixed.</string>
     <string name="about_crash_share">What went wrong</string>
+    <!-- The analysis as a PDF: saved in Downloads, or shared with an app of the user -->
+    <string name="ai_pdf_save">Save as PDF</string>
+    <string name="ai_pdf_share">Share as PDF</string>
+    <string name="ai_pdf_numbers">The numbers this analysis was made from:</string>
+    <string name="ai_pdf_saved">Saved as a PDF in the Downloads folder.</string>
+    <string name="ai_pdf_failed">The PDF could not be made.</string>
+    <string name="ai_pdf_chooser">Share the analysis as a PDF</string>
 </resources>

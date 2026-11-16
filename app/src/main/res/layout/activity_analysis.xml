@@ -492,6 +492,18 @@
                     android:layout_marginTop="10dp"
                     android:text="@string/ai_show" />
 
+                <Button
+                    android:id="@+id/aiPdfSave"
+                    style="@style/OutlineButton"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/ai_pdf_save" />
+
+                <Button
+                    android:id="@+id/aiPdfShare"
+                    style="@style/OutlineButton"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/ai_pdf_share" />
+
                 <TextView
                     android:id="@+id/aiReport"
                     android:layout_width="match_parent"

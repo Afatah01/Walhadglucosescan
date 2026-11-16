@@ -235,5 +235,11 @@
         <receiver
             android:name=".live.TickReceiver"
             android:exported="false" />
+            <provider
+            android:name=".export.PdfProvider"
+            android:authorities="${applicationId}.pdf"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
     </application>
 </manifest>

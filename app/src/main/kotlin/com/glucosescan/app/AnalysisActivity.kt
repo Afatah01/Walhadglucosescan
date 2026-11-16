@@ -45,6 +45,7 @@ import com.glucosescan.app.ai.WalhadAi
 import com.glucosescan.app.data.GlucoseStore
 import com.glucosescan.app.net.Net
 import com.glucosescan.app.data.Settings
+import com.glucosescan.app.export.PdfExporter
 import com.glucosescan.app.live.LiveBus
 import com.glucosescan.app.ui.AppClock
 import com.glucosescan.app.ui.CurrentValues
@@ -128,6 +129,9 @@ class AnalysisActivity : BaseActivity() {
             textShown = !textShown
             render()
         }
+        findViewById<View>(R.id.aiPdfSave).setOnClickListener { savePdf() }
+        findViewById<View>(R.id.aiPdfShare).setOnClickListener { sharePdf() }
+
         findViewById<View>(R.id.openReport).setOnClickListener {
             // like the bar at the bottom: the Report screen takes the place of this one
             startActivity(Intent(this, ReportActivity::class.java))
@@ -630,6 +634,44 @@ class AnalysisActivity : BaseActivity() {
     }
 
     // ---------------------------------------------------------------- rows
+
+    /** The words the PDF holds: the answer of the AI, then the numbers it was made from. */
+    private fun pdfBody(): String {
+        val answer = settings.aiAnswer
+        if (answer.isEmpty()) {
+            return aiText
+        }
+        return answer + "\n\n" + getString(R.string.ai_pdf_numbers) + "\n\n" + aiText
+    }
+
+    private fun savePdf() {
+        if (aiText.isEmpty()) {
+            return
+        }
+        try {
+            val file = PdfExporter.build(this, getString(R.string.ai_subject), pdfBody(), AppClock.now())
+            val saved = PdfExporter.saveToDownloads(this, file)
+            if (saved == null) {
+                PdfExporter.share(this, file, getString(R.string.ai_pdf_chooser))
+            } else {
+                Toast.makeText(this, R.string.ai_pdf_saved, Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.ai_pdf_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun sharePdf() {
+        if (aiText.isEmpty()) {
+            return
+        }
+        try {
+            val file = PdfExporter.build(this, getString(R.string.ai_subject), pdfBody(), AppClock.now())
+            PdfExporter.share(this, file, getString(R.string.ai_pdf_chooser))
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.ai_pdf_failed, Toast.LENGTH_LONG).show()
+        }
+    }
 
     private fun addRow(box: LinearLayout, label: String, text: String) {
         val row = LayoutInflater.from(this).inflate(R.layout.row_label_value, box, false)
