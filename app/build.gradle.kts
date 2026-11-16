@@ -28,11 +28,11 @@ if (secretsPropertiesFile.exists()) {
 // Where the AI door is, baked in so that a fresh clone works with nothing to fill in.
 //
 // Neither of these is a secret. Both end up inside the APK, and anyone who decompiles it can
-// read them. The one value that would cost money if it leaked — the Google Gemini key — lives
+// read them. The one value that would cost money if it leaked — the Groq key — lives
 // only on the server and is never compiled into the app. That is the whole reason for the door.
 //
 // secrets.properties overrides these two, for somebody building their own copy.
-val DEFAULT_AI_URL = "https://lhrocwxukovudxmjbaiy.supabase.co/functions/v1/walhad-ai"
+val DEFAULT_AI_URL = "https://bhogtezbvoijtixkzrwr.supabase.co/functions/v1/walhad-ai-core"
 val DEFAULT_AI_SECRET = "a274936ddec05a084677d6f1d6fe501328044569820fc4e88716887741a65d65"
 
 /** The value for [name] if secrets.properties sets one, otherwise [fallback]. */
@@ -55,7 +55,7 @@ android {
         applicationId = "com.glucosescan.app"
         minSdk = 23
         targetSdk = 34
-        versionCode = 11
+        versionCode = 12
         versionName = "5.0.0"
 
         // The AI door. Already filled in: the app asks nothing of the person using it.

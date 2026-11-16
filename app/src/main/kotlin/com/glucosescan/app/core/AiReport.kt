@@ -19,11 +19,10 @@ enum class AnswerLanguage(val code: String, val english: String) {
 
 /**
  * Writes the numbers of a period as plain text, with a question in front, so that the user
- * can give it to an AI app of their choice (the app itself has no internet and no AI in it).
+ * can give it to the built-in AI (or to an AI app of their choice).
  *
- * The text is English, like the rest of the app; the AI is asked to answer in the language
- * the user chose. It asks for an explanation and for questions to take to the doctor, and it
- * tells the AI not to give doses.
+ * The text is English, like the rest of the app; the AI door answers in English. It asks for
+ * an explanation and for questions to take to the doctor, and it tells the AI not to give doses.
  *
  * No Android code here, so it is easy to test.
  */
@@ -35,6 +34,9 @@ object AiReport {
      * @param analysis the period
      * @param hours the last 24 hours, hour by hour, oldest first (see [AnalysisCalculator.hours])
      * @param days the last days, newest first (see [AnalysisCalculator.days])
+     * @param recent the newest readings with their timestamps and arrows. A forecast question
+     *   can only be answered from these; summaries alone are not enough, so the section is
+     *   written only when they were sent.
      */
     fun build(
         analysis: Analysis,
@@ -45,7 +47,8 @@ object AiReport {
         highLimit: Int,
         language: AnswerLanguage,
         zone: TimeZone = TimeZone.getDefault(),
-        fromLinkUp: Boolean = false
+        fromLinkUp: Boolean = false,
+        recent: List<Glucose> = emptyList()
     ): String {
         val stats = analysis.stats
         val dayCount = Math.max(1L, Math.round((stats.to - stats.from).toDouble() / StatisticsCalculator.DAY))
@@ -108,12 +111,12 @@ object AiReport {
         text.append('\n')
 
         text.append("TIME IN RANGES\n")
-        text.append("Very high (over ").append(value(StatisticsCalculator.VERY_HIGH_ABOVE)).append("): ").append(percent(analysis.over250)).append('\n')
+        text.append("Very high (over ").append(value(StatisticsCalculator.VERY_HIGH_ABOVE)).append(": ").append(percent(analysis.over250)).append('\n')
         text.append("High (over ").append(value(StatisticsCalculator.HIGH_ABOVE)).append(", with very high): ").append(percent(analysis.over180)).append('\n')
         text.append("In range (").append(value(StatisticsCalculator.LOW_BELOW)).append(" to ").append(value(StatisticsCalculator.HIGH_ABOVE))
-            .append("): ").append(percent(analysis.inRange)).append('\n')
+            .append(": ").append(percent(analysis.inRange)).append('\n')
         text.append("Low (under ").append(value(StatisticsCalculator.LOW_BELOW)).append(", with very low): ").append(percent(analysis.under70)).append('\n')
-        text.append("Very low (under ").append(value(StatisticsCalculator.VERY_LOW_BELOW)).append("): ").append(percent(analysis.under54)).append('\n')
+        text.append("Very low (under ").append(value(StatisticsCalculator.VERY_LOW_BELOW)).append(": ").append(percent(analysis.under54)).append('\n')
         text.append("My own target range is ").append(value(lowLimit)).append(" to ").append(value(highLimit)).append(": ")
             .append(stats.inTargetPercent).append(" % of the time inside.\n\n")
 
@@ -138,7 +141,7 @@ object AiReport {
                 .append(value(episode.extreme)).append('\n')
         }
         val highs = analysis.highs
-        text.append("HIGH EVENTS (over ").append(value(StatisticsCalculator.HIGH_ABOVE)).append("): ").append(highs.size)
+        text.append("HIGH EVENTS (over ").append(value(StatisticsCalculator.HIGH_ABOVE)).append(": ").append(highs.size)
         if (highs.isNotEmpty()) {
             text.append(", mean length ").append(Math.round(highs.sumOf { it.minutes }.toDouble() / highs.size)).append(" minutes")
         }
@@ -167,6 +170,16 @@ object AiReport {
             for (hour in hoursWithValues) {
                 text.append(hourFormat.format(Date(hour.start))).append(": ").append(value(hour.mean ?: 0.0)).append("; ")
                     .append(value(hour.lowest ?: 0)).append(" to ").append(value(hour.highest ?: 0)).append('\n')
+            }
+            text.append('\n')
+        }
+
+        if (recent.isNotEmpty()) {
+            text.append("RECENT READINGS (the last hour, oldest first, values in ").append(unit.label)
+                .append(", the arrow is the sensor's own direction)\n")
+            for (g in recent.takeLast(12)) {
+                text.append(time.format(Date(g.timestamp))).append(" - ").append(value(g.readableValue))
+                    .append(" ").append(g.trend.arrow).append('\n')
             }
             text.append('\n')
         }
