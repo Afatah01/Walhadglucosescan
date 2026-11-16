@@ -9,7 +9,6 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.MediaStore
 import java.io.File
 import java.text.SimpleDateFormat
@@ -170,7 +169,7 @@ object PdfExporter {
         out.use { dest -> file.inputStream().use { src -> src.copyTo(dest) } }
         val done = ContentValues()
         done.put(MediaStore.Downloads.IS_PENDING, 0)
-        resolver.update(uri, done, null as String?, null as Bundle?)
+        resolver.update(uri, done, null, null)
         return file.name
     }
 }
