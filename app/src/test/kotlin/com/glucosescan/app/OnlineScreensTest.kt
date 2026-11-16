@@ -653,7 +653,7 @@ class OnlineScreensTest {
 
         // what went to the built-in server
         val request = server.last
-        assertEquals("https://lhrocwxukovudxmjbaiy.supabase.co/functions/v1/walhad-ai", request.url)
+        assertEquals("https://bhogtezbvoijtixkzrwr.supabase.co/functions/v1/walhad-ai-core", request.url)
         val body = JSONObject(request.body!!)
         assertEquals("so", body.getString("language"))
         assertEquals("Why is it high after lunch?", body.getString("question"))

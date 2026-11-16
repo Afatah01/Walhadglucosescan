@@ -111,12 +111,12 @@ object AiReport {
         text.append('\n')
 
         text.append("TIME IN RANGES\n")
-        text.append("Very high (over ").append(value(StatisticsCalculator.VERY_HIGH_ABOVE)).append(": ").append(percent(analysis.over250)).append('\n')
+        text.append("Very high (over ").append(value(StatisticsCalculator.VERY_HIGH_ABOVE)).append(""): "").append(percent(analysis.over250)).append('\n')
         text.append("High (over ").append(value(StatisticsCalculator.HIGH_ABOVE)).append(", with very high): ").append(percent(analysis.over180)).append('\n')
         text.append("In range (").append(value(StatisticsCalculator.LOW_BELOW)).append(" to ").append(value(StatisticsCalculator.HIGH_ABOVE))
-            .append(": ").append(percent(analysis.inRange)).append('\n')
+            .append(""): "").append(percent(analysis.inRange)).append('\n')
         text.append("Low (under ").append(value(StatisticsCalculator.LOW_BELOW)).append(", with very low): ").append(percent(analysis.under70)).append('\n')
-        text.append("Very low (under ").append(value(StatisticsCalculator.VERY_LOW_BELOW)).append(": ").append(percent(analysis.under54)).append('\n')
+        text.append("Very low (under ").append(value(StatisticsCalculator.VERY_LOW_BELOW)).append(""): "").append(percent(analysis.under54)).append('\n')
         text.append("My own target range is ").append(value(lowLimit)).append(" to ").append(value(highLimit)).append(": ")
             .append(stats.inTargetPercent).append(" % of the time inside.\n\n")
 
@@ -141,7 +141,7 @@ object AiReport {
                 .append(value(episode.extreme)).append('\n')
         }
         val highs = analysis.highs
-        text.append("HIGH EVENTS (over ").append(value(StatisticsCalculator.HIGH_ABOVE)).append(": ").append(highs.size)
+        text.append("HIGH EVENTS (over ").append(value(StatisticsCalculator.HIGH_ABOVE)).append(""): "").append(highs.size)
         if (highs.isNotEmpty()) {
             text.append(", mean length ").append(Math.round(highs.sumOf { it.minutes }.toDouble() / highs.size)).append(" minutes")
         }
