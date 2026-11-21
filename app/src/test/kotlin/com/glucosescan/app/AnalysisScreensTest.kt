@@ -740,15 +740,14 @@ class AnalysisScreensTest {
         assertFalse("the name of the user is not in it, nor the number of the sensor", text.contains(serial))
         assertFalse(text.contains("Please answer in"))
 
-        // English is the first choice; the text is hidden until the user wants to see it
-        assertTrue(screen.findViewById<View>(R.id.aiEnglish).isSelected)
+        // The text is hidden until the user wants to see it
         assertFalse(isShown(screen, R.id.aiReport))
         assertEquals("Show the text", text(screen, R.id.aiShow))
         click(screen, R.id.aiShow)
         assertTrue(isShown(screen, R.id.aiReport))
         assertEquals(text, screen.findViewById<TextView>(R.id.aiReport).text.toString())
         assertEquals("Hide the text", text(screen, R.id.aiShow))
-        scrollTo(screen, R.id.aiEnglish, 620)
+        scrollTo(screen, R.id.aiShow, 620)
         picture(screen, "44-analysis-ask-an-ai")
         click(screen, R.id.aiShow)
         assertFalse(isShown(screen, R.id.aiReport))
@@ -770,26 +769,9 @@ class AnalysisScreensTest {
         assertEquals(text, clipboard.primaryClip!!.getItemAt(0).text.toString())
     }
 
-    @Test
-    fun theAiCanBeAskedToAnswerInSomaliOrArabic() {
-        seedPerson()
-        val screen = open(AnalysisActivity::class.java)
-        click(screen, R.id.aiSomali)
-        assertEquals(AnswerLanguage.SOMALI, settings.answerLanguage)
-        assertTrue(screen.findViewById<View>(R.id.aiSomali).isSelected)
-        assertFalse(screen.findViewById<View>(R.id.aiEnglish).isSelected)
-        assertTrue(screen.aiText.contains("Please answer in Somali.\n"))
-
-        click(screen, R.id.aiArabic)
-        assertEquals(AnswerLanguage.ARABIC, settings.answerLanguage)
-        assertTrue(screen.aiText.contains("Please answer in Arabic.\n"))
-        assertFalse(screen.aiText.contains("Somali"))
-
-        // the choice is kept
-        assertTrue(open(AnalysisActivity::class.java).findViewById<View>(R.id.aiArabic).isSelected)
-        click(screen, R.id.aiEnglish)
-        assertFalse(screen.aiText.contains("Please answer in"))
-    }
+    // NOTE (merge from the repository copy): the analysis screen used to offer answer chips in
+    // English, Somali and Arabic; the current app answers in English only, so the test of the
+    // removed chips was dropped. The rest of this file covers the report card unchanged.
 
     @Test
     fun theTextForTheAiUsesTheUnitOfTheUser() {

@@ -29,7 +29,15 @@ class ScaleView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         style = Paint.Style.FILL
     }
     private val zonePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getColor(R.color.scale_zone)
+        color = context.getColor(R.color.scale_target)
+        style = Paint.Style.FILL
+    }
+    private val lowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.getColor(R.color.scale_low)
+        style = Paint.Style.FILL
+    }
+    private val highPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.getColor(R.color.scale_high)
         style = Paint.Style.FILL
     }
     private val markerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -101,8 +109,11 @@ class ScaleView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val half = TRACK_DP * dp / 2
         fun x(mgdl: Int): Float = left + fraction(mgdl) * (right - left)
 
+        // the bar of the reference: red below the range, green across it, amber above it
         canvas.drawRoundRect(left, centerY - half, right, centerY + half, half, half, trackPaint)
+        canvas.drawRoundRect(left, centerY - half, x(low), centerY + half, half, half, lowPaint)
         canvas.drawRoundRect(x(low), centerY - half, x(high), centerY + half, half, half, zonePaint)
+        canvas.drawRoundRect(x(high), centerY - half, right, centerY + half, half, half, highPaint)
 
         // the two ends of the target range, as numbers under the line; left out if they would touch
         val lowText = GlucoseFormat.value(low, unit)
@@ -111,10 +122,19 @@ class ScaleView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val highWidth = labelPaint.measureText(highText)
         val lowX = x(low).coerceIn(lowWidth / 2, width - lowWidth / 2)
         val highX = x(high).coerceIn(highWidth / 2, width - highWidth / 2)
+        val baseline = centerY + radius + 4 * dp + labelSize
         if (highX - lowX >= (lowWidth + highWidth) / 2 + 6 * dp) {
-            val baseline = centerY + radius + 4 * dp + labelSize
             canvas.drawText(lowText, lowX, baseline, labelPaint)
             canvas.drawText(highText, highX, baseline, labelPaint)
+        }
+        // the words under the middle of the bar, as in the reference
+        val middle = context.getString(R.string.scale_target_word)
+        val middleWidth = labelPaint.measureText(middle)
+        val middleX = (lowX + highX) / 2
+        if (middleX - middleWidth / 2 >= lowX + lowWidth / 2 + 4 * dp &&
+            middleX + middleWidth / 2 <= highX - highWidth / 2 - 4 * dp
+        ) {
+            canvas.drawText(middle, middleX, baseline, labelPaint)
         }
 
         // the mark: white, with a dark edge so that it also shows on the white part of the line
@@ -126,7 +146,7 @@ class ScaleView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     companion object {
         const val SCALE_MIN = 40
         const val SCALE_MAX_AT_LEAST = 300
-        private const val MARKER_DP = 9f
-        private const val TRACK_DP = 8f
+        private const val MARKER_DP = 10f
+        private const val TRACK_DP = 10f
     }
 }

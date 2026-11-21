@@ -37,6 +37,16 @@ class Statistics(
     val rangeCounts: IntArray,
     /** Quarter hours inside the target range of the user. */
     val inTarget: Int,
+    /** Quarter hours with a mean under the low limit of the person's target range. */
+    val below: Int = 0,
+    /** Quarter hours with a mean over the high limit of the person's target range. */
+    val above: Int = 0,
+    /** Quarter hours inside the published tight range, 70 to 140 mg/dL. */
+    val inTight: Int = 0,
+    /** How many quarter hours grew out of at least one reading: the same as [slots]. */
+    val readingCount: Int = 0,
+    /** Quarter hours of the period with no reading at all. */
+    val missingSlots: Int = 0,
     /** 24 entries, one for each hour of the day. Null where there are fewer than 3 quarter hours. */
     val hours: List<HourBand?>
 ) {
@@ -53,6 +63,26 @@ class Statistics(
 
     val inTargetPercent: Int
         get() = if (slots <= 0) 0 else Math.round(inTarget * 100.0 / slots).toInt()
+
+    /** Quarter hours inside the published tight range (70 to 140 mg/dL), in whole percent. */
+    val inTightPercent: Int
+        get() = if (slots <= 0) 0 else Math.round(inTight * 100.0 / slots).toInt()
+
+    /** Quarter hours under 54 mg/dL, in whole percent. */
+    val veryLowPercent: Int
+        get() = if (slots <= 0) 0 else Math.round(rangeCounts[0] * 100.0 / slots).toInt()
+
+    /** Quarter hours over 250 mg/dL, in whole percent. */
+    val veryHighPercent: Int
+        get() = if (slots <= 0) 0 else Math.round(rangeCounts[4] * 100.0 / slots).toInt()
+
+    /** Quarter hours with a mean under the low limit of the person's target range, in whole percent. */
+    val belowPercent: Int
+        get() = if (slots <= 0) 0 else Math.round(below * 100.0 / slots).toInt()
+
+    /** Quarter hours with a mean over the high limit of the person's target range, in whole percent. */
+    val abovePercent: Int
+        get() = if (slots <= 0) 0 else Math.round(above * 100.0 / slots).toInt()
 
     /**
      * True if the period is long and full enough for the estimate [gmi] to mean something:
@@ -79,6 +109,10 @@ object StatisticsCalculator {
     const val LOW_BELOW = 70
     const val HIGH_ABOVE = 180
     const val VERY_HIGH_ABOVE = 250
+
+    /** The limits of the tight range that is reported next to time in range (mg/dL). */
+    const val TIGHT_LOW = 70
+    const val TIGHT_HIGH = 140
 
     /**
      * @param values the values to count, in any order; values outside [from]..[to] are skipped
@@ -113,6 +147,10 @@ object StatisticsCalculator {
         val means = DoubleArray(sums.size)
         val rangeCounts = IntArray(5)
         var inTarget = 0
+        // the tight range is fixed at 70 to 140 mg/dL: a published measure, the same on every phone
+        var inTight = 0
+        var belowTarget = 0
+        var aboveTarget = 0
         val days = HashSet<Long>()
         val byHour = Array(24) { ArrayList<Double>() }
         var index = 0
@@ -122,6 +160,16 @@ object StatisticsCalculator {
             rangeCounts[rangeOf(mean)]++
             if (mean >= lowLimit && mean <= highLimit) {
                 inTarget++
+            }
+            // The tight range is fixed at 70 to 140 mg/dL, not the person's own target: it is a
+            // published measure, so it has to mean the same thing on every phone.
+            if (mean >= TIGHT_LOW && mean <= TIGHT_HIGH) {
+                inTight++
+            }
+            if (mean < lowLimit) {
+                belowTarget++
+            } else if (mean > highLimit) {
+                aboveTarget++
             }
             val time = slot * SLOT
             val local = time + zone.getOffset(time)
@@ -165,6 +213,11 @@ object StatisticsCalculator {
             highest = highest,
             rangeCounts = rangeCounts,
             inTarget = inTarget,
+            below = belowTarget,
+            above = aboveTarget,
+            inTight = inTight,
+            readingCount = count,
+            missingSlots = Math.max(0, possible - count),
             hours = hours
         )
     }

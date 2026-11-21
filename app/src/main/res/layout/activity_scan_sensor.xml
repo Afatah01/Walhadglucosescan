@@ -75,8 +75,7 @@
 
             <Button
                 android:id="@+id/scanFix"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/ColorButton"
                 android:layout_marginTop="10dp"
                 android:text="@string/nfc_open_settings"
                 android:visibility="gone" />
@@ -118,7 +117,7 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/scan_number_note"
                 android:textColor="@color/text_tertiary"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
 
             <LinearLayout
                 android:id="@+id/sensorBox"
@@ -164,5 +163,8 @@
                 android:textSize="14sp"
                 android:lineSpacingExtra="3dp" />
         </LinearLayout>
+        <TextView
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
     </LinearLayout>
 </ScrollView>

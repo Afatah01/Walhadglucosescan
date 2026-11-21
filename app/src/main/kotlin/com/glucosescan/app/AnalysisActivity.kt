@@ -36,6 +36,7 @@ import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.Span
 import com.glucosescan.app.core.StatisticsCalculator
 import com.glucosescan.app.core.Verdict
+import com.glucosescan.app.ui.ChartView
 import com.glucosescan.app.ai.AiAnswer
 import com.glucosescan.app.ai.AiProblem
 import com.glucosescan.app.ai.AiWords
@@ -115,12 +116,6 @@ class AnalysisActivity : BaseActivity() {
                 render()
             }
         }
-        for ((id, language) in LANGUAGES) {
-            findViewById<View>(id).setOnClickListener {
-                settings.answerLanguage = language
-                render()
-            }
-        }
         findViewById<View>(R.id.aiAsk).setOnClickListener { askAi() }
         findViewById<TextView>(R.id.analysisFooter).setText(if (settings.linkUpEnabled) R.string.analysis_footer_linkup else R.string.analysis_footer)
         findViewById<View>(R.id.aiSend).setOnClickListener { send() }
@@ -138,7 +133,31 @@ class AnalysisActivity : BaseActivity() {
             finish()
         }
         findViewById<View>(R.id.openStatistics).setOnClickListener { startActivity(Intent(this, StatisticsActivity::class.java)) }
+        renderForecastAccuracy()
         ready = true
+    }
+
+    /** Fill the "Forecast accuracy" card with what the log has measured. */
+    private fun renderForecastAccuracy() {
+        val view = findViewById<TextView>(R.id.forecastAccuracyValue)
+        try {
+            val accuracy = store.forecastAccuracy(AppClock.now() - 30L * 24 * 60 * 60_000L)
+            if (accuracy == null || accuracy.count < 10) {
+                view.text = getString(R.string.forecast_accuracy_empty)
+                view.textSize = 13f
+                view.setTextColor(getColor(R.color.p_text2))
+                return
+            }
+            val unit = settings.unit ?: GlucoseUnit.MGDL
+            val factor = if (unit == GlucoseUnit.MMOLL) GlucoseUnit.EXCHANGE_RATE else 1.0
+            val mae = if (factor == 1.0) Math.round(accuracy.mae).toString() else String.format(java.util.Locale.US, "%.1f", accuracy.mae * factor)
+            val rmse = if (factor == 1.0) Math.round(accuracy.rmse).toString() else String.format(java.util.Locale.US, "%.1f", accuracy.rmse * factor)
+            view.text = getString(R.string.forecast_accuracy_line, mae + " " + unit.label, rmse + " " + unit.label, accuracy.count)
+            view.textSize = 17f
+            view.setTextColor(getColor(R.color.p_violet))
+        } catch (e: RuntimeException) {
+            view.text = getString(R.string.forecast_accuracy_empty)
+        }
     }
 
     override fun onResume() {
@@ -146,6 +165,7 @@ class AnalysisActivity : BaseActivity() {
         if (ready) {
             LiveBus.add(refresh)
             render()
+            renderForecastAccuracy()
         }
     }
 
@@ -193,8 +213,8 @@ class AnalysisActivity : BaseActivity() {
             note.text = getString(R.string.analysis_now_no_forecast)
             return
         }
-        addRow(box, getString(R.string.analysis_forecast_15), FindingTexts.forecast(this, forecast.valueAt(now + 15 * MINUTE), unit))
-        addRow(box, getString(R.string.analysis_forecast_30), FindingTexts.forecast(this, forecast.valueAt(now + Forecaster.HORIZON_MINUTES * MINUTE), unit))
+        addForecastPanel(box, getString(R.string.analysis_forecast_15), FindingTexts.forecast(this, forecast.valueAt(now + 15 * MINUTE), unit), first = true)
+        addForecastPanel(box, getString(R.string.analysis_forecast_30), FindingTexts.forecast(this, forecast.valueAt(now + Forecaster.HORIZON_MINUTES * MINUTE), unit), first = false)
         val minutes = current.minutesUntilBelowTarget(now)
         if (minutes != null) {
             warning.text = Texts.unbroken(resources.getQuantityString(R.plurals.outlook_low_soon, minutes, FindingTexts.glucose(settings.lowLimit, unit), minutes))
@@ -247,14 +267,9 @@ class AnalysisActivity : BaseActivity() {
         } else {
             warning.visibility = View.VISIBLE
             warning.text = Texts.unbroken(warningWords)
-            warning.setTextColor(
-                getColor(
-                    when {
-                        outlook.risk == OutlookRisk.SEVERE_LOW || outlook.risk == OutlookRisk.LOW || outlook.risk == OutlookRisk.LOW_SOON -> R.color.red
-                        else -> R.color.on_amber
-                    }
-                )
-            )
+            val lowRisk = outlook.risk == OutlookRisk.SEVERE_LOW || outlook.risk == OutlookRisk.LOW || outlook.risk == OutlookRisk.LOW_SOON
+            warning.setTextColor(getColor(if (lowRisk) R.color.p_red else R.color.on_amber))
+            warning.setBackgroundResource(if (lowRisk) R.drawable.warn_red else R.drawable.warn_amber)
         }
 
         // when it is urgent the safety words come before everything else
@@ -262,7 +277,7 @@ class AnalysisActivity : BaseActivity() {
         if (outlook.isUrgent) {
             safety.visibility = View.VISIBLE
             safety.text = getString(R.string.outlook_safety_severe)
-            safety.setTextColor(getColor(R.color.red))
+            safety.setTextColor(getColor(R.color.p_red))
         } else {
             safety.visibility = View.GONE
         }
@@ -287,6 +302,7 @@ class AnalysisActivity : BaseActivity() {
         val to = now + MINUTE
         val from = to - hours * HOUR
         val values = settings.correction.applyAll(store.between(from, to))
+        findViewById<ChartView>(R.id.analysisChart).show(values, now, hours, unit, settings.lowLimit, settings.highLimit, null)
         val span = AnalysisCalculator.span(values, from, to, settings.lowLimit, settings.highLimit)
         lastSpan = span
 
@@ -465,13 +481,10 @@ class AnalysisActivity : BaseActivity() {
         findViewById<TextView>(R.id.lowsNote).text = getString(R.string.analysis_lows_note, FindingTexts.glucose(StatisticsCalculator.LOW_BELOW, unit))
 
         // what the app itself says about the period: always there, in the language below
-        val language = settings.answerLanguage
+        val language = AnswerLanguage.ENGLISH
         showAdvisor(values, from, to, low, high, unit, language)
 
         // the text for an AI app
-        for ((id, value) in LANGUAGES) {
-            findViewById<View>(id).isSelected = value == language
-        }
         val lastDay = AnalysisCalculator.hours(values, to - StatisticsCalculator.DAY, to)
         val dayList = AnalysisCalculator.days(values, now, Math.min(days, AI_DAYS), to, low, high)
         aiText = AiReport.build(analysis, lastDay, dayList, unit, low, high, language, fromLinkUp = settings.linkUpEnabled)
@@ -539,7 +552,7 @@ class AnalysisActivity : BaseActivity() {
         val question = findViewById<EditText>(R.id.aiQuestion).text.toString()
         val report = aiText
         val unit = settings.unit ?: GlucoseUnit.MGDL
-        val language = settings.answerLanguage
+        val language = AnswerLanguage.ENGLISH
         val low = settings.lowLimit
         val high = settings.highLimit
         val days = settings.statisticsDays
@@ -673,11 +686,14 @@ class AnalysisActivity : BaseActivity() {
         }
     }
 
-    private fun addRow(box: LinearLayout, label: String, text: String) {
-        val row = LayoutInflater.from(this).inflate(R.layout.row_label_value, box, false)
-        row.findViewById<TextView>(R.id.label).text = label
-        row.findViewById<TextView>(R.id.text).text = text
-        box.addView(row)
+    private fun addForecastPanel(box: LinearLayout, label: String, text: String, first: Boolean) {
+        val panel = LayoutInflater.from(this).inflate(R.layout.row_forecast_panel, box, false)
+        panel.findViewById<TextView>(R.id.label).text = label
+        panel.findViewById<TextView>(R.id.text).text = text
+        if (!first) {
+            (panel.layoutParams as LinearLayout.LayoutParams).marginStart = Math.round(8 * resources.displayMetrics.density)
+        }
+        box.addView(panel)
     }
 
     private fun addSentence(box: LinearLayout, words: String) {
@@ -770,8 +786,6 @@ class AnalysisActivity : BaseActivity() {
 
         private val DAYS = mapOf(R.id.days1 to 1, R.id.days7 to 7, R.id.days14 to 14, R.id.days30 to 30, R.id.days90 to 90)
         private val HOURS = mapOf(R.id.hours3 to 3, R.id.hours6 to 6, R.id.hours12 to 12, R.id.hours24 to 24)
-        private val LANGUAGES = mapOf(R.id.aiEnglish to AnswerLanguage.ENGLISH, R.id.aiSomali to AnswerLanguage.SOMALI, R.id.aiArabic to AnswerLanguage.ARABIC)
-
         /** "Today · Tue, Nov 10, 2026", "Yesterday · …", or the day alone. */
         fun dayName(context: Context, dayStart: Long, today: Long): String {
             val day = Texts.day(context, dayStart)

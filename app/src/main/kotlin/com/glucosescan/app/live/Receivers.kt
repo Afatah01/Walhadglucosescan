@@ -9,6 +9,8 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
         if (action == Intent.ACTION_BOOT_COMPLETED || action == Intent.ACTION_MY_PACKAGE_REPLACED) {
+            MonitoringSyncWorker.schedule(context)   // the background safety-net survives reboots
+            OnlineSync.schedule(context)             // so does the copy of the values to the online database
             LiveService.startFromBackground(context)
         }
     }

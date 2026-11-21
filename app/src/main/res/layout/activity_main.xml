@@ -2,225 +2,441 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="@color/p_bg"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:scrollbarStyle="outsideOverlay">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="16dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="20dp">
 
-        <!-- The value, on a big coloured card.
-             Green: in the target range. Red: outside of it, or a problem. Blue: no current value. -->
+        <!-- ===== the main reading, as in the reference: number, arrow, rate, bar ===== -->
         <com.glucosescan.app.ui.HeroLayout
             android:id="@+id/valueCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/hero_none"
-            android:elevation="2dp"
-            android:gravity="center_horizontal"
+            android:background="@drawable/p_hero_premium"
+            android:elevation="4dp"
             android:orientation="vertical"
-            android:paddingBottom="20dp"
-            android:paddingEnd="12dp"
-            android:paddingStart="12dp"
-            android:paddingTop="18dp">
-
-            <TextView
-                android:id="@+id/rangeChip"
-                style="@style/HeroText"
-                android:layout_marginBottom="6dp"
-                android:background="@drawable/pill_on_hero"
-                android:paddingBottom="4dp"
-                android:paddingEnd="14dp"
-                android:paddingStart="14dp"
-                android:paddingTop="4dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
+            android:paddingBottom="14dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
+                android:baselineAligned="false"
                 android:orientation="horizontal">
 
-                <!-- MainActivity makes the number and the arrow smaller when they would not
-                     fit side by side (small phone, big text). -->
-                <TextView
-                    android:id="@+id/value"
-                    style="@style/HeroText"
-                    android:includeFontPadding="false"
-                    android:textSize="84sp"
-                    android:textStyle="bold" />
+                <!-- the number and its unit, with the arrow beside them -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.15"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/arrow"
-                    style="@style/HeroText"
-                    android:layout_marginStart="12dp"
-                    android:includeFontPadding="false"
-                    android:textSize="48sp" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/value"
+                            style="@style/HeroText"
+                            android:fontFamily="sans-serif"
+                            android:textSize="76sp"
+                            android:textStyle="bold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.03" />
+
+                        <TextView
+                            android:id="@+id/arrow"
+                            style="@style/HeroText"
+                            android:layout_marginStart="6dp"
+                            android:textSize="54sp"
+                            android:textStyle="bold"
+                            android:includeFontPadding="false"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/unit"
+                        style="@style/HeroText"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.02"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/rangeChip"
+                        style="@style/HeroText"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/pill_on_hero_solid"
+                        android:drawablePadding="6dp"
+                        android:drawableStart="@drawable/ic_warn_white"
+                        android:paddingBottom="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingStart="12dp"
+                        android:paddingTop="7dp"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/valueNote"
+                        style="@style/HeroText"
+                        android:layout_marginTop="6dp"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <!-- the rate of change and the time, on their own side -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="12dp">
+
+                    <TextView
+                        android:id="@+id/trendLine"
+                        style="@style/HeroText"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:gravity="start"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/trendBasis"
+                        style="@style/HeroText"
+                        android:layout_marginTop="3dp"
+                        android:gravity="start"
+                        android:textSize="11.5sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/valueTime"
+                        style="@style/HeroText"
+                        android:layout_marginTop="10dp"
+                        android:drawablePadding="7dp"
+                        android:drawableStart="@drawable/ic_clock_white"
+                        android:gravity="start"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/correctedNote"
+                        style="@style/HeroText"
+                        android:layout_marginTop="6dp"
+                        android:gravity="start"
+                        android:textSize="11sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/lastValue"
+                        style="@style/HeroText"
+                        android:layout_marginTop="6dp"
+                        android:gravity="start"
+                        android:textSize="11.5sp"
+                        android:visibility="gone" />
+                </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/unit"
-                style="@style/HeroText"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/valueNote"
-                style="@style/HeroText"
-                android:layout_marginTop="4dp"
-                android:breakStrategy="balanced"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <!-- Only when the user has set up a correction: says so, and names the sensor value -->
-            <TextView
-                android:id="@+id/correctedNote"
-                style="@style/HeroText"
-                android:layout_marginTop="6dp"
-                android:breakStrategy="balanced"
-                android:textSize="15sp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/trendLine"
-                style="@style/HeroText"
-                android:layout_marginTop="8dp"
-                android:breakStrategy="balanced"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/trendBasis"
-                style="@style/HeroText"
-                android:textSize="13sp" />
-
-            <!-- Where the value lies between low and high, with the target range marked -->
+            <!-- the target bar under the number: low, target, high -->
             <com.glucosescan.app.ui.ScaleView
                 android:id="@+id/scale"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_marginStart="10dp"
                 android:layout_marginTop="12dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginStart="4dp"
                 android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/valueTime"
-                style="@style/HeroText"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/pill_on_hero"
-                android:paddingBottom="5dp"
-                android:paddingEnd="14dp"
-                android:paddingStart="14dp"
-                android:paddingTop="5dp"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/lastValue"
-                style="@style/HeroText"
-                android:layout_marginTop="6dp"
-                android:breakStrategy="balanced"
-                android:textSize="15sp" />
         </com.glucosescan.app.ui.HeroLayout>
 
-        <!-- Where the values head in the next half hour. Only with a current value and enough
-             values before it. Yellow when the value may go below the target range soon. -->
+        <!-- ===== the forecast: ONE large card, three horizons, and the message ===== -->
         <LinearLayout
             android:id="@+id/outlookCard"
-            style="@style/Card"
-            android:paddingBottom="12dp"
-            android:paddingTop="12dp"
-            android:visibility="gone">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/card_for"
+            android:orientation="vertical"
+            android:padding="14dp">
 
             <TextView
-                android:id="@+id/outlookTitle"
-                style="@style/CardTitle"
-                android:layout_marginBottom="4dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_outlook"
-                android:gravity="center_vertical"
-                android:text="@string/outlook_title" />
+                style="@style/DashTitle"
+                android:drawablePadding="9dp"
+                android:drawableStart="@drawable/ic_forecast_blue"
+                android:text="@string/home_forecast_title"
+                android:textColor="@color/p_text" />
 
             <TextView
-                android:id="@+id/outlookWarning"
-                style="@style/BodyText"
-                android:layout_marginBottom="4dp"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                style="@style/T_Meta"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="1dp"
+                android:text="@string/forecast_subtitle" />
 
+            <!-- the three horizons -->
             <LinearLayout
+                android:id="@+id/forecastRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="12dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:id="@+id/forecast15Card"
+                    style="@style/F_Tile"
+                    android:background="@drawable/card_f15">
 
                     <TextView
-                        style="@style/TileCaption"
-                        android:text="@string/outlook_in_15" />
+                        style="@style/F_TileTitle"
+                        android:text="@string/forecast_15" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/outlook15"
+                            style="@style/F_TileValue" />
+
+                        <TextView
+                            android:id="@+id/outlookTrend15"
+                            style="@style/F_TileArrow" />
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/outlook15"
-                        style="@style/TileValue" />
+                        android:id="@+id/outlook15Unit"
+                        style="@style/F_TileUnit"
+                        android:text="@string/unit_mgdl_short" />
 
                     <TextView
                         android:id="@+id/outlook15Time"
-                        style="@style/NoteText" />
+                        style="@style/F_TileMeta"
+                        android:drawablePadding="4dp"
+                        android:drawableStart="@drawable/ic_clock_small" />
+
+                    <TextView
+                        android:id="@+id/outlookBand15"
+                        style="@style/F_TileChip" />
+
+                    <TextView
+                        android:id="@+id/outlook15Conf"
+                        style="@style/F_TileMeta"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/p_text2"
+                        android:textSize="10.5sp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:id="@+id/forecast30Card"
+                    style="@style/F_Tile"
+                    android:layout_marginStart="9dp"
+                    android:background="@drawable/card_f30">
 
                     <TextView
-                        style="@style/TileCaption"
-                        android:text="@string/outlook_in_30" />
+                        style="@style/F_TileTitle"
+                        android:text="@string/forecast_30" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/outlook30"
+                            style="@style/F_TileValue" />
+
+                        <TextView
+                            android:id="@+id/outlookTrend30"
+                            style="@style/F_TileArrow" />
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/outlook30"
-                        style="@style/TileValue" />
+                        android:id="@+id/outlook30Unit"
+                        style="@style/F_TileUnit"
+                        android:text="@string/unit_mgdl_short" />
 
                     <TextView
                         android:id="@+id/outlook30Time"
-                        style="@style/NoteText" />
+                        style="@style/F_TileMeta"
+                        android:drawablePadding="4dp"
+                        android:drawableStart="@drawable/ic_clock_small" />
+
+                    <TextView
+                        android:id="@+id/outlookBand30"
+                        style="@style/F_TileChip" />
+
+                    <TextView
+                        android:id="@+id/outlook30Conf"
+                        style="@style/F_TileMeta"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/p_text2"
+                        android:textSize="10.5sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/forecast60Card"
+                    style="@style/F_Tile"
+                    android:layout_marginStart="9dp"
+                    android:background="@drawable/card_f60">
+
+                    <TextView
+                        style="@style/F_TileTitle"
+                        android:text="@string/forecast_60" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/outlook60"
+                            style="@style/F_TileValue" />
+
+                        <TextView
+                            android:id="@+id/outlookTrend60"
+                            style="@style/F_TileArrow" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/outlook60Unit"
+                        style="@style/F_TileUnit"
+                        android:text="@string/unit_mgdl_short" />
+
+                    <TextView
+                        android:id="@+id/outlook60Time"
+                        style="@style/F_TileMeta"
+                        android:drawablePadding="4dp"
+                        android:drawableStart="@drawable/ic_clock_small" />
+
+                    <TextView
+                        android:id="@+id/outlookBand60"
+                        style="@style/F_TileChip" />
+
+                    <TextView
+                        android:id="@+id/outlook60Conf"
+                        style="@style/F_TileMeta"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/p_text2"
+                        android:textSize="10.5sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/outlookText"
-                style="@style/BodyText"
-                android:layout_marginTop="8dp" />
+            <!-- the prediction message: the real, dynamically written explanation -->
+            <LinearLayout
+                android:id="@+id/forecastAlert"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/card_for"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/outlookTitle"
+                    style="@style/T_Meta"
+                    android:drawablePadding="6dp"
+                    android:drawableStart="@drawable/ic_info_blue"
+                    android:text="@string/outlook_title"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/outlookSeverity"
+                    style="@style/SummaryBadge"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/pill_state_off"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/outlookWarning"
+                    style="@style/T_Body"
+                    android:layout_marginTop="4dp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/outlookDirection"
+                    style="@style/T_Meta"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/p_text"
+                    android:textSize="12.5sp" />
+
+                <TextView
+                    android:id="@+id/outlookConfidence"
+                    style="@style/T_Meta"
+                    android:layout_marginTop="3dp" />
+
+                <TextView
+                    android:id="@+id/outlookThresholds"
+                    style="@style/T_Meta"
+                    android:layout_marginTop="3dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/outlookAdvice"
+                    style="@style/T_Body"
+                    android:layout_marginTop="6dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/outlookNote"
+                    style="@style/T_Meta"
+                    android:layout_marginTop="5dp"
+                    android:textSize="10.5sp" />
+
+                <TextView
+                    android:id="@+id/outlookAck"
+                    style="@style/PillButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="9dp"
+                    android:background="@drawable/btn_blue"
+                    android:text="@string/outlook_ack"
+                    android:textColor="@color/p_card"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/outlookDirection"
-                style="@style/BodyText"
-                android:layout_marginTop="2dp" />
+                android:id="@+id/outlook60Note"
+                style="@style/T_Meta"
+                android:layout_marginTop="7dp"
+                android:layout_marginStart="2dp"
+                android:text="@string/forecast_low_confidence"
+                android:textSize="10.5sp"
+                android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/outlookConfidence"
-                style="@style/NoteText"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:id="@+id/outlookAdvice"
-                style="@style/BodyText"
-                android:layout_marginTop="8dp"
+            <!-- kept so that no old reference dangles -->
+            <LinearLayout
+                android:id="@+id/outlook60Box"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/outlookNote"
-                style="@style/NoteText"
-                android:layout_marginTop="4dp" />
+                android:id="@+id/outlookText"
+                style="@style/T_Meta"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- What the last scan did, and how to scan -->
@@ -229,7 +445,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@drawable/card_scan"
+            android:background="@drawable/card_blue"
             android:baselineAligned="false"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -266,7 +482,7 @@
 
                 <TextView
                     android:id="@+id/scanHint"
-                    style="@style/NoteText"
+                    style="@style/DashNote"
                     android:text="@string/hint_scan" />
 
                 <Button
@@ -283,11 +499,12 @@
              and the user has not said "not now". -->
         <LinearLayout
             android:id="@+id/liveOffer"
-            style="@style/Card"
+            style="@style/DashCard"
+            android:background="@drawable/card_blue"
             android:visibility="gone">
 
             <TextView
-                style="@style/CardTitle"
+                style="@style/DashTitle"
                 android:layout_marginBottom="4dp"
                 android:drawablePadding="10dp"
                 android:drawableStart="@drawable/ic_bluetooth"
@@ -295,7 +512,7 @@
                 android:text="@string/offer_title" />
 
             <TextView
-                style="@style/BodyText"
+                style="@style/DashNote"
                 android:text="@string/offer_text" />
 
             <LinearLayout
@@ -328,7 +545,8 @@
         <!-- Live values: what the Bluetooth connection does. Only while live values are on. -->
         <LinearLayout
             android:id="@+id/liveCard"
-            style="@style/Card"
+            style="@style/DashCard"
+            android:background="@drawable/card_violet"
             android:clickable="true"
             android:focusable="true"
             android:paddingBottom="12dp"
@@ -337,7 +555,7 @@
 
             <TextView
                 android:id="@+id/liveCardTitle"
-                style="@style/CardTitle"
+                style="@style/DashTitle"
                 android:layout_marginBottom="2dp"
                 android:drawablePadding="10dp"
                 android:drawableStart="@drawable/ic_live"
@@ -346,13 +564,16 @@
 
             <TextView
                 android:id="@+id/liveState"
-                style="@style/BodyText" />
+                style="@style/DashNote" />
         </LinearLayout>
 
         <!-- Chart -->
         <LinearLayout
-            style="@style/Card"
-            android:paddingBottom="10dp"
+            android:id="@+id/chartCard"
+            style="@style/DashCard"
+            android:background="@drawable/p_card"
+            android:elevation="2dp"
+            android:paddingBottom="14dp"
             android:paddingEnd="10dp"
             android:paddingStart="10dp"
             android:paddingTop="6dp">
@@ -364,99 +585,113 @@
 
                 <TextView
                     android:id="@+id/range3"
-                    style="@style/RangeButton"
+                    style="@style/RangeButtonNew"
                     android:text="@string/hours_3" />
 
                 <TextView
                     android:id="@+id/range6"
-                    style="@style/RangeButton"
+                    style="@style/RangeButtonNew"
                     android:text="@string/hours_6" />
 
                 <TextView
                     android:id="@+id/range12"
-                    style="@style/RangeButton"
+                    style="@style/RangeButtonNew"
                     android:text="@string/hours_12" />
 
                 <TextView
                     android:id="@+id/range24"
-                    style="@style/RangeButton"
+                    style="@style/RangeButtonNew"
                     android:text="@string/hours_24" />
             </LinearLayout>
 
             <com.glucosescan.app.ui.ChartView
                 android:id="@+id/chart"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
+                android:layout_height="238dp"
                 android:layout_marginTop="4dp" />
 
-            <!-- What the dotted line means: only if the chart shows a forecast. -->
+            <!-- What the colours and the dotted line mean: only when a forecast is shown. -->
             <TextView
                 android:id="@+id/chartForecastLegend"
-                style="@style/NoteText"
+                style="@style/DashNote"
                 android:layout_marginEnd="6dp"
                 android:layout_marginStart="6dp"
                 android:layout_marginTop="4dp"
-                android:text="@string/chart_forecast_legend"
+                android:text="@string/chart_now_legend"
                 android:visibility="gone" />
+
+            <!-- The legend of the three regions, and how to inspect a point -->
+            <TextView
+                android:id="@+id/chartLegend"
+                style="@style/DashNote"
+                android:layout_marginEnd="6dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/chart_touch_hint" />
         </LinearLayout>
 
-        <!-- Nine numbers of the last 24 hours -->
+        <!-- The figures of the last 24 hours, compact and coloured by family -->
         <TextView
-            style="@style/SectionLabel"
+            style="@style/T_Section"
             android:text="@string/day_title" />
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="9dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <LinearLayout style="@style/Tile">
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_mint">
 
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_green" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_target"
+                    android:tint="@color/p_green" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
                         android:text="@string/day_in_target" />
 
                     <TextView
                         android:id="@+id/tileInTarget"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_blue"
+                android:layout_marginStart="9dp">
 
-            <LinearLayout
-                style="@style/Tile"
-                android:layout_marginStart="10dp">
-
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_blue" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_average"
+                    android:tint="@color/p_blue" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
                         android:text="@string/day_average" />
 
                     <TextView
                         android:id="@+id/tileAverage"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -464,55 +699,59 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="9dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <LinearLayout style="@style/Tile">
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_rose">
 
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_red" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_low"
+                    android:tint="@color/p_red" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
                         android:text="@string/day_lowest" />
 
                     <TextView
                         android:id="@+id/tileLowest"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_amber"
+                android:layout_marginStart="9dp">
 
-            <LinearLayout
-                style="@style/Tile"
-                android:layout_marginStart="10dp">
-
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_amber" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_high"
+                    android:tint="@color/p_orange" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
                         android:text="@string/day_highest" />
 
                     <TextView
                         android:id="@+id/tileHighest"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -520,81 +759,59 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="9dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <LinearLayout
-                style="@style/Tile">
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_rose">
 
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_red" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_time_low"
+                    android:tint="@color/p_red" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
                         android:text="@string/day_time_low" />
 
                     <TextView
                         android:id="@+id/tileTimeLow"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_amber"
+                android:layout_marginStart="9dp">
 
-            <LinearLayout
-                style="@style/Tile"
-                android:layout_marginStart="10dp">
-
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_amber" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_high"
+                    android:tint="@color/p_orange" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
                         android:text="@string/day_time_high" />
 
                     <TextView
                         android:id="@+id/tileTimeHigh"
-                        style="@style/TileValue" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/Tile"
-                android:layout_marginStart="10dp">
-
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_blue" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        style="@style/TileCaption"
-                        android:text="@string/day_variation" />
-
-                    <TextView
-                        android:id="@+id/tileVariation"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -602,56 +819,239 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="9dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <LinearLayout
-                style="@style/Tile">
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_rose">
 
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_blue" />
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_very_low"
+                    android:tint="@color/p_red" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
+                        android:text="@string/day_very_low" />
+
+                    <TextView
+                        android:id="@+id/tileVeryLow"
+                        style="@style/M_Value" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_amber"
+                android:layout_marginStart="9dp">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_very_high"
+                    android:tint="@color/p_orange" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/M_Label"
+                        android:text="@string/day_very_high" />
+
+                    <TextView
+                        android:id="@+id/tileVeryHigh"
+                        style="@style/M_Value" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_teal">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_variation"
+                    android:tint="@color/p_teal" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/M_Label"
+                        android:text="@string/day_variation" />
+
+                    <TextView
+                        android:id="@+id/tileVariation"
+                        style="@style/M_Value" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_blue"
+                android:layout_marginStart="9dp">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_a1c"
+                    android:tint="@color/p_blue" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/M_Label"
                         android:text="@string/day_gmi" />
 
                     <TextView
                         android:id="@+id/tileGmi"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
+        </LinearLayout>
 
-            <LinearLayout
-                style="@style/Tile"
-                android:layout_marginStart="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/accent_red" />
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_mint">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_tight"
+                    android:tint="@color/p_green" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TileCaption"
+                        style="@style/M_Label"
+                        android:text="@string/day_in_tight" />
+
+                    <TextView
+                        android:id="@+id/tileInTight"
+                        style="@style/M_Value" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_rose"
+                android:layout_marginStart="9dp">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_events"
+                    android:tint="@color/p_red" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/M_Label"
                         android:text="@string/day_events" />
 
                     <TextView
                         android:id="@+id/tileEvents"
-                        style="@style/TileValue" />
+                        style="@style/M_Value" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_violet">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_coverage"
+                    android:tint="@color/p_violet" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/M_Label"
+                        android:text="@string/day_coverage" />
+
+                    <TextView
+                        android:id="@+id/tileCoverage"
+                        style="@style/M_Value" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/M_Card" android:background="@drawable/card_indigo"
+                android:layout_marginStart="9dp">
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+                    android:layout_marginEnd="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_readings"
+                    android:tint="@color/p_indigo" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/M_Label"
+                        android:text="@string/day_readings" />
+
+                    <TextView
+                        android:id="@+id/tileReadings"
+                        style="@style/M_Value" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -659,13 +1059,13 @@
         <!-- The short analysis: what stands out most. A tap opens the whole analysis. -->
         <LinearLayout
             android:id="@+id/analysisCard"
-            style="@style/Card"
-            android:background="@drawable/card_ripple"
+            style="@style/DashCard"
+            android:background="@drawable/card_amber"
             android:clickable="true"
             android:focusable="true">
 
             <TextView
-                style="@style/CardTitle"
+                style="@style/DashTitle"
                 android:layout_marginBottom="2dp"
                 android:drawableEnd="@drawable/ic_chevron"
                 android:drawablePadding="10dp"
@@ -674,9 +1074,18 @@
                 android:text="@string/home_analysis_title" />
 
             <TextView
+                android:id="@+id/analysisBadgeHint"
+                style="@style/DashNote"
+                android:layout_marginBottom="6dp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/analysisPeriod"
-                style="@style/NoteText"
-                android:layout_marginBottom="4dp" />
+                style="@style/SummaryBadge"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="2dp"
+                android:background="@drawable/pill_state_off"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/analysisBox"
@@ -686,29 +1095,64 @@
 
             <TextView
                 android:id="@+id/analysisEmpty"
-                style="@style/BodyText"
+                style="@style/DashNote"
+                android:layout_marginTop="8dp"
                 android:text="@string/analysis_too_few"
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Sensor -->
-        <LinearLayout style="@style/Card">
+        <!-- Sensor status: each item with its label above and its value under it -->
+        <LinearLayout
+            android:id="@+id/sensorCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/card_teal"
+            android:orientation="vertical"
+            android:padding="14dp">
 
-            <TextView
-                style="@style/CardTitle"
-                android:layout_marginBottom="6dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_sensor"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:text="@string/sensor_title" />
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="10dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_dash_sensor"
+                    android:tint="@color/p_teal" />
+
+                <TextView
+                    style="@style/DashTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/sensor_status_title"
+                    android:textColor="@color/p_text" />
+
+                <TextView
+                    android:id="@+id/sensorSourceChip"
+                    style="@style/F_TileChip"
+                    android:background="@drawable/pill_state_on"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_link_small"
+                    android:textColor="@color/p_green" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/t_teal_edge" />
 
             <ProgressBar
                 android:id="@+id/sensorProgress"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="10dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="2dp"
+                android:layout_height="8dp"
+                android:layout_marginTop="10dp"
                 android:contentDescription="@string/sensor_progress_description"
                 android:max="1000"
                 android:progressDrawable="@drawable/sensor_progress"
@@ -718,12 +1162,20 @@
                 android:id="@+id/sensorBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 android:orientation="vertical" />
         </LinearLayout>
+
+        <!-- The footer of the reference -->
+        <TextView
+            android:id="@+id/footer"
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
 
         <TextView
             android:id="@+id/credit"
             style="@style/Credit"
+            android:visibility="gone"
             android:text="@string/powered_by" />
     </LinearLayout>
 </ScrollView>

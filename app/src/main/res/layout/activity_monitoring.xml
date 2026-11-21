@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        style="@style/Page"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginTop="10dp"
+            android:text="@string/monitoring_subtitle" />
+
+        <!-- Right now -->
+        <LinearLayout
+            style="@style/Card"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/monitoring_section_now" />
+
+            <include
+                android:id="@+id/rowCurrent"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowStatus"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowTrend"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowMeasured"
+                layout="@layout/row_status" />
+        </LinearLayout>
+
+        <!-- Alert engine -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/monitoring_section_alerts" />
+
+            <include
+                android:id="@+id/rowService"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowAlerts"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowLastAlert"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowNotifPerm"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowFullScreen"
+                layout="@layout/row_status" />
+        </LinearLayout>
+
+        <!-- Sync -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/monitoring_section_sync" />
+
+            <include
+                android:id="@+id/rowLinkUp"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowLastSync"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowLastReading"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowNetwork"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowBattery"
+                layout="@layout/row_status" />
+        </LinearLayout>
+
+        <!-- Online copy: what the phone last heard from the database, straight from the database -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/monitoring_section_cloud" />
+
+            <include
+                android:id="@+id/rowSupabase"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowPendingSync"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowOnlineProblem"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowSession"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowBackground"
+                layout="@layout/row_status" />
+
+            <include
+                android:id="@+id/rowBuild"
+                layout="@layout/row_status" />
+        </LinearLayout>
+
+        <!-- Records -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/monitoring_section_records" />
+
+            <include
+                android:id="@+id/rowOnlineCopy"
+                layout="@layout/row_status" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="6dp"
+                android:text="@string/monitoring_records_note" />
+        </LinearLayout>
+
+        <!-- Records so far -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/monitoring_section_events" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/monitoring_events_alerts_title"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/lastAlertsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:lineSpacingMultiplier="1.35"
+                android:textColor="@color/text"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/monitoring_events_syncs_title"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/lastSyncsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:lineSpacingMultiplier="1.35"
+                android:textColor="@color/text"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Test the path -->
+        <Button
+            android:id="@+id/syncNowButton"
+            style="@style/OutlineButton"
+            android:layout_marginTop="16dp"
+            android:text="@string/monitoring_sync_now_button" />
+
+        <Button
+            android:id="@+id/testAlertButton"
+            style="@style/OutlineButton"
+            android:layout_marginTop="8dp"
+            android:text="@string/monitoring_test_button" />
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginTop="6dp"
+            android:text="@string/monitoring_test_note" />
+
+        <TextView
+            style="@style/NoteText"
+            android:layout_marginTop="18dp"
+            android:text="@string/monitoring_medical_note" />
+    </LinearLayout>
+</ScrollView>

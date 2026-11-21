@@ -54,6 +54,7 @@
         <item name="android:background">@drawable/card_background</item>
         <item name="android:orientation">vertical</item>
         <item name="android:padding">16dp</item>
+        <item name="android:elevation">1dp</item>
     </style>
 
     <!-- A card that holds a list: its rows reach from edge to edge. -->
@@ -69,16 +70,16 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">8dp</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/text</item>
-        <item name="android:drawableTint">@color/blue</item>
+        <item name="android:drawableTint">@color/p_blue</item>
     </style>
 
     <style name="BodyText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14.5sp</item>
         <item name="android:lineSpacingMultiplier">1.22</item>
         <item name="android:textColor">@color/text</item>
     </style>
@@ -91,12 +92,12 @@
     </style>
 
     <style name="AdvisorLine" parent="BodyText">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">14.5sp</item>
         <item name="android:textColor">@color/text_secondary</item>
     </style>
 
     <style name="NoteText" parent="BodyText">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textColor">@color/text_secondary</item>
     </style>
 
@@ -110,7 +111,7 @@
 
     <style name="RangeButton">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
         <item name="android:textSize">14sp</item>
@@ -124,15 +125,15 @@
     <!-- One of a row of choices (how far back to look). The chosen one is filled. -->
     <style name="Chip">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">38dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_marginStart">4dp</item>
         <item name="android:layout_marginEnd">4dp</item>
         <item name="android:gravity">center</item>
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/range_button_text</item>
-        <item name="android:background">@drawable/range_button_background</item>
+        <item name="android:textColor">@color/chip_text_state</item>
+        <item name="android:background">@drawable/p_chip</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
@@ -140,13 +141,12 @@
     <!-- The main button of a screen: filled with the brand colour, white words. -->
     <style name="ColorButton">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">50dp</item>
+        <item name="android:layout_height">46dp</item>
         <item name="android:background">@drawable/btn_blue</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/button_text</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14.5sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:paddingStart">18dp</item>
         <item name="android:paddingEnd">18dp</item>
@@ -160,14 +160,12 @@
 
     <!-- A quiet button: white with a thin edge. -->
     <style name="OutlineButton" parent="ColorButton">
-        <item name="android:minHeight">48dp</item>
         <item name="android:background">@drawable/btn_outline_blue</item>
         <item name="android:textColor">@color/tonal_text</item>
     </style>
 
     <!-- A button that removes something. -->
     <style name="DangerButton" parent="ColorButton">
-        <item name="android:minHeight">48dp</item>
         <item name="android:background">@drawable/btn_outline_red</item>
         <item name="android:textColor">@color/red</item>
     </style>
@@ -213,10 +211,10 @@
         <item name="android:layout_weight">1</item>
         <item name="android:minHeight">58dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">7dp</item>
+        <item name="android:paddingTop">7dp</item>
+        <item name="android:paddingBottom">6dp</item>
         <item name="android:drawablePadding">3dp</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">11.5sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/tab_color</item>
         <item name="android:drawableTint">@color/tab_color</item>
@@ -265,11 +263,11 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">22dp</item>
         <item name="android:layout_marginStart">4dp</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">17sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:letterSpacing">0.07</item>
-        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:letterSpacing">0.03</item>
+        <item name="android:textColor">@color/p_text</item>
     </style>
 
     <!-- One of the four small cards with a number of the last 24 hours. -->
@@ -334,10 +332,292 @@
     <style name="Credit">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">22dp</item>
+        <item name="android:layout_marginTop">18dp</item>
         <item name="android:gravity">center</item>
         <item name="android:textSize">13sp</item>
-        <item name="android:letterSpacing">0.02</item>
-        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:textColor">@color/p_text2</item>
+    </style>
+
+    <!-- The premium pill: a rounded button with a real action behind it -->
+
+    <!-- The four words of the analysis summary -->
+
+    <!-- ===== 5.5.0: the professional dashboard ===== -->
+
+    <!-- a card of the new system: white, 22dp corners, hairline border, soft shadow -->
+
+
+
+
+    <!-- one figure of the 2x2 grid: white, 18dp, a coloured bar and a coloured figure -->
+    <style name="StatCard">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/p_card_tile</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:elevation">1dp</item>
+    </style>
+
+
+
+
+
+    <!-- ===== 5.6.0: the strict type scale and compact cards ===== -->
+    <style name="T_Title">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+    <style name="T_Section">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:layout_marginTop">22dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginStart">2dp</item>
+    </style>
+    <style name="T_Label">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+        <item name="android:maxLines">2</item>
+    </style>
+    <style name="T_Value">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">23sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <style name="T_Body">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14.5sp</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+    </style>
+    <style name="T_Meta">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+        <item name="android:lineSpacingMultiplier">1.25</item>
+    </style>
+    <style name="T_Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- a compact statistics card: 16dp inside, 16dp corners, equal heights in a row -->
+    <style name="S_Card">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:minHeight">126dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <!-- a group header inside the 24 hours section -->
+    <style name="S_GroupTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+    </style>
+
+    <style name="DashCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:background">@drawable/p_card</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:elevation">1dp</item>
+    </style>
+    <style name="DashTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:drawablePadding">9dp</item>
+    </style>
+    <style name="DashCaption">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+    <style name="DashNote">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+    </style>
+    <style name="StatLabel" parent="T_Label">
+        <item name="android:layout_marginTop">6dp</item>
+    </style>
+    <style name="StatValue" parent="T_Value">
+        <item name="android:layout_marginTop">1dp</item>
+    </style>
+    <style name="SummaryBadge">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="RangeButtonNew">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">12.5sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/chip_text_state</item>
+        <item name="android:background">@drawable/p_chip</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="PillButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <!-- ===== 5.7.0: the reference look ===== -->
+    <style name="F_Tile">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">9dp</item>
+        <item name="android:paddingStart">6dp</item>
+        <item name="android:paddingEnd">6dp</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+    <style name="F_TileTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">11.5sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="F_TileValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="F_TileArrow">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+    </style>
+    <style name="F_TileUnit">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+    </style>
+    <style name="F_TileMeta">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="F_TileChip">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingStart">9dp</item>
+        <item name="android:paddingEnd">9dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+        <item name="android:background">@drawable/pill_soft_white</item>
+    </style>
+
+    <!-- a compact metric card of the reference: 16dp inside, 18dp corners, one line of label -->
+    <style name="M_Card">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">54dp</item>
+        <item name="android:paddingStart">11dp</item>
+        <item name="android:paddingEnd">9dp</item>
+        <item name="android:paddingTop">7dp</item>
+        <item name="android:paddingBottom">7dp</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+    <style name="M_Label">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:textColor">@color/p_text2</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <style name="M_Value">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">15.5sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/p_text</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <!-- the credit line at the end of the pages: plain centred text, never a button -->
+    <style name="CreditLine">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">18dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/p_text2</item>
     </style>
 </resources>

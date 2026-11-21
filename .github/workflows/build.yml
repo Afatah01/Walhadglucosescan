@@ -1,0 +1,128 @@
+name: Build
+
+# Builds, tests and packages the app on every push to main and on every pull request.
+# A push of a tag "v*" additionally attaches the signed APK to a GitHub release.
+#
+# Signing: the release APK is signed with the project keystore, which lives ONLY in
+# GitHub Actions secrets (WALHAD_KEYSTORE_BASE64 / WALHAD_KEYSTORE_PASSWORD /
+# WALHAD_KEY_ALIAS / WALHAD_KEY_PASSWORD) — never in this repository. The workflow
+# fails if the secrets are missing on main, and it refuses to publish an APK signed
+# with any other certificate: the expected signer fingerprint is checked below, so a
+# stray or regenerated keystore cannot silently produce an "update" nobody can install.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Install the Android platform the app targets
+        run: |
+          yes | sdkmanager --install "platforms;android-35" "build-tools;35.0.0" >/dev/null || true
+
+      - name: Decode the project keystore from secrets (skipped for pull requests)
+        if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.WALHAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.WALHAD_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.WALHAD_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.WALHAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            if [ "${GITHUB_REF}" = "refs/heads/main" ] || [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+              echo "::error::The signing secrets are not set on this repository. Refusing to build an APK nobody can install over the previous one. See HOW-TO-SHIP-A-VERSION.md."
+              exit 1
+            fi
+            echo "Signing secrets not available on this ref; building an unsigned APK (compile and test validation only)."
+            exit 0
+          fi
+          mkdir -p keystore
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > keystore/walhad-release.keystore
+          printf 'storeFile=walhad-release.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore/keystore.properties
+          chmod 600 keystore/walhad-release.keystore keystore/keystore.properties
+
+      - name: Run the unit tests and build the release APK
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest assembleRelease --no-daemon --stacktrace
+
+      - name: Validate the APK (package, version, signer)
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)
+          "${BT}aapt2" dump badging "$APK" | tee badging.txt
+          grep -q "package: name='com.glucosescan.app'" badging.txt
+          grep -Eq "versionName:'[0-9]+\.[0-9]+\.[0-9]+'" badging.txt
+          if [ -f keystore/walhad-release.keystore ]; then
+            "${BT}apksigner" verify --print-certs "$APK" | tee certs.txt
+            grep -qi '3908916b302b34788ffab42a691e56f3dd163aae677f4fcf2467333651f4a376' certs.txt
+            echo "Signer certificate matches the project identity."
+          fi
+
+      - name: Keep the APK as a downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Walhad-GlucoseScan-${{ github.sha }}
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 90
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches versionName
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/}"
+          VN=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
+          if [ "$TAG" != "v$VN" ]; then
+            echo "::error::Tag $TAG does not match versionName $VN (expected v$VN)."
+            exit 1
+          fi
+
+      - name: Download the APK built by the build job
+        uses: actions/download-artifact@v4
+        with:
+          name: Walhad-GlucoseScan-${{ github.sha }}
+          path: dist
+
+      - name: Publish the release with the APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/}"
+          APK=$(find dist -name '*.apk' | head -1)
+          NAME="Walhad-GlucoseScan-${TAG}.apk"
+          cp "$APK" "$NAME"
+          SHA=$(sha256sum "$NAME" | cut -d' ' -f1)
+          {
+            echo "Built by GitHub Actions from commit ${GITHUB_SHA}."
+            echo
+            echo "sha256 of the APK: $SHA"
+          } > notes.md
+          gh release create "$TAG" "$NAME" --title "Walhad Glucose Scan ${TAG#v}" --notes-file notes.md

@@ -2,6 +2,8 @@ package com.glucosescan.app
 
 import android.app.Application
 import android.content.Context
+import com.glucosescan.app.live.MonitoringSyncWorker
+import com.glucosescan.app.live.OnlineSync
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -72,5 +74,9 @@ class WalhadApp : Application() {
     override fun onCreate() {
         super.onCreate()
         CrashLog.install(this)
+        // The background safety-net for monitoring. Unique work: asking again is harmless.
+        MonitoringSyncWorker.schedule(this)
+        // The online copy: refreshed by Android in the background; asking again is harmless.
+        OnlineSync.schedule(this)
     }
 }

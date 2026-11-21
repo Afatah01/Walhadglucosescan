@@ -34,6 +34,10 @@
                 layout="@layout/row_nav" />
 
             <include
+                android:id="@+id/buttonMonitoring"
+                layout="@layout/row_nav" />
+
+            <include
                 android:id="@+id/buttonVoice"
                 layout="@layout/row_nav" />
         </LinearLayout>

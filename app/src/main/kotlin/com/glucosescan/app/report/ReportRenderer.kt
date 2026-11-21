@@ -1086,7 +1086,7 @@ class ReportRenderer(
     companion object {
         /** A4 paper in points. */
         /** The line at the bottom of every page of the report. */
-        const val CREDIT = "Powered by: Abdifatah Elmi"
+        const val CREDIT = "Powered by : Abdifatah Elmi"
 
         const val PAGE_WIDTH = 595
         const val PAGE_HEIGHT = 842

@@ -12,18 +12,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/top_bar"
+        android:elevation="1dp"
         android:gravity="center_vertical"
-        android:minHeight="60dp"
+        android:minHeight="68dp"
         android:orientation="horizontal"
-        android:paddingBottom="9dp"
+        android:paddingBottom="7dp"
         android:paddingEnd="14dp"
         android:paddingStart="16dp"
-        android:paddingTop="8dp">
+        android:paddingTop="6dp">
 
         <ImageView
             android:id="@+id/topLogo"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
             android:importantForAccessibility="no"
             android:src="@drawable/brand_logo" />
 
@@ -33,21 +34,22 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:textColor="@color/text"
+            android:textColor="@color/p_text"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:letterSpacing="-0.01" />
 
         <LinearLayout
             android:id="@+id/livePill"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
-            android:background="@drawable/pill_soft"
+            android:background="@drawable/pill_state_on"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingBottom="6dp"
-            android:paddingEnd="10dp"
-            android:paddingStart="6dp"
+            android:paddingEnd="12dp"
+            android:paddingStart="7dp"
             android:paddingTop="6dp"
             android:visibility="gone">
 
@@ -61,8 +63,8 @@
                 android:id="@+id/livePillText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/text"
+                android:layout_marginStart="4dp"
+                android:textColor="@color/p_green"
                 android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -77,13 +79,14 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/card_stroke" />
+        android:background="@color/p_border" />
 
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface"
+        android:background="@color/p_card"
+        android:elevation="8dp"
         android:baselineAligned="false"
         android:orientation="horizontal">
 

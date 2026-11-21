@@ -89,6 +89,10 @@ object SpeechText {
             AlarmKind.HIGH -> "High glucose alarm." + if (shown != null) " " + number(shown, unit) + "." else ""
             AlarmKind.NO_DATA -> "No values from the sensor."
             AlarmKind.LOW_SOON -> "Low glucose soon." + if (shown != null) " " + number(shown, unit) + "." else ""
+            AlarmKind.VERY_LOW -> "Very low glucose. This is urgent." + if (shown != null) " " + number(shown, unit) + "." else ""
+            AlarmKind.VERY_HIGH -> "Very high glucose." + if (shown != null) " " + number(shown, unit) + "." else ""
+            AlarmKind.RAPID_RISE -> "Glucose rising very fast." + if (shown != null) " " + number(shown, unit) + "." else ""
+            AlarmKind.RAPID_FALL -> "Glucose falling very fast." + if (shown != null) " " + number(shown, unit) + "." else ""
         }
     }
 

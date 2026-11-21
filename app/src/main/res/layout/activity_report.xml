@@ -211,5 +211,8 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="14dp"
             android:text="@string/report_note" />
+        <TextView
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
     </LinearLayout>
 </ScrollView>

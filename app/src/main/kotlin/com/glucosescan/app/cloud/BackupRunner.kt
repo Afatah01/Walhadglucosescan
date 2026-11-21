@@ -1,7 +1,9 @@
 package com.glucosescan.app.cloud
 
 import android.content.Context
+import com.glucosescan.app.BuildConfig
 import com.glucosescan.app.data.GlucoseStore
+import com.glucosescan.app.data.LiveLog
 import com.glucosescan.app.data.ScanHandler
 import com.glucosescan.app.data.Settings
 import com.glucosescan.app.data.StoredValue
@@ -121,6 +123,26 @@ class BackupRunner(
                 copied += values.size
             }
         }
+        // the monitoring audit trail rides along: alert events, sync events, this phone's
+        // registration and one app-health snapshot. Best-effort: it must never break the copy
+        // of the values, and rows that do not make it stay on the phone for the next round.
+        try {
+            copyMonitoring(session)
+        } catch (e: Exception) {
+            LiveLog.add(settings, now, "monitoring copy failed: ${Net.words(e)}")
+        }
+        // the predictions, and the open/closed monitoring session: same rules as the rest —
+        // rows that do not make it stay on the phone and are tried again next time.
+        try {
+            pushForecasts(session)
+        } catch (e: Exception) {
+            LiveLog.add(settings, now, "forecast copy failed: ${Net.words(e)}")
+        }
+        try {
+            pushSession(session)
+        } catch (e: Exception) {
+            LiveLog.add(settings, now, "session copy failed: ${Net.words(e)}")
+        }
         val count = api().count(session)
         if (count.isOk) {
             settings.backupOnlineCount = count.value!!
@@ -129,6 +151,95 @@ class BackupRunner(
         settings.backupProblem = ""
         settings.backupDetail = if (copied > 0) "copied $copied" else "nothing new"
         return BackupResult(null, copied)
+    }
+
+    /**
+     * Copies the monitoring records that are not in the online copy yet: the alert events, the
+     * sync events, the registration of this phone (refreshed every copy) and one app-health
+     * snapshot of how the monitoring stack looks from here. If the network is gone we could not
+     * get here, so the network flag says "online".
+     */
+    private fun copyMonitoring(session: BackupSession) {
+        val alerts = store.unsyncedAlerts(100)
+        if (alerts.isNotEmpty()) {
+            val reply = api().addAlertEvents(session, alerts)
+            if (reply.isOk) {
+                store.markAlertsSynced(alerts.map { it.id })
+            }
+        }
+        val syncs = store.unsyncedSyncs(100)
+        if (syncs.isNotEmpty()) {
+            val reply = api().addSyncEvents(session, syncs)
+            if (reply.isOk) {
+                store.markSyncsSynced(syncs.map { it.id })
+            }
+        }
+        api().addDeviceRegistration(session, settings.deviceId, "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+        val foreground = settings.valuesComeByThemselves && com.glucosescan.app.live.LiveService.instance != null
+        api().addAppHealth(session, foreground, settings.linkUpState.name, networkUp = true, detail = null)
+    }
+
+    /** Copies the predictions that are not in the online copy yet (or that have been scored since they were sent). */
+    private fun pushForecasts(session: BackupSession) {
+        val pending = com.glucosescan.app.data.ForecastLog.unsynced(store, 200)
+        if (pending.isEmpty()) {
+            return
+        }
+        val reply = api().addForecastPredictions(session, pending)
+        if (reply.isOk) {
+            store.writableDatabase.let { db -> com.glucosescan.app.data.ForecastLog.markSynced(db, pending) }
+        }
+    }
+
+    /** Writes the open monitoring session (or its close) to the online copy. */
+    private fun pushSession(session: BackupSession) {
+        val clientId = settings.monitoringSessionClientId
+        val startedAt = settings.monitoringSessionStartedAt
+        if (clientId.isEmpty() || startedAt == 0L) {
+            return
+        }
+        val endedAt = settings.monitoringSessionEndedAt
+        if (endedAt > 0L && settings.monitoringSessionCopied) {
+            return // the close is already in the copy; keep the row on screen, stop the traffic
+        }
+        val reply = api().addMonitoringSession(
+            session, clientId, startedAt,
+            if (endedAt > 0L) endedAt else null,
+            settings.monitoringSessionEndReason.ifEmpty { null },
+            settings.monitoringSessionSource.ifEmpty { "live" }
+        )
+        if (reply.isOk && endedAt > 0L) {
+            // keep the finished session on screen, but stop copying it on every sync
+            settings.monitoringSessionCopied = true
+        }
+    }
+
+    /**
+     * An authenticated round-trip to the project, timed. What the Monitoring screen shows about
+     * the online copy comes from this answer — never from a flag remembered from last week.
+     */
+    fun ping(now: Long): BackupResult {
+        if (!settings.backupEnabled) {
+            return BackupResult(BackupFailure(BackupProblem.LOGIN, "the online copy is off"))
+        }
+        val session = session(now) ?: return pingFailed(lastFailure!!, now)
+        val reply = api().ping(session)
+        settings.supabasePingTime = now
+        if (reply.isOk) {
+            settings.supabasePingOk = true
+            settings.supabasePingMillis = reply.value ?: -1L
+            settings.supabasePingWords = "answered in ${reply.value} ms"
+            return BackupResult(null)
+        }
+        return pingFailed(reply.failure!!, now)
+    }
+
+    private fun pingFailed(failure: BackupFailure, now: Long): BackupResult {
+        settings.supabasePingTime = now
+        settings.supabasePingOk = false
+        settings.supabasePingMillis = -1L
+        settings.supabasePingWords = failure.detail
+        return BackupResult(failure)
     }
 
     /** Fetches the values of the last 90 days from the copy. Values the phone has already stay as they are. */

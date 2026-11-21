@@ -166,7 +166,7 @@
                 style="@style/NoteText"
                 android:fontFamily="monospace"
                 android:textIsSelectable="true"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
 
             <Button
                 android:id="@+id/linkupLogCopy"
@@ -174,5 +174,8 @@
                 android:layout_marginTop="10dp"
                 android:text="@string/copy" />
         </LinearLayout>
+        <TextView
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
     </LinearLayout>
 </ScrollView>

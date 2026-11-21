@@ -17,3 +17,13 @@ secrets.properties
 .env.*
 supabase/.env
 supabase/.env.*
+
+# Signing material and private configuration
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+**/secrets.properties
+**/local.properties

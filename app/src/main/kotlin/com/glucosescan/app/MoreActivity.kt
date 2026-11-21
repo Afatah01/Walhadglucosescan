@@ -137,6 +137,7 @@ class MoreActivity : BaseActivity() {
             Entry(R.id.buttonLinkUp, R.drawable.ic_cloud, R.string.linkup_title, R.string.more_note_linkup, LinkUpActivity::class.java),
             Entry(R.id.buttonLive, R.drawable.ic_bluetooth, R.string.more_bluetooth, R.string.more_note_live, LiveActivity::class.java),
             Entry(R.id.buttonAlarms, R.drawable.ic_bell, R.string.alarms_title, R.string.more_note_alarms, AlarmsActivity::class.java),
+            Entry(R.id.buttonMonitoring, R.drawable.ic_clock, R.string.monitoring_title, R.string.more_note_monitoring, MonitoringActivity::class.java),
             Entry(R.id.buttonVoice, R.drawable.ic_voice, R.string.voice_title, R.string.more_note_voice, VoiceActivity::class.java),
             Entry(R.id.buttonStatistics, R.drawable.ic_tab_stats, R.string.stats_title, R.string.more_note_statistics, StatisticsActivity::class.java),
             Entry(R.id.buttonReadings, R.drawable.ic_list, R.string.readings, R.string.more_note_readings, ReadingsActivity::class.java),

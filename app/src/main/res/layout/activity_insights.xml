@@ -5,7 +5,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/p_bg"
     android:fillViewport="true">
 
     <LinearLayout
@@ -20,10 +20,15 @@
         <!-- How far back to look. -->
         <LinearLayout
             style="@style/Card"
+            android:background="@drawable/card_blue"
             android:layout_marginTop="0dp">
 
             <TextView
                 style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_clock"
+                android:drawableTint="@color/p_blue"
+                android:gravity="center_vertical"
                 android:text="@string/insights_period" />
 
             <LinearLayout
@@ -56,13 +61,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/text_tertiary"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
         <!-- What the AI said, when it could be reached. -->
         <LinearLayout
             android:id="@+id/answerCard"
             style="@style/Card"
+            android:background="@drawable/card_violet"
             android:visibility="gone">
 
             <LinearLayout
@@ -76,6 +82,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_spark"
+                    android:drawableTint="@color/p_violet"
+                    android:gravity="center_vertical"
                     android:text="@string/insights_answer" />
 
                 <!-- Says where the words came from. Never blank, never guessed. -->
@@ -83,12 +93,12 @@
                     android:id="@+id/answerSource"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/pill_state_off"
-                    android:paddingBottom="3dp"
-                    android:paddingEnd="9dp"
-                    android:paddingStart="9dp"
-                    android:paddingTop="3dp"
-                    android:textColor="@color/text_secondary"
+                    android:background="@drawable/pill_answer_source"
+                    android:paddingBottom="4dp"
+                    android:paddingEnd="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingTop="4dp"
+                    android:textColor="@color/p_violet"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -117,15 +127,21 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/text_tertiary"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:visibility="gone" />
         </LinearLayout>
 
         <!-- Ask about it: ready-made questions, or one of your own. -->
-        <LinearLayout style="@style/Card">
+        <LinearLayout
+            style="@style/Card"
+            android:background="@drawable/card_teal">
 
             <TextView
                 style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_spark"
+                android:drawableTint="@color/p_teal"
+                android:gravity="center_vertical"
                 android:text="@string/insights_ask" />
 
             <LinearLayout
@@ -152,8 +168,7 @@
 
             <Button
                 android:id="@+id/askButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/ColorButton"
                 android:layout_marginTop="10dp"
                 android:text="@string/insights_ask_button" />
         </LinearLayout>
@@ -161,10 +176,15 @@
         <!-- What the phone itself reads from the numbers. Always there. -->
         <LinearLayout
             android:id="@+id/readingCard"
-            style="@style/Card">
+            style="@style/Card"
+            android:background="@drawable/card_blue">
 
             <TextView
                 style="@style/CardTitle"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_analysis"
+                android:drawableTint="@color/p_blue"
+                android:gravity="center_vertical"
                 android:text="@string/insights_reading" />
 
             <TextView
@@ -174,7 +194,7 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/insights_reading_note"
                 android:textColor="@color/text_tertiary"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
 
             <LinearLayout
                 android:id="@+id/readingBox"
@@ -183,5 +203,9 @@
                 android:layout_marginTop="8dp"
                 android:orientation="vertical" />
         </LinearLayout>
+
+        <TextView
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
     </LinearLayout>
 </ScrollView>

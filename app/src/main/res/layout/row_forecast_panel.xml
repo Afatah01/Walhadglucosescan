@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One white panel inside the tinted "Right now" card: when the value heads, and what to. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="@drawable/forecast_panel"
+    android:elevation="1dp"
+    android:orientation="vertical"
+    android:paddingBottom="10dp"
+    android:paddingEnd="12dp"
+    android:paddingStart="12dp"
+    android:paddingTop="9dp">
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="true"
+        android:textColor="@color/p_text2"
+        android:textSize="10.5sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.06"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/p_text"
+        android:textSize="15.5sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:maxLines="2"
+        android:ellipsize="end" />
+</LinearLayout>

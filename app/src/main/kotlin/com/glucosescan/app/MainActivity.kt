@@ -23,10 +23,20 @@ import android.widget.TextView
 import com.glucosescan.app.core.Analysis
 import com.glucosescan.app.core.AnalysisCalculator
 import com.glucosescan.app.core.FindingLevel
+import com.glucosescan.app.core.ControlLevel
+import com.glucosescan.app.core.ControlSummary
+import com.glucosescan.app.core.ControlSummaryOf
 import com.glucosescan.app.core.Forecaster
+import com.glucosescan.app.core.GlucoseBand
+import com.glucosescan.app.core.HorizonEstimate
+import com.glucosescan.app.core.Horizons
+import com.glucosescan.app.core.PredictionConfidence
+import com.glucosescan.app.core.PredictionConfidenceWord
+import com.glucosescan.app.core.Thresholds
 import com.glucosescan.app.core.OutlookConfidence
 import com.glucosescan.app.core.OutlookDirection
 import com.glucosescan.app.core.OutlookRisk
+import com.glucosescan.app.core.OutlookSeverity
 import com.glucosescan.app.core.Outlooks
 import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.ScanStatus
@@ -259,7 +269,7 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
         renderChart(now, unit, current)
         renderDay(now, unit)
         renderAnalysis(now, unit)
-        renderSensor(now)
+        renderSensor(now, unit)
     }
 
     // ---------------------------------------------------------------- new in version 3
@@ -289,37 +299,79 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
         val card = findViewById<View>(R.id.outlookCard)
         val forecast = current.forecast
         warnsOfLow = false
+        outlookSeverity = OutlookSeverity.NORMAL
+        val ack = findViewById<View>(R.id.outlookAck)
+        ack.visibility = View.GONE
+        ack.setOnClickListener { }
+        for (id in listOf(R.id.outlookThresholds, R.id.outlookSeverity, R.id.outlookWarning, R.id.outlook60Note)) {
+            findViewById<View>(id).visibility = View.GONE
+        }
+
+        // The three cards always stand there. With no line to stand on, they say so instead of
+        // showing a number that was not measured.
+        val unavailable = getString(R.string.day_none)
+        for (id in listOf(
+            R.id.outlook15, R.id.outlook30, R.id.outlook60,
+            R.id.outlookTrend15, R.id.outlookTrend30, R.id.outlookTrend60,
+            R.id.outlook15Time, R.id.outlook30Time, R.id.outlook60Time,
+            R.id.outlook15Conf, R.id.outlook30Conf, R.id.outlook60Conf
+        )) {
+            findViewById<TextView>(id).text = unavailable
+        }
+        for (id in listOf(R.id.forecast15Card, R.id.forecast30Card, R.id.forecast60Card)) {
+            findViewById<View>(id).setBackgroundResource(R.drawable.card_overview)
+        }
+
         if (forecast == null || !current.isCurrent) {
-            card.visibility = View.GONE
+            card.visibility = View.VISIBLE
+            findViewById<TextView>(R.id.outlookDirection).text =
+                if (!current.isCurrent) getString(R.string.no_current_value) else getString(R.string.forecast_insufficient)
+            findViewById<TextView>(R.id.outlookConfidence).text = ""
+            findViewById<TextView>(R.id.outlookNote).text = ""
             return
         }
-        val at = now + Forecaster.HORIZON_MINUTES * 60_000L
-        val outlook = Outlooks.of(forecast, now, current.shown?.readableValue ?: 0, settings.lowLimit, settings.highLimit)
-        findViewById<TextView>(R.id.outlookText).text = Texts.unbroken(getString(R.string.outlook_line, FindingTexts.forecast(this, forecast.valueAt(at), unit), Texts.timeOfDay(this, at)))
-        findViewById<TextView>(R.id.outlookNote).text = getString(R.string.outlook_note, forecast.spanMinutes)
 
-        // both estimates, with the time each is for
-        if (outlook == null) {
-            findViewById<View>(R.id.outlook15).visibility = View.GONE
-            findViewById<View>(R.id.outlook15Time).visibility = View.GONE
-            findViewById<View>(R.id.outlook30).visibility = View.GONE
-            findViewById<View>(R.id.outlook30Time).visibility = View.GONE
-            findViewById<View>(R.id.outlookConfidence).visibility = View.GONE
-            findViewById<View>(R.id.outlookDirection).visibility = View.GONE
-        } else {
-            val at15 = now + 15 * 60_000L
-            findViewById<TextView>(R.id.outlook15).text = FindingTexts.forecast(this, outlook.value15, unit)
-            findViewById<TextView>(R.id.outlook15Time).text = Texts.timeOfDay(this, outlook.at15)
-            findViewById<TextView>(R.id.outlook30).text = FindingTexts.forecast(this, outlook.value, unit)
-            findViewById<TextView>(R.id.outlook30Time).text = Texts.timeOfDay(this, outlook.at)
-            findViewById<TextView>(R.id.outlookConfidence).text = getString(
-                when (outlook.confidence) {
-                    OutlookConfidence.GOOD -> R.string.outlook_confidence_good
-                    OutlookConfidence.FAIR -> R.string.outlook_confidence_fair
-                    OutlookConfidence.LOW -> R.string.outlook_confidence_low
+        val lowLimit = settings.lowLimit
+        val highLimit = settings.highLimit
+        val nowValue = current.shown?.readableValue ?: 0
+
+        // The mean of the values the line was built on: the anchor the 60-minute estimate bends
+        // back towards. It is a mean of real readings, never a guess.
+        val mean = current.shown?.let { getMeanOfWindow(now) }
+
+        // 15, 30 and 60 minutes, all three at once, from the one engine.
+        val fifteen = Horizons.at(forecast, now, 15, mean, lowLimit, highLimit)
+        val thirty = Horizons.at(forecast, now, Forecaster.HORIZON_MINUTES, mean, lowLimit, highLimit)
+        val sixty = Horizons.at(forecast, now, Forecaster.FAR_HORIZON_MINUTES, mean, lowLimit, highLimit)
+
+        paintHorizon(R.id.forecast15Card, R.id.outlook15, R.id.outlookTrend15, R.id.outlook15Time, fifteen, unit)
+        paintHorizon(R.id.forecast30Card, R.id.outlook30, R.id.outlookTrend30, R.id.outlook30Time, thirty, unit)
+        paintHorizon(R.id.forecast60Card, R.id.outlook60, R.id.outlookTrend60, R.id.outlook60Time, sixty, unit)
+
+        // The confidence comes from the values themselves, and the weaker 60-minute estimate says
+        // so in one line under the cards rather than being hidden.
+        val confidence = PredictionConfidence.of(forecast)
+        findViewById<TextView>(R.id.outlookNote).text =
+            getString(R.string.outlook_estimate_note2, forecast.spanMinutes, Texts.timeOfDay(this, now))
+        if (confidence.word != PredictionConfidenceWord.HIGH) {
+            findViewById<View>(R.id.outlook60Note).visibility = View.VISIBLE
+        }
+        findViewById<TextView>(R.id.outlookConfidence).text = getString(
+            R.string.outlook_confidence_detail,
+            getString(
+                when (confidence.word) {
+                    PredictionConfidenceWord.HIGH -> R.string.outlook_confidence_high
+                    PredictionConfidenceWord.MODERATE -> R.string.outlook_confidence_moderate
+                    PredictionConfidenceWord.LOW -> R.string.outlook_confidence_low
                 }
-            )
-            // and which way it is going, with the rate
+            ),
+            confidence.basedOn,
+            confidence.spanMinutes
+        )
+
+        // Which way it is going, with the rate (the same figures as before).
+        val outlook = Outlooks.of(forecast, now, nowValue, lowLimit, highLimit)
+        if (outlook != null) {
             val perMinute = FindingTexts.glucose(Math.round(Math.abs(outlook.perMinute)).toInt(), unit)
             findViewById<TextView>(R.id.outlookDirection).text = Texts.unbroken(
                 when (outlook.direction) {
@@ -330,41 +382,192 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
             )
         }
 
-        val minutes = current.minutesUntilBelowTarget(now)
-        val warning = findViewById<TextView>(R.id.outlookWarning)
-        val title = findViewById<TextView>(R.id.outlookTitle)
-        if (minutes != null) {
-            warnsOfLow = true
-            warning.text = Texts.unbroken(resources.getQuantityString(R.plurals.outlook_low_soon, minutes, FindingTexts.glucose(settings.lowLimit, unit), minutes))
-            warning.visibility = View.VISIBLE
-            card.setBackgroundResource(R.drawable.card_notice)
-            title.setTextColor(getColor(R.color.notice_title))
-            title.compoundDrawableTintList = getColorStateList(R.color.notice_title)
-        } else {
-            warning.visibility = View.GONE
-            card.setBackgroundResource(R.drawable.card_background)
-            title.setTextColor(getColor(R.color.text))
-            title.compoundDrawableTintList = getColorStateList(R.color.blue)
+        // The times to the two limits, when the line reaches one inside three hours.
+        val crossings = Thresholds.crossings(forecast, now, lowLimit, highLimit)
+        if (crossings.isNotEmpty()) {
+            val lines = crossings.joinToString("\n") { crossing ->
+                getString(
+                    if (crossing.rising) R.string.outlook_until_high else R.string.outlook_until_low,
+                    crossing.minutes,
+                    FindingTexts.glucose(crossing.limit, unit)
+                )
+            }
+            val view = findViewById<TextView>(R.id.outlookThresholds)
+            view.text = Texts.unbroken(lines)
+            view.visibility = View.VISIBLE
         }
+
+        // The severity of the whole panel: one word, one colour, and the words say the same.
+        val minutes = current.minutesUntilBelowTarget(now)
+        val risk = outlook?.risk ?: OutlookRisk.NONE
+        val severity = when (risk) {
+            OutlookRisk.SEVERE_LOW, OutlookRisk.LOW, OutlookRisk.LOW_SOON -> OutlookSeverity.URGENT
+            OutlookRisk.VERY_HIGH, OutlookRisk.HIGH -> OutlookSeverity.WARNING
+            OutlookRisk.NONE -> OutlookSeverity.NORMAL
+        }
+        outlookSeverity = severity
+        paintSeverity(severity)
+
+        val alert = findViewById<View>(R.id.forecastAlert)
+        alert.setBackgroundResource(
+            when (severity) {
+                OutlookSeverity.URGENT -> R.drawable.card_risk
+                OutlookSeverity.WARNING -> R.drawable.card_amber
+                OutlookSeverity.NORMAL -> R.drawable.card_overview
+            }
+        )
+
+        val warning = findViewById<TextView>(R.id.outlookWarning)
+        val lowWords = FindingTexts.glucose(lowLimit, unit)
+        val highWords = FindingTexts.glucose(highLimit, unit)
+        if (severity == OutlookSeverity.URGENT) {
+            warnsOfLow = true
+            val words = when (risk) {
+                OutlookRisk.SEVERE_LOW, OutlookRisk.LOW ->
+                    getString(R.string.outlook_predicted_low, lowWords, FindingTexts.forecast(this, forecast.valueAt(now), unit), 0)
+                else -> getString(
+                    R.string.outlook_predicted_low,
+                    lowWords,
+                    FindingTexts.forecast(this, forecast.valueAt(now + Forecaster.HORIZON_MINUTES * 60_000L), unit),
+                    minutes ?: Forecaster.HORIZON_MINUTES
+                )
+            }
+            warning.text = Texts.unbroken(words)
+            warning.setTextColor(getColor(R.color.p_red))
+            warning.typeface = AppFont.bold(this)
+            warning.visibility = View.VISIBLE
+            ack.visibility = View.VISIBLE
+            ack.setOnClickListener { ack.visibility = View.GONE }
+        } else if (severity == OutlookSeverity.WARNING) {
+            warning.text = Texts.unbroken(
+                getString(
+                    R.string.outlook_predicted_high,
+                    highWords,
+                    FindingTexts.forecast(this, forecast.valueAt(now + Forecaster.HORIZON_MINUTES * 60_000L), unit),
+                    Forecaster.HORIZON_MINUTES
+                )
+            )
+            warning.setTextColor(getColor(R.color.p_amber))
+            warning.typeface = AppFont.bold(this)
+            warning.visibility = View.VISIBLE
+        }
+
         card.visibility = View.VISIBLE
 
-        // what to do about it, said on the phone, without any network
+        // What to do about it, from the phone, without any network.
         val advice = findViewById<TextView>(R.id.outlookAdvice)
-        if (outlook == null) {
-            advice.visibility = View.GONE
-        } else {
-            advice.visibility = View.VISIBLE
-            advice.text = Texts.unbroken(
-                when (outlook.risk) {
-                    OutlookRisk.SEVERE_LOW -> getString(R.string.outlook_advice_severe_low)
-                    OutlookRisk.LOW -> getString(R.string.outlook_advice_low)
-                    OutlookRisk.LOW_SOON -> if (minutes == null) getString(R.string.outlook_advice_none) else getString(R.string.outlook_advice_low_soon, minutes, FindingTexts.glucose(settings.lowLimit, unit))
-                    OutlookRisk.VERY_HIGH -> getString(R.string.outlook_advice_very_high)
-                    OutlookRisk.HIGH -> getString(R.string.outlook_advice_high)
-                    OutlookRisk.NONE -> getString(R.string.outlook_advice_none)
+        advice.visibility = View.VISIBLE
+        advice.text = Texts.unbroken(
+            when (risk) {
+                OutlookRisk.SEVERE_LOW -> getString(R.string.outlook_advice_severe_low)
+                OutlookRisk.LOW -> getString(R.string.outlook_advice_low)
+                OutlookRisk.LOW_SOON -> if (minutes == null) getString(R.string.outlook_advice_none) else getString(R.string.outlook_advice_low_soon, minutes, lowWords)
+                OutlookRisk.VERY_HIGH -> getString(R.string.outlook_advice_very_high)
+                OutlookRisk.HIGH -> getString(R.string.outlook_advice_high)
+                OutlookRisk.NONE -> getString(R.string.outlook_advice_none)
+            }
+        )
+    }
+
+    /** Paints one of the three horizon cards: the value, the arrow, the time, the colour. */
+    private fun paintHorizon(cardId: Int, valueId: Int, trendId: Int, timeId: Int, estimate: HorizonEstimate, unit: GlucoseUnit) {
+        val colour = when (estimate.band) {
+            GlucoseBand.VERY_LOW -> R.color.p_red
+            GlucoseBand.LOW -> R.color.p_red
+            GlucoseBand.IN_RANGE -> R.color.p_green
+            GlucoseBand.HIGH -> R.color.p_amber
+            GlucoseBand.VERY_HIGH -> R.color.p_amber
+        }
+        val background = when (estimate.band) {
+            GlucoseBand.VERY_LOW -> R.drawable.card_risk
+            GlucoseBand.LOW -> R.drawable.card_risk
+            GlucoseBand.IN_RANGE -> R.drawable.card_stability
+            GlucoseBand.HIGH -> R.drawable.card_amber
+            GlucoseBand.VERY_HIGH -> R.drawable.card_amber
+        }
+        findViewById<View>(cardId).setBackgroundResource(background)
+        val value = findViewById<TextView>(valueId)
+        value.text = GlucoseFormat.value(estimate.value, unit)
+        value.setTextColor(getColor(colour))
+        // the arrow sits beside the number, coloured with the card
+        val trend = findViewById<TextView>(trendId)
+        trend.text = estimate.arrow
+        trend.setTextColor(getColor(colour))
+        // the band word goes in its own small chip under the time
+        val chipId = when (valueId) {
+            R.id.outlook15 -> R.id.outlookBand15
+            R.id.outlook30 -> R.id.outlookBand30
+            else -> R.id.outlookBand60
+        }
+        val unitId = when (valueId) {
+            R.id.outlook15 -> R.id.outlook15Unit
+            R.id.outlook30 -> R.id.outlook30Unit
+            else -> R.id.outlook60Unit
+        }
+        findViewById<TextView>(unitId).text = unit.label
+        val chip = findViewById<TextView>(chipId)
+        chip.text = getString(
+            when (estimate.band) {
+                GlucoseBand.VERY_LOW -> R.string.band_word_very_low
+                GlucoseBand.LOW -> R.string.band_word_low
+                GlucoseBand.IN_RANGE -> R.string.band_word_in
+                GlucoseBand.HIGH -> R.string.band_word_high
+                GlucoseBand.VERY_HIGH -> R.string.band_word_very_high
+            }
+        )
+        chip.setTextColor(getColor(colour))
+        findViewById<TextView>(timeId).text = Texts.timeOfDay(this, estimate.at)
+        // each estimate says how much it is to be trusted, on its own card
+        val confId = when (valueId) {
+            R.id.outlook15 -> R.id.outlook15Conf
+            R.id.outlook30 -> R.id.outlook30Conf
+            else -> R.id.outlook60Conf
+        }
+        findViewById<TextView>(confId).text = getString(
+            R.string.forecast_confidence_line,
+            getString(
+                when (estimate.confidence) {
+                    PredictionConfidenceWord.HIGH -> R.string.forecast_conf_high
+                    PredictionConfidenceWord.MODERATE -> R.string.forecast_conf_moderate
+                    PredictionConfidenceWord.LOW -> R.string.forecast_conf_low
                 }
             )
+        )
+    }
+
+    /** The mean of the readings of the forecast window, or null when there are none. */
+    private fun getMeanOfWindow(now: Long): Double? {
+        val from = now - Forecaster.WINDOW_MINUTES * 60_000L
+        val values = settings.correction.applyAll(store.since(from))
+        if (values.isEmpty()) {
+            return null
         }
+        var sum = 0.0
+        for (value in values) {
+            sum += value.readableValue.toDouble()
+        }
+        return sum / values.size
+    }
+
+    /** The severity of the estimates card, said in words as well as in colour. */
+    private fun paintSeverity(severity: OutlookSeverity) {
+        val view = findViewById<TextView>(R.id.outlookSeverity)
+        val title = findViewById<TextView>(R.id.outlookTitle)
+        val colour = when (severity) {
+            OutlookSeverity.URGENT -> R.color.p_red
+            OutlookSeverity.WARNING -> R.color.p_amber
+            OutlookSeverity.NORMAL -> R.color.p_text2
+        }
+        val word = when (severity) {
+            OutlookSeverity.URGENT -> R.string.outlook_severity_urgent
+            OutlookSeverity.WARNING -> R.string.outlook_severity_warning
+            OutlookSeverity.NORMAL -> R.string.outlook_severity_normal
+        }
+        view.text = getString(word)
+        view.setTextColor(getColor(colour))
+        view.typeface = AppFont.bold(this)
+        view.visibility = View.VISIBLE
+        title.setTextColor(getColor(if (severity == OutlookSeverity.NORMAL) R.color.p_text else colour))
     }
 
     /** What the sign at the top says. For tests. */
@@ -461,6 +664,15 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
         val span = AnalysisCalculator.span(values, from, to, settings.lowLimit, settings.highLimit)
         val events = if (stats.hasValues) span.lows.size.toString() + " / " + span.highs.size.toString() else none
         findViewById<TextView>(R.id.tileEvents).text = events
+
+        // The five figures the design adds to the day: the tight range (70 to 140), the two
+        // outer bands, how much of the day has readings, and how many readings there are.
+        findViewById<TextView>(R.id.tileInTight).text = if (stats.hasValues) stats.inTightPercent.toString() + " %" else none
+        findViewById<TextView>(R.id.tileVeryLow).text = if (stats.hasValues) stats.veryLowPercent.toString() + " %" else none
+        findViewById<TextView>(R.id.tileVeryHigh).text = if (stats.hasValues) stats.veryHighPercent.toString() + " %" else none
+        findViewById<TextView>(R.id.tileCoverage).text = if (stats.hasValues) stats.coveragePercent.toString() + " %" else none
+        findViewById<TextView>(R.id.tileReadings).text =
+            if (stats.hasValues) stats.readingCount.toString() else none
     }
 
     /** The analysis of the last days. It is counted anew every 5 minutes and after a scan. */
@@ -484,7 +696,40 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
 
         val box = findViewById<LinearLayout>(R.id.analysisBox)
         box.removeAllViews()
-        findViewById<TextView>(R.id.analysisPeriod).visibility = View.GONE
+
+        // The judgement of the whole period, in one of four words, with the figures behind it.
+        // It is never "Good" on a thin period: too little data says so instead.
+        val summary = ControlSummaryOf.of(result.stats)
+        controlSummary = summary
+        val periodView = findViewById<TextView>(R.id.analysisPeriod)
+        periodView.text = summary.word
+        periodView.visibility = View.VISIBLE
+        periodView.textSize = 13f
+        periodView.typeface = AppFont.bold(this)
+        periodView.setPadding(dp(14), dp(7), dp(14), dp(7))
+        // A badge, not a word: the colour of the card the badge sits on, and the words on top.
+        periodView.setBackgroundResource(
+            when {
+                !summary.judged -> R.drawable.pill_state_off
+                summary.level == ControlLevel.GOOD -> R.drawable.pill_state_on
+                summary.level == ControlLevel.NEEDS_ATTENTION -> R.drawable.p_card_amber
+                else -> R.drawable.p_card_red
+            }
+        )
+        periodView.setTextColor(
+            getColor(
+                when {
+                    !summary.judged -> R.color.p_text2
+                    summary.level == ControlLevel.GOOD -> R.color.p_green
+                    summary.level == ControlLevel.NEEDS_ATTENTION -> R.color.p_amber
+                    else -> R.color.p_red
+                }
+            )
+        )
+        val hint = findViewById<TextView>(R.id.analysisBadgeHint)
+        hint.text = getString(R.string.analysis_badge_hint, days)
+        hint.visibility = View.VISIBLE
+        addSentence(box, summary.sentence)
 
         // how the last 24 hours were, in one sentence
         val dayFrom = to - StatisticsCalculator.DAY
@@ -500,6 +745,25 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
             addFinding(box, getString(R.string.analysis_period, FindingTexts.days(this, days)), first.level, FindingTexts.text(this, first, unit, days))
         }
         findViewById<View>(R.id.analysisEmpty).visibility = if (enough) View.GONE else View.VISIBLE
+    }
+
+    private fun dp(value: Int): Int = Math.round(value * resources.displayMetrics.density)
+
+    /** A plain sentence in a card: no badge, no colour beyond the body text. */
+    private fun addSentence(box: LinearLayout, words: String) {
+        val view = TextView(this)
+        view.text = Texts.unbroken(words)
+        view.setTextColor(getColor(R.color.p_text2))
+        view.textSize = 13.5f
+        view.setLineSpacing(0f, 1.3f)
+        view.setLineSpacing(0f, 1.25f)
+        val params = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        params.topMargin = Math.round(8 * resources.displayMetrics.density)
+        view.layoutParams = params
+        box.addView(view)
     }
 
     private fun addFinding(box: LinearLayout, caption: String, level: FindingLevel, words: String) {
@@ -520,17 +784,35 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
      * the card say the same.
      */
     internal enum class ValueLook(val background: Int) {
-        /** green: a current value inside the target range */
-        IN_RANGE(R.drawable.hero_good),
+        /** premium amber-orange: a current value inside the target range (the hero of the Home page) */
+        IN_RANGE(R.drawable.p_hero_premium),
 
-        /** red: a current value outside the target range (also LOW and HIGH), or a problem */
-        ALERT(R.drawable.hero_alert),
+        /** teal: a current value inside the range, with the calm colour of the brand */
+        IN_RANGE_TEAL(R.drawable.p_hero_teal),
+
+        /** amber: above the target range, but not dangerously so */
+        HIGH(R.drawable.p_hero_amber),
+
+        /** red: a low value, or a problem */
+        ALERT(R.drawable.p_hero_red),
 
         /** blue: no current value */
-        NO_VALUE(R.drawable.hero_none)
+        NO_VALUE(R.drawable.p_hero_blue)
     }
 
     internal var valueLook: ValueLook = ValueLook.NO_VALUE
+        private set
+
+    /** The band of the newest value as the screen shows it, or null with no current value. */
+    internal var currentBand: GlucoseBand? = null
+        private set
+
+    /** The judgement of the last days, or null before it is counted. */
+    internal var controlSummary: ControlSummary? = null
+        private set
+
+    /** How serious the card of estimates is. */
+    internal var outlookSeverity: OutlookSeverity = OutlookSeverity.NORMAL
         private set
 
     private fun showValueLook(look: ValueLook) {
@@ -606,13 +888,39 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
             val sensorBelow = sensorNote != null && latest != null && latest.value < settings.lowLimit
             val above = glucose.value > settings.highLimit
             value.text = Texts.valueText(this, glucose, unit)
-            showValueLook(if (below || sensorBelow || above) ValueLook.ALERT else ValueLook.IN_RANGE)
+            // The five bands of the design: very low, low, in range, high, very high. The colour
+            // follows the band, and the words on the chip say the same thing as the colour.
+            val band = GlucoseBand.of(glucose.readableValue, settings.lowLimit, settings.highLimit)
+            currentBand = band
+            val look = when {
+                sensorBelow || below || band == GlucoseBand.VERY_LOW -> ValueLook.ALERT
+                band == GlucoseBand.HIGH || band == GlucoseBand.VERY_HIGH -> ValueLook.HIGH
+                // inside the target the card breathes: green at the edges, teal in the middle
+                glucose.readableValue in (settings.lowLimit + 12)..(settings.highLimit - 20) ->
+                    ValueLook.IN_RANGE_TEAL
+                else -> ValueLook.IN_RANGE
+            }
+            showValueLook(look)
+            rangeChip.typeface = AppFont.bold(this)
             rangeChip.text = getString(
                 when {
-                    below -> R.string.range_below
                     sensorBelow -> R.string.range_sensor_below
-                    above -> R.string.range_above
-                    else -> R.string.range_in
+                    band == GlucoseBand.VERY_LOW -> R.string.band_very_low
+                    band == GlucoseBand.LOW -> R.string.band_low
+                    band == GlucoseBand.HIGH -> R.string.band_high
+                    band == GlucoseBand.VERY_HIGH -> R.string.band_very_high
+                    else -> R.string.band_in_range
+                },
+                FindingTexts.glucose(settings.lowLimit, unit),
+                FindingTexts.glucose(settings.highLimit, unit)
+            )
+            // the status pill: solid red or amber when something is wrong, soft when all is well
+            rangeChip.setBackgroundResource(
+                when {
+                    sensorBelow || below || band == GlucoseBand.VERY_LOW || band == GlucoseBand.LOW ->
+                        R.drawable.pill_on_hero_solid
+                    band == GlucoseBand.HIGH || band == GlucoseBand.VERY_HIGH -> R.drawable.pill_on_hero_amber
+                    else -> R.drawable.pill_on_hero_soft
                 }
             )
             rangeChip.visibility = View.VISIBLE
@@ -624,11 +932,9 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
             unitView.text = unit.label
             unitView.visibility = View.VISIBLE
 
-            val lowHigh = Texts.lowHighNote(this, glucose, unit)
-            if (lowHigh != null) {
-                note.text = lowHigh
-                note.visibility = View.VISIBLE
-            }
+            // The card of the reference has no second sentence under the number: the status pill
+            // above says the same thing in fewer words, so this line stays out of the way.
+            note.visibility = View.GONE
 
             val trend = state.trend
             val change = state.changePerMinute
@@ -765,47 +1071,114 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
         card.visibility = View.VISIBLE
     }
 
-    private fun renderSensor(now: Long) {
+    /**
+     * The sensor card: where the readings come from, whether they are arriving now, and when the
+     * last one arrived.
+     *
+     * Two things never appear here. There is no battery or signal figure, because a scan over
+     * NFC knows neither. And nothing is called LIVE because a link was agreed or a scan worked:
+     * only a reading that has actually arrived says "receiving". NFC is a scan, not a connection,
+     * and the card says so in words.
+     */
+    private fun renderSensor(now: Long, unit: GlucoseUnit) {
         val box = findViewById<LinearLayout>(R.id.sensorBox)
         box.removeAllViews()
         val progress = findViewById<ProgressBar>(R.id.sensorProgress)
         progress.visibility = View.GONE
-        val sensor = settings.lastSensor
-        if (sensor == null) {
-            addRow(box, getString(R.string.sensor_none), "", false)
-            return
+        val chip = findViewById<TextView>(R.id.sensorSourceChip)
+
+        val latest = store.latest()
+        val ageMinutes = if (latest != null) Math.max(0L, (now - latest.timestamp) / 60_000L) else null
+
+        // which source supplied the newest reading: the tables say, not the switches
+        val sensorNewest = store.latestOf(ValueSource.SENSOR)
+        val linkUpNewest = store.latestOf(ValueSource.LINKUP)
+        val fromLinkUp = linkUpNewest != null && (sensorNewest == null || linkUpNewest.timestamp > sensorNewest.timestamp)
+        chip.text = when {
+            latest == null -> getString(R.string.sensor_none)
+            fromLinkUp -> getString(R.string.sensor_source_linkup)
+            else -> getString(R.string.sensor_source_sensor)
+        }
+        chip.setTextColor(getColor(if (latest == null) R.color.p_text2 else R.color.p_green))
+        chip.setBackgroundResource(if (latest == null) R.drawable.pill_state_off else R.drawable.pill_state_on)
+
+        // the reception state, in words: LIVE only while readings actually arrive
+        val receiving = ageMinutes != null && ageMinutes <= FRESH_MINUTES
+        val late = ageMinutes != null && ageMinutes > FRESH_MINUTES && ageMinutes <= STALE_MINUTES
+        val stateWord = when {
+            ageMinutes == null -> getString(R.string.sensor_quiet)
+            receiving -> getString(R.string.sensor_receiving)
+            late -> getString(R.string.sensor_late, Texts.ago(this, ageMinutes.toInt()))
+            else -> getString(R.string.sensor_quiet)
         }
 
-        val minutesSinceScan = Math.max(0L, (now - sensor.scanTime) / 60_000L).coerceAtMost(1_000_000L).toInt()
-        val running = sensor.status == ScanStatus.OK || sensor.status == ScanStatus.STARTING
-        val ageNow = if (running) sensor.age + minutesSinceScan else sensor.age
-        val status = if (sensor.status == ScanStatus.OK && ageNow >= sensor.lifetime) ScanStatus.EXPIRED else sensor.status
-        val startTime = sensor.scanTime - sensor.age * 60_000L
-        // a bar for the time of the sensor that is used; the rows below say the same in words
-        if (sensor.lifetime > 0 && (status == ScanStatus.OK || status == ScanStatus.EXPIRED)) {
-            progress.progress = (ageNow.toLong() * 1000L / sensor.lifetime).coerceIn(0L, 1000L).toInt()
-            progress.visibility = View.VISIBLE
-        }
+        // two columns of label/value pairs, as in the reference
+        val rows = ArrayList<Triple<String, String, Boolean>>()
+        rows.add(Triple(getString(R.string.sensor_last_reading), if (latest != null) Texts.timeOfDay(this, latest.timestamp) + " (" + Texts.ago(this, (ageMinutes ?: 0L).toInt()) + ")" else stateWord, !receiving))
+        rows.add(Triple(getString(R.string.sensor_current), if (latest != null) Texts.valueWithUnit(this, latest, unit) else getString(R.string.day_none), latest == null))
+        rows.add(Triple(getString(R.string.sensor_source_sensor), if (settings.valuesComeByThemselves && !settings.linkUpEnabled) stateWord else getString(R.string.sensor_inactive_source), !(settings.valuesComeByThemselves && !settings.linkUpEnabled && receiving)))
+        rows.add(Triple(getString(R.string.sensor_nfc_note), getString(R.string.sensor_inactive_source), false))
+        rows.add(Triple(getString(R.string.sensor_source_linkup), if (settings.linkUpEnabled) LinkUpWords.state(this, settings.linkUpState) else getString(R.string.sensor_linkup_off), !settings.linkUpEnabled))
+        rows.add(Triple(getString(R.string.home_live_title), if (settings.linkUpEnabled) LinkUpWords.state(this, settings.linkUpState) else LiveNotifications.stateText(this, settings.liveState), !receiving))
 
-        addRow(box, getString(R.string.sensor_state), Texts.stateLabel(this, status), status != ScanStatus.OK && status != ScanStatus.STARTING)
-        if (status == ScanStatus.STARTING) {
-            addRow(box, getString(R.string.sensor_warmup_left), GlucoseFormat.duration(Math.max(0, SensorInfo.WARMUP_MINUTES - ageNow)), false)
-        }
-        if (sensor.status != ScanStatus.NOT_STARTED && sensor.age > 0) {
-            addRow(box, getString(R.string.sensor_start), Texts.dateTime(this, startTime), false)
-            if (sensor.lifetime > 0) {
-                addRow(box, getString(R.string.sensor_end), Texts.dateTime(this, startTime + sensor.lifetime * 60_000L), false)
+        var index = 0
+        while (index < rows.size) {
+            val pair = LinearLayout(this)
+            pair.orientation = LinearLayout.HORIZONTAL
+            pair.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).also { it.topMargin = dp(10) }
+            for (column in 0..1) {
+                val cell = LayoutInflater.from(this).inflate(R.layout.row_sensor_item, pair, false)
+                val item = rows.getOrNull(index + column)
+                if (item == null) {
+                    cell.visibility = View.INVISIBLE
+                } else {
+                    cell.findViewById<TextView>(R.id.itemLabel).text = item.first
+                    val value = cell.findViewById<TextView>(R.id.itemValue)
+                    value.text = Texts.unbroken(item.second)
+                    value.setTextColor(getColor(if (item.third) R.color.p_red else R.color.p_green))
+                }
+                val params = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                if (column == 1) params.marginStart = dp(12)
+                cell.layoutParams = params
+                pair.addView(cell)
             }
+            box.addView(pair)
+            index += 2
         }
-        if (status == ScanStatus.OK) {
-            addRow(box, getString(R.string.sensor_age), GlucoseFormat.duration(ageNow), false)
-            addRow(box, getString(R.string.sensor_left), GlucoseFormat.duration(Math.max(0, sensor.lifetime - ageNow)), false)
-        }
-        addRow(box, getString(R.string.sensor_type), sensor.typeLabel, false)
-        addRow(box, getString(R.string.sensor_region), sensor.regionLabel, false)
-        addRow(box, getString(R.string.sensor_serial), sensor.serial ?: "–", false)
 
-        addRow(box, getString(R.string.sensor_as_of, Texts.timeOrDateTime(this, sensor.scanTime, now)), "", false)
+        // the honest age of the sensor the last scan found; never a made-up battery
+        val sensor = settings.lastSensor
+        if (sensor != null) {
+            val minutesSinceScan = Math.max(0L, (now - sensor.scanTime) / 60_000L).coerceAtMost(1_000_000L).toInt()
+            val running = sensor.status == ScanStatus.OK || sensor.status == ScanStatus.STARTING
+            val ageNow = if (running) sensor.age + minutesSinceScan else sensor.age
+            val status = if (sensor.status == ScanStatus.OK && ageNow >= sensor.lifetime) ScanStatus.EXPIRED else sensor.status
+            if (sensor.lifetime > 0 && (status == ScanStatus.OK || status == ScanStatus.EXPIRED)) {
+                progress.progress = (ageNow.toLong() * 1000L / sensor.lifetime).coerceIn(0L, 1000L).toInt()
+                progress.visibility = View.VISIBLE
+            }
+            val words = ArrayList<String>(3)
+            words.add(Texts.stateLabel(this, status))
+            words.add(sensor.typeLabel)
+            if (status == ScanStatus.STARTING) {
+                words.add(getString(R.string.sensor_warmup_left) + " " + GlucoseFormat.duration(Math.max(0, SensorInfo.WARMUP_MINUTES - ageNow)))
+            }
+            if (status == ScanStatus.OK) {
+                words.add(getString(R.string.sensor_left) + " " + GlucoseFormat.duration(Math.max(0, sensor.lifetime - ageNow)))
+            }
+            val line = TextView(this)
+            line.text = Texts.unbroken(words.joinToString(" · "))
+            line.setTextColor(getColor(R.color.p_text2))
+            line.textSize = 11f
+            line.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).also { it.topMargin = dp(10) }
+            box.addView(line)
+        }
     }
 
     private fun addRow(box: LinearLayout, label: String, text: String, problem: Boolean) {
@@ -823,11 +1196,20 @@ class MainActivity : Activity(), NfcAdapter.ReaderCallback {
     companion object {
         private const val REFRESH_MILLIS = 20_000L
 
+        /**
+         * A reading this recent means readings are arriving now. The sensor samples each minute,
+         * so six minutes already allows for a few missed ones.
+         */
+        private const val FRESH_MINUTES = 6L
+
+        /** After this a reading is shown as late rather than as arriving. */
+        private const val STALE_MINUTES = 30L
+
         /** How often the analysis of the last days is counted anew. */
         private const val ANALYSIS_MILLIS = 5 * 60_000L
 
         /** The text sizes of the big number and its arrow, as in activity_main.xml. */
-        private const val VALUE_TEXT_SP = 84f
-        private const val ARROW_TEXT_SP = 48f
+        private const val VALUE_TEXT_SP = 76f
+        private const val ARROW_TEXT_SP = 42f
     }
 }

@@ -65,6 +65,17 @@ class GlucoseTable internal constructor(private val helper: SQLiteOpenHelper, va
         } finally {
             db.endTransaction()
         }
+        if (added > 0) {
+            // check the stored predictions against the readings that just landed
+            try {
+                val evalDb = helper.writableDatabase
+                for (glucose in values) {
+                    ForecastLog.evaluate(evalDb, glucose.timestamp, glucose.value)
+                }
+            } catch (e: RuntimeException) {
+                // the log must never break the saving of a value
+            }
+        }
         return added
     }
 
@@ -196,6 +207,8 @@ class GlucoseStore(context: Context, name: String? = DATABASE_NAME) :
         for (source in ValueSource.values()) {
             createTable(db, source.table)
         }
+        ForecastLog.create(db)
+        AlertLog.create(db)
     }
 
     private fun createTable(db: SQLiteDatabase, table: String) {
@@ -222,6 +235,23 @@ class GlucoseStore(context: Context, name: String? = DATABASE_NAME) :
             db.execSQL("ALTER TABLE glucose ADD COLUMN synced INTEGER NOT NULL DEFAULT 0")
             createTable(db, ValueSource.LINKUP.table)
         }
+        // Version 5 (app 5.9): the log of the forecasts, so that the app can measure its own
+        // predictions against the readings that actually arrived (MAE and RMSE).
+        if (oldVersion < 5) {
+            ForecastLog.create(db)
+        }
+        // Version 6 (app 5.10): the records of the alert engine and of the sync: which alarm
+        // fired about which reading, whether the notification could be posted, and when the
+        // phone last asked LibreLinkUp.
+        if (oldVersion < 6) {
+            AlertLog.create(db)
+        }
+        // Version 7 (app 5.11): the predictions gain the columns the online copy needs
+        // (which model, what it was built on, how fresh that was, how wide its own spread
+        // was) and a mark for "copied", so they can be copied and checked there too.
+        if (oldVersion >= 5 && oldVersion < 7) {
+            ForecastLog.upgradeToV7(db)
+        }
     }
 
     /** Adds values to [shown]. A value for a minute that is already there is left as it is. */
@@ -231,6 +261,14 @@ class GlucoseStore(context: Context, name: String? = DATABASE_NAME) :
 
     /** The newest value of [shown], or null if there is none. */
     fun latest(): Glucose? = shown.latest()
+
+    /**
+     * The newest value of one table, whichever table the screens happen to be showing.
+     *
+     * The Home screen needs this to say honestly which source supplied the last reading: the
+     * answer has to come from the two tables themselves, not from which switch is on.
+     */
+    fun latestOf(source: ValueSource): Glucose? = table(source).latest()
 
     /** All values of [shown] from [from] on (milliseconds since 1970), oldest first. */
     fun since(from: Long): List<Glucose> = shown.since(from)
@@ -243,11 +281,19 @@ class GlucoseStore(context: Context, name: String? = DATABASE_NAME) :
 
     fun count(): Int = shown.count()
 
+    /** How well the stored forecasts have matched the real readings lately. Null before anything was checked. */
+    fun forecastAccuracy(since: Long): ForecastAccuracy? = ForecastLog.accuracy(this, since)
+
+    /** Store the three horizon estimates for [forecast]. Throttling is the caller's job. */
+    fun recordForecasts(forecast: com.glucosescan.app.core.Forecast, now: Long, mean: Double?, lowLimit: Int, highLimit: Int, inputValue: Double? = null, inputTime: Long? = null, freshnessMinutes: Int? = null): Int =
+        ForecastLog.record(this, forecast, now, mean, lowLimit, highLimit, inputValue, inputTime, freshnessMinutes)
+
     /** Removes values of [shown] with a time after [time]. */
     fun deleteAfter(time: Long): Int = shown.deleteAfter(time)
 
-    /** Removes the values of both sets that are older than [time]. */
-    fun deleteBefore(time: Long): Int = sensorTable.deleteBefore(time) + linkUpTable.deleteBefore(time)
+    /** Removes the values of both sets that are older than [time], and the forecasts. */
+    fun deleteBefore(time: Long): Int = sensorTable.deleteBefore(time) + linkUpTable.deleteBefore(time) +
+        ForecastLog.deleteBefore(writableDatabase, time)
 
     /** Removes every value of both sets from the phone. The online copy is not touched. */
     fun deleteAll() {
@@ -258,9 +304,46 @@ class GlucoseStore(context: Context, name: String? = DATABASE_NAME) :
     /** How many values of both sets there are. */
     fun countAll(): Int = sensorTable.count() + linkUpTable.count()
 
+    /** The newest alert event, or null if none ever fired (or the records were reset). */
+    fun latestAlert(): AlertRecord? = AlertLog.latestAlert(readableDatabase)
+
+    /** The newest [limit] alert events, newest first. */
+    fun recentAlerts(limit: Int): List<AlertRecord> = AlertLog.recentAlerts(readableDatabase, limit)
+
+    /** The newest sync event, or null if none was ever recorded. */
+    fun latestSync(): SyncRecord? = AlertLog.latestSync(readableDatabase)
+
+    /** The newest [limit] sync events, newest first. */
+    fun recentSyncs(limit: Int): List<SyncRecord> = AlertLog.recentSyncs(readableDatabase, limit)
+
+    /**
+     * Records an alert and returns true if it was new. The same reading produces the same event
+     * id, so a duplicate evaluation records nothing.
+     */
+    fun recordAlertIfNew(eventId: String, kind: String, valueMgdl: Int?, measuredAt: Long, at: Long, status: String, detail: String?): Boolean {
+        return AlertLog.recordAlert(writableDatabase, eventId, kind, valueMgdl, measuredAt, at, status, detail)
+    }
+
+    /** Records a sync event. */
+    fun recordSync(clientId: String, kind: String, ok: Boolean, detail: String?, at: Long) {
+        AlertLog.recordSync(writableDatabase, clientId, kind, ok, detail, at)
+    }
+
+    /** The alerts that have not been copied to the online copy yet (oldest first). */
+    fun unsyncedAlerts(limit: Int): List<AlertRecord> = AlertLog.unsyncedAlerts(readableDatabase, limit)
+
+    /** The sync events that have not been copied to the online copy yet (oldest first). */
+    fun unsyncedSyncs(limit: Int): List<SyncRecord> = AlertLog.unsyncedSyncs(readableDatabase, limit)
+
+    /** Marks alerts as copied to the online copy. */
+    fun markAlertsSynced(ids: List<Long>) = AlertLog.markAlertsSynced(writableDatabase, ids)
+
+    /** Marks sync events as copied to the online copy. */
+    fun markSyncsSynced(ids: List<Long>) = AlertLog.markSyncsSynced(writableDatabase, ids)
+
     companion object {
         const val DATABASE_NAME = "glucose.db"
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 7
 
         @Volatile
         private var instance: GlucoseStore? = null

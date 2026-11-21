@@ -86,5 +86,8 @@
             android:minHeight="56dp"
             android:text="@string/welcome_start"
             android:textSize="18sp" />
+        <TextView
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
     </LinearLayout>
 </ScrollView>

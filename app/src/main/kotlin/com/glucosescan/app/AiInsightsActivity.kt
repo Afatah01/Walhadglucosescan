@@ -3,6 +3,7 @@ package com.glucosescan.app
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -185,7 +186,8 @@ class AiInsightsActivity : BaseActivity() {
 
         val days = this.days
         val unit = settings.unit ?: GlucoseUnit.MGDL
-        val language = settings.answerLanguage
+        // English only.
+        val language = AnswerLanguage.ENGLISH
         val low = settings.lowLimit
         val high = settings.highLimit
         val readings = store
@@ -237,29 +239,21 @@ class AiInsightsActivity : BaseActivity() {
         val blocks: List<AdvisorBlock>
     )
 
-    /** The ready-made questions, as wide buttons that ask the moment they are pressed. */
+    /** The ready-made questions, each its own white card: a violet spark and a chevron. */
     private fun renderQuestions() {
         val box = findViewById<LinearLayout>(R.id.questionChips)
         box.removeAllViews()
         for (textId in readyQuestions) {
-            val button = Button(this)
-            button.text = getString(textId)
-            button.setTextColor(getColor(R.color.text))
-            button.textSize = 14f
-            button.isAllCaps = false
-            button.typeface = AppFont.regular(this)
-            button.background = getDrawable(R.drawable.range_button_background)
-            button.minimumHeight = 0
-            button.minHeight = 0
-            button.setPadding(dp(12), dp(12), dp(12), dp(12))
+            val row = LayoutInflater.from(this).inflate(R.layout.row_question, box, false)
+            row.findViewById<TextView>(R.id.text).text = getString(textId)
             val params = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            params.topMargin = dp(6)
-            button.layoutParams = params
-            button.setOnClickListener { ask(getString(textId)) }
-            box.addView(button)
+            params.topMargin = dp(8)
+            row.layoutParams = params
+            row.setOnClickListener { ask(getString(textId)) }
+            box.addView(row)
         }
     }
 
@@ -408,8 +402,8 @@ class AiInsightsActivity : BaseActivity() {
             badge.setTextColor(getColor(R.color.state_on_text))
         } else {
             badge.text = getString(R.string.insights_from_phone)
-            badge.setBackgroundResource(R.drawable.pill_state_off)
-            badge.setTextColor(getColor(R.color.text_secondary))
+            badge.setBackgroundResource(R.drawable.pill_answer_source)
+            badge.setTextColor(getColor(R.color.p_violet))
         }
 
         val note = findViewById<TextView>(R.id.answerNote)
@@ -445,10 +439,15 @@ class AiInsightsActivity : BaseActivity() {
  * it never keeps the app alive after the person leaves, and no screen makes its own.
  */
 object SharedAiBackground {
+    /**
+     * Note what this does NOT do: it does not start the thread itself.
+     *
+     * `Thread(work).start()` inside the thread factory hands the pool a thread that has already
+     * been started, and the pool then fails at the moment it tries to start it — every time.
+     * That is what closed the app the instant Insights was opened: the very first line of work
+     * threw `IllegalThreadStateException` on the main thread. The factory only builds the thread.
+     */
     val executor: java.util.concurrent.Executor = Executors.newSingleThreadExecutor { work ->
-        Thread(work, "ai-question").apply {
-            isDaemon = true
-            start()
-        }
+        Thread(work, "ai-question").apply { isDaemon = true }
     }
 }

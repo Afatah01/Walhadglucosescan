@@ -1,5 +1,7 @@
 package com.glucosescan.app.data
 
+import com.glucosescan.app.BuildConfig
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -431,6 +433,11 @@ class Settings(context: Context) {
         get() = prefs.getString("live_address", null)
         set(value) = prefs.edit().putString("live_address", value).apply()
 
+    /** When the forecasts were stored last, so that the log is throttled. */
+    var lastForecastRecordTime: Long
+        get() = prefs.getLong("last_forecast_record", 0L)
+        set(value) = prefs.edit().putLong("last_forecast_record", value).apply()
+
     /** Since when live values are expected (see AlarmRules.reason). */
     var liveWaitingSince: Long
         get() = prefs.getLong("live_waiting_since", 0L)
@@ -490,8 +497,160 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("alarm_low_soon_on", false)
         set(value) = prefs.edit().putBoolean("alarm_low_soon_on", value).apply()
 
+    /** True: an alarm sounds when the value is below the very-low limit. On from the start (a severe low must never be missed). */
+    var alarmVeryLowOn: Boolean
+        get() = prefs.getBoolean("alarm_very_low_on", true)
+        set(value) = prefs.edit().putBoolean("alarm_very_low_on", value).apply()
+
+    /** The very-low alarm sounds below this (mg/dL). */
+    var alarmVeryLow: Int
+        get() = prefs.getInt("alarm_very_low", AlarmSettings.DEFAULT_VERY_LOW)
+        set(value) = prefs.edit().putInt("alarm_very_low", roundToStep(value).coerceIn(ALARM_VERY_LOW_MIN, ALARM_VERY_LOW_MAX)).apply()
+
+    /** True: an alarm sounds when the value is above the very-high limit. Off from the start. */
+    var alarmVeryHighOn: Boolean
+        get() = prefs.getBoolean("alarm_very_high_on", false)
+        set(value) = prefs.edit().putBoolean("alarm_very_high_on", value).apply()
+
+    /** The very-high alarm sounds above this (mg/dL). */
+    var alarmVeryHigh: Int
+        get() = prefs.getInt("alarm_very_high", AlarmSettings.DEFAULT_VERY_HIGH)
+        set(value) = prefs.edit().putInt("alarm_very_high", roundToStep(value).coerceIn(ALARM_VERY_HIGH_MIN, ALARM_VERY_HIGH_MAX)).apply()
+
+    /** True: an alarm sounds when the glucose changes faster than the rapid-change rate. Off from the start. */
+    var alarmRapidOn: Boolean
+        get() = prefs.getBoolean("alarm_rapid_on", false)
+        set(value) = prefs.edit().putBoolean("alarm_rapid_on", value).apply()
+
+    /** Stored as tenths of mg/dL per minute: 20 = 2.0 mg/dL per minute. */
+    var alarmRapidRateTenths: Int
+        get() = prefs.getInt("alarm_rapid_rate_tenths", AlarmSettings.DEFAULT_RAPID_TENTHS)
+        set(value) = prefs.edit().putInt("alarm_rapid_rate_tenths", value.coerceIn(RAPID_RATE_MIN_TENTHS, RAPID_RATE_MAX_TENTHS)).apply()
+
+    /** True: a quiet notification is posted each time a new reading arrives. Off from the start. */
+    var notifyValueOn: Boolean
+        get() = prefs.getBoolean("notify_value_on", false)
+        set(value) = prefs.edit().putBoolean("notify_value_on", value).apply()
+
+    /** How many times LibreLinkUp could not be reached in a row. Reset when it answers again. */
+    var linkUpFailCount: Int
+        get() = prefs.getInt("linkup_fail_count", 0)
+        set(value) = prefs.edit().putInt("linkup_fail_count", value).apply()
+
+    /** True while a "can't reach LibreLinkUp" notification is up and must not be posted again until the connection recovers. */
+    var syncFailNotified: Boolean
+        get() = prefs.getBoolean("sync_fail_notified", false)
+        set(value) = prefs.edit().putBoolean("sync_fail_notified", value).apply()
+
+    /** When the "no internet" notification was posted last, so it repeats at most once an hour. */
+    var networkNotifiedAt: Long
+        get() = prefs.getLong("network_notified_at", 0L)
+        set(value) = prefs.edit().putLong("network_notified_at", value).apply()
+
+    // ------------------------------------------------------------------ monitoring
+
+    /** When the monitoring sync ran last, whatever the outcome (ms since 1970), or 0 if never. */
+    var monitoringLastSyncTime: Long
+        get() = prefs.getLong("monitoring_last_sync", 0L)
+        set(value) = prefs.edit().putLong("monitoring_last_sync", value).apply()
+
+    /** Whether the last monitoring sync reached LibreLinkUp. */
+    var monitoringLastSyncOk: Boolean
+        get() = prefs.getBoolean("monitoring_last_sync_ok", false)
+        set(value) = prefs.edit().putBoolean("monitoring_last_sync_ok", value).apply()
+
+    /** What went wrong in the last monitoring sync, in plain words. Empty when it went fine. */
+    var monitoringLastError: String
+        get() = prefs.getString("monitoring_last_error", "") ?: ""
+        set(value) = prefs.edit().putString("monitoring_last_error", value.take(300)).apply()
+
+    /** When the newest reading the app processed was measured (ms since 1970), or 0 if none. */
+    var monitoringLastReadingAt: Long
+        get() = prefs.getLong("monitoring_last_reading", 0L)
+        set(value) = prefs.edit().putLong("monitoring_last_reading", value).apply()
+
+    /** When the background safety-sync (WorkManager) ran last (ms since 1970), or 0 if never. */
+    var monitoringLastWorkerTime: Long
+        get() = prefs.getLong("monitoring_last_worker", 0L)
+        set(value) = prefs.edit().putLong("monitoring_last_worker", value).apply()
+
+    /** The client id of the monitoring session that is open, or "" when none. Cleared when it is closed. */
+    var monitoringSessionClientId: String
+        get() = prefs.getString("monitoring_session_client_id", "") ?: ""
+        set(value) = prefs.edit().putString("monitoring_session_client_id", value).apply()
+
+    /** When the monitoring session now open (or the last one) started (ms since 1970), 0 if none. */
+    var monitoringSessionStartedAt: Long
+        get() = prefs.getLong("monitoring_session_started_at", 0L)
+        set(value) = prefs.edit().putLong("monitoring_session_started_at", value).apply()
+
+    /** When the monitoring session ended (ms since 1970), or 0 while it is open. */
+    var monitoringSessionEndedAt: Long
+        get() = prefs.getLong("monitoring_session_ended_at", 0L)
+        set(value) = prefs.edit().putLong("monitoring_session_ended_at", value).apply()
+
+    /** Why the last monitoring session ended ("service-ended", "process-restarted"), or "" while open. */
+    var monitoringSessionEndReason: String
+        get() = prefs.getString("monitoring_session_end_reason", "") ?: ""
+        set(value) = prefs.edit().putString("monitoring_session_end_reason", value).apply()
+
+    /** What the monitoring session is backed by: "ble" (the sensor) or "linkup" (the internet). */
+    var monitoringSessionSource: String
+        get() = prefs.getString("monitoring_session_source", "") ?: ""
+        set(value) = prefs.edit().putString("monitoring_session_source", value).apply()
+
+    /** True once the finished session has been copied to the online copy (so it is not copied again). */
+    var monitoringSessionCopied: Boolean
+        get() = prefs.getBoolean("monitoring_session_copied", false)
+        set(value) = prefs.edit().putBoolean("monitoring_session_copied", value).apply()
+
+    /** Forgets the finished session: the online copy has it. */
+    fun clearMonitoringSession() {
+        prefs.edit().remove("monitoring_session_client_id").remove("monitoring_session_started_at")
+            .remove("monitoring_session_ended_at").remove("monitoring_session_end_reason")
+            .remove("monitoring_session_source").remove("monitoring_session_copied").apply()
+    }
+
+    /** When the authenticated round-trip to Supabase was checked last (ms since 1970), or 0 if never. */
+    var supabasePingTime: Long
+        get() = prefs.getLong("supabase_ping_time", 0L)
+        set(value) = prefs.edit().putLong("supabase_ping_time", value).apply()
+
+    /** Whether the last authenticated Supabase round-trip got through. */
+    var supabasePingOk: Boolean
+        get() = prefs.getBoolean("supabase_ping_ok", false)
+        set(value) = prefs.edit().putBoolean("supabase_ping_ok", value).apply()
+
+    /** How many milliseconds the last authenticated round-trip took, or -1 if it did not answer. */
+    var supabasePingMillis: Long
+        get() = prefs.getLong("supabase_ping_millis", -1L)
+        set(value) = prefs.edit().putLong("supabase_ping_millis", value).apply()
+
+    /** What the last Supabase round-trip said, in plain words (includes the time it took). Empty if never checked. */
+    var supabasePingWords: String
+        get() = prefs.getString("supabase_ping_words", "") ?: ""
+        set(value) = prefs.edit().putString("supabase_ping_words", value.take(300)).apply()
+
+    /** A random id for this phone, made on first use. Only used to register the device in the online copy. */
+    val deviceId: String
+        get() {
+            val existing = prefs.getString("device_id", "") ?: ""
+            if (existing.isNotEmpty()) {
+                return existing
+            }
+            val made = java.util.UUID.randomUUID().toString()
+            prefs.edit().putString("device_id", made).apply()
+            return made
+        }
+
     val alarmSettings: AlarmSettings
-        get() = AlarmSettings(alarmLowOn, alarmLow, alarmHighOn, alarmHigh, alarmNoDataOn, lowSoonOn = alarmLowSoonOn)
+        get() = AlarmSettings(
+            alarmLowOn, alarmLow, alarmHighOn, alarmHigh, alarmNoDataOn,
+            lowSoonOn = alarmLowSoonOn,
+            veryLowOn = alarmVeryLowOn, veryLow = alarmVeryLow,
+            veryHighOn = alarmVeryHighOn, veryHigh = alarmVeryHigh,
+            rapidOn = alarmRapidOn, rapidRate = alarmRapidRateTenths / 10.0
+        )
 
     /** What was alarmed last and what the user has silenced. */
     var alarmMemory: AlarmMemory
@@ -669,14 +828,21 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("backup_enabled", false)
         set(value) = prefs.edit().putBoolean("backup_enabled", value).apply()
 
-    /** The address of the Supabase project: "https://xxxx.supabase.co". */
+    /**
+     * The address of the Supabase project: "https://xxxx.supabase.co". Falls back to the built-in
+     * project when the user has not typed one — the address is not a secret.
+     */
     var backupUrl: String
-        get() = prefs.getString("backup_url", "") ?: ""
+        get() = (prefs.getString("backup_url", "") ?: "").ifEmpty { BuildConfig.WALHAD_SUPABASE_URL }
         set(value) = prefs.edit().putString("backup_url", value.trim().trimEnd('/')).apply()
 
-    /** The public key of the project ("publishable" key). It is not a secret. */
+    /**
+     * The public ("anon") key of the project. It is not a secret: the project denies every table
+     * to anonymous callers (Row Level Security + no grants); this only proves which project is
+     * being called. Falls back to the built-in key when the user has not typed one.
+     */
     var backupKey: String
-        get() = prefs.getString("backup_key", "") ?: ""
+        get() = (prefs.getString("backup_key", "") ?: "").ifEmpty { BuildConfig.WALHAD_SUPABASE_ANON_KEY }
         set(value) = prefs.edit().putString("backup_key", value.trim()).apply()
 
     var backupEmail: String
@@ -776,6 +942,12 @@ class Settings(context: Context) {
         const val ALARM_LOW_MAX = 120
         const val ALARM_HIGH_MIN = 130
         const val ALARM_HIGH_MAX = 400
+        const val ALARM_VERY_LOW_MIN = 45
+        const val ALARM_VERY_LOW_MAX = 65
+        const val ALARM_VERY_HIGH_MIN = 220
+        const val ALARM_VERY_HIGH_MAX = 300
+        const val RAPID_RATE_MIN_TENTHS = 10 // 1.0 mg/dL per minute
+        const val RAPID_RATE_MAX_TENTHS = 40 // 4.0 mg/dL per minute
 
         private const val HEX = "0123456789abcdef"
 

@@ -124,6 +124,181 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Very low: severe hypoglycaemia, its own limit -->
+        <LinearLayout style="@style/Card">
+
+            <Switch
+                android:id="@+id/alarmVeryLowSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_very_low_switch"
+                android:textColor="@color/red"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/alarm_very_low_limit"
+                    android:textColor="@color/text"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/alarmVeryLowMinus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_very_low_down"
+                    android:text="@string/minus" />
+
+                <TextView
+                    android:id="@+id/alarmVeryLowValue"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/alarmVeryLowPlus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_very_low_up"
+                    android:text="@string/plus" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/alarm_very_low_note" />
+        </LinearLayout>
+
+        <!-- Very high -->
+        <LinearLayout style="@style/Card">
+
+            <Switch
+                android:id="@+id/alarmVeryHighSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_very_high_switch"
+                android:textColor="@color/p_orange"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/alarm_very_high_limit"
+                    android:textColor="@color/text"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/alarmVeryHighMinus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_very_high_down"
+                    android:text="@string/minus" />
+
+                <TextView
+                    android:id="@+id/alarmVeryHighValue"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/alarmVeryHighPlus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_very_high_up"
+                    android:text="@string/plus" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/alarm_very_high_note" />
+        </LinearLayout>
+
+        <!-- Rapid changes -->
+        <LinearLayout style="@style/Card">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/alarm_rapid_card" />
+
+            <Switch
+                android:id="@+id/alarmRapidSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/alarm_rapid_switch" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/alarm_rapid_rate"
+                    android:textColor="@color/text"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/alarmRapidMinus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_rapid_down"
+                    android:text="@string/minus" />
+
+                <TextView
+                    android:id="@+id/alarmRapidValue"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/alarmRapidPlus"
+                    style="@style/StepButton"
+                    android:contentDescription="@string/alarm_rapid_up"
+                    android:text="@string/plus" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/alarm_rapid_note" />
+        </LinearLayout>
+
+        <!-- Notify on each new reading -->
+        <LinearLayout style="@style/Card">
+
+            <Switch
+                android:id="@+id/notifyValueSwitch"
+                style="@style/SwitchRow"
+                android:text="@string/notify_value_switch" />
+
+            <TextView
+                style="@style/NoteText"
+                android:layout_marginTop="4dp"
+                android:text="@string/notify_value_note" />
+        </LinearLayout>
+
         <LinearLayout style="@style/Card">
 
             <TextView
@@ -176,5 +351,8 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="14dp"
             android:text="@string/alarms_warning" />
+        <TextView
+            style="@style/CreditLine"
+            android:text="@string/powered_by_line" />
     </LinearLayout>
 </ScrollView>

@@ -286,6 +286,164 @@ class SupabaseApi(
         return if (found is String) found else found?.toString() ?: ""
     }
 
+    // ------------------------------------------------------------------ monitoring records
+    //
+    // Copies of the app's own monitoring audit trail (alert events, sync events), the device
+    // registration and the app-health snapshot. All of these are the user's own rows, written
+    // only when the online copy is switched on, and protected by the same row-level security.
+
+    /**
+     * Copies alert events into the online copy. An event that is there already (same person,
+     * same event id) is left as it is.
+     */
+    fun addAlertEvents(session: BackupSession, alerts: List<com.glucosescan.app.data.AlertRecord>): BackupReply<Int> {
+        if (alerts.isEmpty()) {
+            return BackupReply.ok(0)
+        }
+        val rows = JSONArray()
+        for (alert in alerts) {
+            val row = JSONObject()
+                .put("user_id", session.userId)
+                .put("event_id", alert.eventId)
+                .put("kind", alert.kind)
+                .put("fired_at", iso(alert.at))
+                .put("status", alert.status)
+            row.put("value_mgdl", alert.valueMgdl ?: JSONObject.NULL)
+            row.put("measured_at", if (alert.measuredAt > 0L) iso(alert.measuredAt) else JSONObject.NULL)
+            row.put("detail", alert.detail?.take(500) ?: JSONObject.NULL)
+            rows.put(row)
+        }
+        return postRows("alert_events", session, rows, "user_id,event_id")
+    }
+
+    /** Copies sync events into the online copy. A sync event that is there already is left as it is. */
+    fun addSyncEvents(session: BackupSession, syncs: List<com.glucosescan.app.data.SyncRecord>): BackupReply<Int> {
+        if (syncs.isEmpty()) {
+            return BackupReply.ok(0)
+        }
+        val rows = JSONArray()
+        for (sync in syncs) {
+            val row = JSONObject()
+                .put("user_id", session.userId)
+                .put("client_id", sync.clientId)
+                .put("at", iso(sync.at))
+                .put("kind", sync.kind)
+                .put("ok", sync.ok)
+            row.put("detail", sync.detail?.take(500) ?: JSONObject.NULL)
+            rows.put(row)
+        }
+        return postRows("sync_events", session, rows, "user_id,client_id")
+    }
+
+    /** Registers this phone in the online copy (one row per device), refreshing the version it runs. */
+    fun addDeviceRegistration(session: BackupSession, deviceId: String, appVersion: String): BackupReply<Int> {
+        val row = JSONObject()
+            .put("user_id", session.userId)
+            .put("device_id", deviceId)
+            .put("app_version", appVersion)
+            .put("updated_at", iso(System.currentTimeMillis()))
+        return postRows("device_registrations", session, JSONArray().put(row), "user_id,device_id", merge = true)
+    }
+
+    /**
+     * Copies the predictions (and, for the ones that have been checked since they were sent, their
+     * measured error) into the online copy. A prediction that is there already (same person, same
+     * moment of making, same horizon) is replaced with the newer state — so an unchecked prediction
+     * becomes a scored one on the next copy, never a duplicate.
+     */
+    fun addForecastPredictions(session: BackupSession, records: List<com.glucosescan.app.data.ForecastRecord>): BackupReply<Int> {
+        if (records.isEmpty()) {
+            return BackupReply.ok(0)
+        }
+        val rows = JSONArray()
+        for (record in records) {
+            val row = JSONObject()
+                .put("user_id", session.userId)
+                .put("computed_at", iso(record.computedAt))
+                .put("at_time", iso(record.atTime))
+                .put("horizon", record.horizonMinutes)
+                .put("value_mgdl", record.valueMgdl)
+                .put("confidence", record.confidence)
+                .put("actual", record.actual ?: JSONObject.NULL)
+                .put("error", record.error ?: JSONObject.NULL)
+                .put("evaluated_at", record.evaluatedAt?.let { iso(it) } ?: JSONObject.NULL)
+                .put("input_value", record.inputValue ?: JSONObject.NULL)
+                .put("input_time", record.inputTime?.let { iso(it) } ?: JSONObject.NULL)
+                .put("model", record.model ?: JSONObject.NULL)
+                .put("freshness_minutes", record.freshnessMinutes ?: JSONObject.NULL)
+                .put("band", record.band ?: JSONObject.NULL)
+                .put("ci_half_width", record.ciHalfWidth ?: JSONObject.NULL)
+            rows.put(row)
+        }
+        return postRows("forecast_predictions", session, rows, "user_id,computed_at,horizon", merge = true)
+    }
+
+    /**
+     * Writes (or refreshes) this monitoring session in the online copy: when it started, and when
+     * it ended — or, left open, that it is running. The open session of a phone that died without
+     * closing is closed by the app on its next start, with the reason "process-restarted".
+     */
+    fun addMonitoringSession(session: BackupSession, clientId: String, startedAt: Long, endedAt: Long?, endReason: String?, source: String): BackupReply<Int> {
+        val row = JSONObject()
+            .put("user_id", session.userId)
+            .put("client_id", clientId)
+            .put("started_at", iso(startedAt))
+            .put("source", source)
+            .put("ended_at", endedAt?.let { iso(it) } ?: JSONObject.NULL)
+            .put("end_reason", if (endedAt != null && !endReason.isNullOrEmpty()) endReason else JSONObject.NULL)
+        return postRows("monitoring_sessions", session, JSONArray().put(row), "user_id,client_id", merge = true)
+    }
+
+    /**
+     * An authenticated round-trip to the project: one row read from the values table with the
+     * pass of the person. This is the one check the Monitoring screen can make by itself, on
+     * demand, and the truth it shows comes from this answer — never from a remembered flag.
+     * Returns how many milliseconds the database took, or why it failed.
+     */
+    fun ping(session: BackupSession): BackupReply<Long> {
+        val started = System.nanoTime()
+        val response = send("GET", "/rest/v1/$TABLE?select=time_ms&limit=1", session.accessToken, null) ?: return noAnswer()
+        val millis = (System.nanoTime() - started) / 1_000_000L
+        if (!response.isSuccess) {
+            return BackupReply.failed(failure(response))
+        }
+        return BackupReply.ok(millis)
+    }
+
+    /** Writes one app-health snapshot: what the monitoring stack looked like at this moment. */
+    fun addAppHealth(session: BackupSession, foregroundServiceRunning: Boolean, linkUpState: String, networkUp: Boolean, detail: String?, workmanagerOk: Boolean? = null): BackupReply<Int> {
+        val row = JSONObject()
+            .put("user_id", session.userId)
+            .put("at", iso(System.currentTimeMillis()))
+            .put("foreground_service", foregroundServiceRunning)
+            .put("linkup_state", linkUpState)
+            .put("network", if (networkUp) "online" else "offline")
+        row.put("workmanager_ok", workmanagerOk ?: JSONObject.NULL)
+        row.put("detail", detail?.take(500) ?: JSONObject.NULL)
+        return postRows("app_health", session, JSONArray().put(row), null)
+    }
+
+    /** The rows of [table] are added with the resolution asked for. Returns how many went up. */
+    private fun postRows(table: String, session: BackupSession, rows: JSONArray, conflict: String?, merge: Boolean = false): BackupReply<Int> {
+        if (rows.length() == 0) {
+            return BackupReply.ok(0)
+        }
+        val suffix = conflict?.let { "?on_conflict=$it" } ?: ""
+        val prefer = if (merge) "resolution=merge-duplicates,return=minimal" else "resolution=ignore-duplicates,return=minimal"
+        val response = send(
+            "POST", "/rest/v1/$table$suffix", session.accessToken, rows.toString(),
+            mapOf("Prefer" to prefer)
+        ) ?: return noAnswer()
+        return if (response.isSuccess) BackupReply.ok(rows.length()) else BackupReply.failed(failure(response))
+    }
+
+    /** The moment as the database wants it: ISO 8601, UTC. */
+    private fun iso(millis: Long): String {
+        val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+        format.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return format.format(java.util.Date(millis))
+    }
+
     companion object {
         const val TABLE = "glucose_values"
 

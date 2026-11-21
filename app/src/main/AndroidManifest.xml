@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.glucosescan.app"
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- The app reads the sensor with NFC and vibrates when a scan ends. -->
@@ -10,6 +11,8 @@
          up: values from LibreLinkUp, questions to an AI service, and the online copy of the
          values. Without them the app sends nothing. Only https addresses are used. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- To see when the network goes away and comes back, so monitoring recovers by itself. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Live values (only if the user switches them on): a Bluetooth connection to the sensor.
          Android 11 and older: the plain Bluetooth permissions, and "location", which those
@@ -50,6 +53,10 @@
         android:name="android.permission.USE_EXACT_ALARM"
         tools:ignore="ExactAlarm" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Severe alerts (very low / very high) may open the full-screen alert when the user allows it
+         in Settings. Android 14 and newer ask for this access; the app only uses it
+         if the phone says it may. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Lets the app ask the user to keep it running in the background. Alarms need that. -->
@@ -210,6 +217,23 @@
             android:label="@string/linkup_title"
             android:parentActivityName=".MoreActivity"
             android:windowSoftInputMode="stateHidden" />
+
+        <!-- Live monitoring status: service, sync, network, alerts, records. Read from the phone, never painted. -->
+        <activity
+            android:name=".MonitoringActivity"
+            android:exported="false"
+            android:label="@string/monitoring_title"
+            android:parentActivityName=".MoreActivity"
+            android:theme="@style/AppTheme.Main" />
+        <!-- The severe alert screen. Opened by the system from the full-screen alert (only for VERY LOW / VERY HIGH,
+             only when Android allows it and the user granted it), or by tapping the alert. A measured value only. -->
+        <activity
+            android:name=".AlertActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/AppTheme.Main" />
 
         <!-- Gets a value each minute while the app is closed: over Bluetooth from the sensor
              ("connected device"), or over the internet from LibreLinkUp ("special use"). Runs

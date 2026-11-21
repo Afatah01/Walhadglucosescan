@@ -27,9 +27,16 @@ import com.glucosescan.app.ui.Texts
 object LiveNotifications {
     const val CHANNEL_LIVE = "live"
     const val CHANNEL_ALARM = "alarm"
+    const val CHANNEL_STATUS = "status"
+    const val CHANNEL_READINGS = "readings"
     const val ID_LIVE = 1
     const val ID_ALARM = 2
     const val ID_STOPPED = 3
+    const val ID_SYNC_FAIL = 4
+    const val ID_NETWORK = 5
+    const val ID_RESTORED = 6
+    const val ID_NEW_VALUE = 7
+    const val ID_TEST = 8
 
     /** How long until "live values have stopped" is shown again. */
     const val STOPPED_AGAIN_MILLIS = 60 * 60_000L
@@ -53,6 +60,21 @@ object LiveNotifications {
         alarm.setSound(null, null)
         alarm.enableVibration(false)
         manager.createNotificationChannel(alarm)
+
+        // Monitoring status: sync failures, network interruptions, service interruptions and
+        // recovery. Default importance so it is seen, but it never makes a sound.
+        val status = NotificationChannel(CHANNEL_STATUS, context.getString(R.string.channel_status), NotificationManager.IMPORTANCE_DEFAULT)
+        status.description = context.getString(R.string.channel_status_text)
+        status.setSound(null, null)
+        status.enableVibration(false)
+        status.setShowBadge(false)
+        manager.createNotificationChannel(status)
+
+        // Optional: a quiet note for each new reading, if the user switched it on.
+        val readings = NotificationChannel(CHANNEL_READINGS, context.getString(R.string.channel_readings), NotificationManager.IMPORTANCE_LOW)
+        readings.description = context.getString(R.string.channel_readings_text)
+        readings.setShowBadge(false)
+        manager.createNotificationChannel(readings)
     }
 
     /** The words for what the live connection is doing. */
@@ -149,6 +171,10 @@ object LiveNotifications {
             AlarmKind.HIGH -> if (shown != null) context.getString(R.string.alarm_high_title, Texts.valueWithUnit(context, shown, unit)) else context.getString(R.string.alarm_high_plain)
             AlarmKind.NO_DATA -> context.getString(R.string.alarm_no_data_title)
             AlarmKind.LOW_SOON -> if (shown != null) context.getString(R.string.alarm_low_soon_title, Texts.valueWithUnit(context, shown, unit)) else context.getString(R.string.alarm_low_soon_plain)
+            AlarmKind.VERY_LOW -> if (shown != null) context.getString(R.string.alarm_very_low_title, Texts.valueWithUnit(context, shown, unit)) else context.getString(R.string.alarm_very_low_plain)
+            AlarmKind.VERY_HIGH -> if (shown != null) context.getString(R.string.alarm_very_high_title, Texts.valueWithUnit(context, shown, unit)) else context.getString(R.string.alarm_very_high_plain)
+            AlarmKind.RAPID_RISE -> if (shown != null) context.getString(R.string.alarm_rapid_rise_title, Texts.valueWithUnit(context, shown, unit)) else context.getString(R.string.alarm_rapid_rise_plain)
+            AlarmKind.RAPID_FALL -> if (shown != null) context.getString(R.string.alarm_rapid_fall_title, Texts.valueWithUnit(context, shown, unit)) else context.getString(R.string.alarm_rapid_fall_plain)
         }
     }
 
@@ -163,15 +189,32 @@ object LiveNotifications {
             AlarmKind.HIGH -> context.getString(R.string.alarm_high_text)
             AlarmKind.NO_DATA -> context.getString(R.string.alarm_no_data_text, stateText)
             AlarmKind.LOW_SOON -> context.getString(R.string.alarm_low_soon_text)
+            AlarmKind.VERY_LOW -> context.getString(R.string.alarm_very_low_text)
+            AlarmKind.VERY_HIGH -> context.getString(R.string.alarm_very_high_text)
+            AlarmKind.RAPID_RISE -> context.getString(R.string.alarm_rapid_rise_text)
+            AlarmKind.RAPID_FALL -> context.getString(R.string.alarm_rapid_fall_text)
         }
         builder.setSmallIcon(R.drawable.ic_stat_drop)
         builder.setContentTitle(alarmTitle(context, kind, current, unit))
         builder.setContentText(text)
-        builder.setStyle(Notification.BigTextStyle().bigText(text))
+        val shown = current.shown
+        val detail = if (shown != null) {
+            val value = Texts.valueWithUnit(context, shown, unit)
+            val arrow = current.state.trend?.arrow
+            val time = Texts.timeOfDay(context, shown.timestamp)
+            if (arrow != null) "$value · $time · $arrow" else "$value · $time"
+        } else {
+            null
+        }
+        builder.setStyle(Notification.BigTextStyle().bigText(if (detail != null) "$detail\n$text" else text))
+        if (detail != null) {
+            builder.setSubText(detail)
+        }
         builder.setCategory(Notification.CATEGORY_ALARM)
         builder.setColor(context.getColor(R.color.red))
         builder.setAutoCancel(true)
-        builder.setContentIntent(openApp(context))
+        // tapping the alert opens the monitoring dashboard: the value, the trend and the state of the alert engine
+        builder.setContentIntent(openMonitoring(context))
         if (Build.VERSION.SDK_INT < 26) {
             @Suppress("DEPRECATION")
             builder.setPriority(Notification.PRIORITY_HIGH)
@@ -184,6 +227,42 @@ object LiveNotifications {
         builder.addAction(
             Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_stat_drop), context.getString(R.string.alarm_silence), pending).build()
         )
+        val monitoring = Intent(context, com.glucosescan.app.MonitoringActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val open = PendingIntent.getActivity(context, 30 + kind.ordinal, monitoring, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        builder.addAction(
+            Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_warn_white), context.getString(R.string.alarm_open_monitoring), open).build()
+        )
+        // a full-screen alert is only for the severe kinds, and only where Android lets the app do it
+        // (Android 14+: only when the user granted "full screen intent" to this app). Otherwise the
+        // alert stays a heads-up notification. The app never tries to force the screen on its own.
+        if ((kind == AlarmKind.VERY_LOW || kind == AlarmKind.VERY_HIGH) && fullScreenAllowed(context)) {
+            builder.setFullScreenIntent(fsiIntent(context, kind, current, unit), true)
+        }
+        return builder.build()
+    }
+
+    /** A clearly-labelled simulated alert for testing the delivery path end to end. Not a medical reading. */
+    fun testAlert(context: Context, current: CurrentValue, unit: GlucoseUnit): Notification {
+        val shown = current.shown
+        val builder = builder(context, CHANNEL_ALARM)
+        builder.setSmallIcon(R.drawable.ic_stat_drop)
+        val value = if (shown != null && current.isCurrent) Texts.valueWithUnit(context, shown, unit) else null
+        val line = if (value != null && shown != null) {
+            context.getString(R.string.test_alert_text_value, value, Texts.timeOfDay(context, shown.timestamp))
+        } else {
+            context.getString(R.string.test_alert_text)
+        }
+        builder.setContentTitle(context.getString(R.string.test_alert_title))
+        builder.setContentText(line)
+        builder.setStyle(Notification.BigTextStyle().bigText(context.getString(R.string.test_alert_text) + "\n" + line))
+        builder.setCategory(Notification.CATEGORY_ALARM)
+        builder.setColor(context.getColor(R.color.red))
+        builder.setAutoCancel(true)
+        builder.setContentIntent(openMonitoring(context))
+        if (Build.VERSION.SDK_INT < 26) {
+            @Suppress("DEPRECATION")
+            builder.setPriority(Notification.PRIORITY_HIGH)
+        }
         return builder.build()
     }
 
@@ -220,6 +299,100 @@ object LiveNotifications {
         }
     }
 
+    /**
+     * A sync failure that the user should know about: LibreLinkUp cannot be reached. Shown
+     * once per failure-streak; the [Settings] flag is cleared when the server answers again.
+     */
+    fun showSyncFailure(context: Context) {
+        createChannels(context)
+        val text = context.getString(R.string.sync_fail_text)
+        val builder = builder(context, CHANNEL_STATUS)
+        builder.setSmallIcon(R.drawable.ic_stat_drop)
+        builder.setContentTitle(context.getString(R.string.sync_fail_title))
+        builder.setContentText(text)
+        builder.setStyle(Notification.BigTextStyle().bigText(text))
+        builder.setCategory(Notification.CATEGORY_ERROR)
+        builder.setColor(context.getColor(R.color.red))
+        builder.setAutoCancel(true)
+        builder.setContentIntent(openApp(context))
+        try {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.notify(ID_SYNC_FAIL, builder.build())
+        } catch (e: RuntimeException) {
+            // notifications are not allowed: nothing more can be done from here
+        }
+    }
+
+    /**
+     * The network went away while monitoring is on. Repeated at most once an hour, like the
+     * other status notes, because the service keeps retrying by itself.
+     */
+    fun showNetworkLost(context: Context) {
+        val settings = Settings(context)
+        val now = AppClock.now()
+        val shownAt = settings.networkNotifiedAt
+        if (shownAt != 0L && now >= shownAt && now - shownAt < STOPPED_AGAIN_MILLIS) {
+            return
+        }
+        settings.networkNotifiedAt = now
+
+        createChannels(context)
+        val text = context.getString(R.string.network_lost_text)
+        val builder = builder(context, CHANNEL_STATUS)
+        builder.setSmallIcon(R.drawable.ic_stat_drop)
+        builder.setContentTitle(context.getString(R.string.network_lost_title))
+        builder.setContentText(text)
+        builder.setStyle(Notification.BigTextStyle().bigText(text))
+        builder.setCategory(Notification.CATEGORY_ERROR)
+        builder.setColor(context.getColor(R.color.red))
+        builder.setAutoCancel(true)
+        builder.setContentIntent(openApp(context))
+        try {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.notify(ID_NETWORK, builder.build())
+        } catch (e: RuntimeException) {
+            // notifications are not allowed: nothing more can be done from here
+        }
+    }
+
+    /** Monitoring is back: the service could not run, and now it can. */
+    fun showMonitoringRestored(context: Context) {
+        createChannels(context)
+        val text = context.getString(R.string.monitoring_restored_text)
+        val builder = builder(context, CHANNEL_STATUS)
+        builder.setSmallIcon(R.drawable.ic_stat_drop)
+        builder.setContentTitle(context.getString(R.string.monitoring_restored_title))
+        builder.setContentText(text)
+        builder.setCategory(Notification.CATEGORY_STATUS)
+        builder.setColor(context.getColor(R.color.brand))
+        builder.setAutoCancel(true)
+        builder.setContentIntent(openApp(context))
+        try {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.notify(ID_RESTORED, builder.build())
+        } catch (e: RuntimeException) {
+            // notifications are not allowed: nothing more can be done from here
+        }
+    }
+
+    /** A quiet note for a new reading. Only posted when the user asked for it. */
+    fun showNewReading(context: Context, current: CurrentValue, unit: GlucoseUnit) {
+        val shown = current.shown ?: return
+        createChannels(context)
+        val builder = builder(context, CHANNEL_READINGS)
+        builder.setSmallIcon(R.drawable.ic_stat_drop)
+        builder.setContentTitle(liveTitle(context, current, unit))
+        val time = Texts.timeOfDay(context, shown.timestamp)
+        val arrow = current.state.trend?.arrow
+        builder.setContentText(if (arrow != null) "$time · $arrow" else time)
+        builder.setAutoCancel(true)
+        builder.setCategory(Notification.CATEGORY_STATUS)
+        builder.setColor(context.getColor(R.color.brand))
+        builder.setContentIntent(openApp(context))
+        try {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.notify(ID_NEW_VALUE, builder.build())
+        } catch (e: RuntimeException) {
+            // notifications are not allowed: nothing more can be done from here
+        }
+    }
+
     private fun builder(context: Context, channel: String): Notification.Builder {
         return if (Build.VERSION.SDK_INT >= 26) {
             Notification.Builder(context, channel)
@@ -232,6 +405,40 @@ object LiveNotifications {
     private fun openApp(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    /** Opens the monitoring dashboard — where the user sees the value, the trend and the alert engine. */
+    private fun openMonitoring(context: Context): PendingIntent {
+        val intent = Intent(context, com.glucosescan.app.MonitoringActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        return PendingIntent.getActivity(context, 5, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    /**
+     * True if Android permits a full-screen intent right now. Android 14 and newer gate it behind
+     * a special app access ("full screen intent"); the app asks for the permission in the manifest,
+     * the user grants or denies it, and this check is what the app obeys. On older versions the
+     * platform decides by the importance of the channel, like any alarm.
+     */
+    private fun fullScreenAllowed(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < 34) {
+            return true
+        }
+        return try {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.canUseFullScreenIntent() == true
+        } catch (e: RuntimeException) {
+            false
+        }
+    }
+
+    /** The full-screen alert: what fired, the value, when it was measured. */
+    private fun fsiIntent(context: Context, kind: AlarmKind, current: CurrentValue, unit: GlucoseUnit): PendingIntent {
+        val shown = current.shown
+        val intent = Intent(context, com.glucosescan.app.AlertActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .putExtra(com.glucosescan.app.AlertActivity.EXTRA_KIND, kind.name)
+            .putExtra(com.glucosescan.app.AlertActivity.EXTRA_VALUE, shown?.value ?: -1)
+            .putExtra(com.glucosescan.app.AlertActivity.EXTRA_MEASURED_AT, shown?.timestamp ?: 0L)
+        return PendingIntent.getActivity(context, 20 + kind.ordinal, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     /** The value as a small white picture for the status bar. */

@@ -10,6 +10,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -30,6 +34,8 @@ import com.glucosescan.app.core.GlucoseUnit
 import com.glucosescan.app.core.LiveStatus
 import com.glucosescan.app.core.SpeechText
 import com.glucosescan.app.data.GlucoseStore
+import com.glucosescan.app.monitoring.AlertPipeline
+import com.glucosescan.app.monitoring.MonitoringEvents
 import com.glucosescan.app.data.LiveHandler
 import com.glucosescan.app.data.LiveLog
 import com.glucosescan.app.data.LiveSensorRecord
@@ -98,6 +104,36 @@ class LiveService : Service(), SessionHost {
         }
     }
 
+    /** LibreLinkUp needs the network: watch it while live values are on, and recover by itself. */
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            handler.post {
+                if (instance !== this@LiveService) {
+                    return@post
+                }
+                // the connection is back: ask at once, and tell the user if we had said it was gone
+                if (settings.linkUpEnabled) {
+                    notifications()?.cancel(LiveNotifications.ID_NETWORK)
+                    nextLookAt = 0L
+                    lookIfDue()
+                }
+            }
+        }
+
+        override fun onLost(network: Network) {
+            handler.post {
+                if (instance !== this@LiveService) {
+                    return@post
+                }
+                log("network lost")
+                if (settings.linkUpEnabled) {
+                    LiveNotifications.showNetworkLost(this@LiveService)
+                }
+            }
+        }
+    }
+    private var networkCallbackRegistered = false
+
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) {
@@ -144,6 +180,12 @@ class LiveService : Service(), SessionHost {
         notifications()?.cancel(LiveNotifications.ID_STOPPED)
         if (settings.liveStoppedShownTime != 0L) {
             settings.liveStoppedShownTime = 0L // it runs again: the next stop is told at once
+            LiveNotifications.showMonitoringRestored(this) // monitoring is back; tell the user
+        }
+        if (linkUp && !networkCallbackRegistered) {
+            networkCallbackRegistered = registerNetworkCallback()
+        } else if (!linkUp && networkCallbackRegistered) {
+            unregisterNetworkCallback()
         }
         if (!linkUp && !receiverRegistered) {
             // Only Android itself can send this broadcast, so the receiver can be open to it.
@@ -155,6 +197,8 @@ class LiveService : Service(), SessionHost {
             }
             receiverRegistered = true
         }
+        // a monitoring session is a session: opened when monitoring starts, closed when the service ends
+        OnlineSync.openSession(this, if (linkUp) "linkup" else "ble")
         if (!loopRuns) {
             loopRuns = true
             handler.removeCallbacks(everyMinute)
@@ -189,6 +233,7 @@ class LiveService : Service(), SessionHost {
 
     override fun onDestroy() {
         instance = null
+        OnlineSync.closeSession(this, "service-ended")
         handler.removeCallbacksAndMessages(null)
         deadline = 0L
         session.stop()
@@ -201,6 +246,7 @@ class LiveService : Service(), SessionHost {
             }
             receiverRegistered = false
         }
+        unregisterNetworkCallback()
         notifications()?.cancel(LiveNotifications.ID_ALARM)
         releaseWakeLock()
         if (settings.valuesComeByThemselves) {
@@ -317,9 +363,24 @@ class LiveService : Service(), SessionHost {
     // ------------------------------------------------------------------ once a minute
 
     /** Called by [TickReceiver] when the phone was woken to look after the connection. */
+    private fun requestOnlineSyncIfWaiting() {
+        try {
+            val store = GlucoseStore.get(this)
+            val waiting = com.glucosescan.app.data.ValueSource.values().sumOf { store.table(it).unsyncedCount() } +
+                store.unsyncedAlerts(1).size + store.unsyncedSyncs(1).size +
+                com.glucosescan.app.data.ForecastLog.pendingSyncCount(store)
+            if (waiting > 0) {
+                OnlineSync.enqueueNow(this)
+            }
+        } catch (e: Exception) {
+            // the copy must never break the monitoring loop
+        }
+    }
+
     fun onTick() {
         check(newValue = false)
         lookIfDue()
+        requestOnlineSyncIfWaiting()
     }
 
     // ------------------------------------------------------------------ LibreLinkUp
@@ -347,6 +408,36 @@ class LiveService : Service(), SessionHost {
             handler.post {
                 looking = false
                 if (instance === this) {
+                    // the server is "unreachable" for the app when the question errored out,
+                    // or the answer says there is no internet or the server is broken
+                    val unreachable = look == null ||
+                        look.state == LinkUpState.NO_INTERNET ||
+                        look.state == LinkUpState.SERVER_PROBLEM
+                    if (unreachable) {
+                        val fails = settings.linkUpFailCount + 1
+                        settings.linkUpFailCount = fails
+                        if (fails >= SYNC_FAIL_LIMIT && !settings.syncFailNotified) {
+                            settings.syncFailNotified = true
+                            LiveNotifications.showSyncFailure(this)
+                        }
+                    } else {
+                        if (settings.linkUpFailCount != 0) {
+                            settings.linkUpFailCount = 0
+                        }
+                        if (settings.syncFailNotified) {
+                            settings.syncFailNotified = false
+                            notifications()?.cancel(LiveNotifications.ID_SYNC_FAIL)
+                            LiveNotifications.showMonitoringRestored(this)
+                        }
+                    }
+                    // record the sync: markers always, a persistent event on a state change
+                    MonitoringEvents.syncDone(
+                        this,
+                        ok = !unreachable,
+                        detail = if (unreachable) (look?.state?.name ?: "no answer") else if (look?.newValue == true) "new reading" else "up to date",
+                        readingAt = if (unreachable) 0L else (look?.newestTime ?: 0L),
+                        from = "sync"
+                    )
                     // LibreLink sends a value each minute. Ask again a few seconds after the next one is due.
                     val now = AppClock.now()
                     val newest = look?.newestTime ?: 0L
@@ -379,7 +470,11 @@ class LiveService : Service(), SessionHost {
         notifications()?.notify(LiveNotifications.ID_LIVE, LiveNotifications.live(this, current, stateWords(), receiving, unit()))
         alarms(current, now)
         if (newValue) {
+            settings.monitoringLastReadingAt = current.shown?.timestamp ?: now
             sayIfDue(current, now)
+            if (settings.notifyValueOn) {
+                LiveNotifications.showNewReading(this, current, unit())
+            }
             Backup.request(this) // the online copy, if the user has one; at most every 15 minutes
         }
         scheduleTick(this)
@@ -396,32 +491,14 @@ class LiveService : Service(), SessionHost {
     }
 
     private fun alarms(current: CurrentValue, now: Long) {
-        val alarmSettings = settings.alarmSettings
-        val minutesToLow = if (alarmSettings.lowSoonOn) current.minutesUntilBelow(alarmSettings.low, now) else null
-        var reason = AlarmRules.reason(current.shown, current.sensor, now, alarmSettings, settings.liveWaitingSince, minutesToLow)
-        if (reason == AlarmKind.NO_DATA && !settings.linkUpEnabled && session.state == LiveState.SENSOR_ENDED) {
-            reason = null // an ended sensor sends nothing: the notification says so, an alarm every 15 minutes would not help
-        }
-        val memory = settings.alarmMemory
-        val sound = AlarmRules.decide(reason, now, alarmSettings, memory)
-        val remembered = AlarmRules.remember(memory, reason, sound, now)
-        if (remembered.lastKind != memory.lastKind || remembered.lastTime != memory.lastTime ||
-            remembered.silencedKind != memory.silencedKind || remembered.silencedUntil != memory.silencedUntil ||
-            remembered.lastSoonTime != memory.lastSoonTime
-        ) {
-            settings.alarmMemory = remembered
-        }
-
-        if (sound != null) {
-            holdWakeLock(AlarmSounder.SOUND_MILLIS + 10_000L)
-            log("alarm: ${sound.name}")
-            alarmShown = sound
-            notifications()?.notify(LiveNotifications.ID_ALARM, LiveNotifications.alarm(this, sound, current, stateWords(), unit()))
-            val sentence = SpeechText.alarm(sound, current.shown, unit())
-            val short = if (sound == AlarmKind.NO_DATA || current.shown == null) "" else SpeechText.number(current.shown!!, unit())
-            // no ringtone: the alarm vibrates and the voice says what it is about
-            sounder.play(words = if (settings.speakAlarms) sentence else null, short = short)
-        } else if (reason == null && alarmShown != null) {
+        val suppressNoData = !settings.linkUpEnabled && session.state == LiveState.SENSOR_ENDED
+        val result = AlertPipeline.evaluateAndAlert(
+            this, settings, handler, sounder, current, now, stateWords(), suppressNoData,
+            { millis -> holdWakeLock(millis) }, { text -> log(text) }
+        )
+        if (result.sounded != null) {
+            alarmShown = result.sounded
+        } else if (result.reason == null && alarmShown != null) {
             // the reason is gone: take the alarm away
             alarmShown = null
             sounder.stop()
@@ -464,6 +541,33 @@ class LiveService : Service(), SessionHost {
 
     private fun notifications(): NotificationManager? = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager
 
+    /** Register the network callback. False if the phone does not allow it. */
+    private fun registerNetworkCallback(): Boolean {
+        return try {
+            val connectivity = getSystemService(CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+            val request = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build()
+            connectivity.registerNetworkCallback(request, networkCallback)
+            true
+        } catch (e: RuntimeException) {
+            log("network callback may not be registered: ${e.javaClass.simpleName}")
+            false
+        }
+    }
+
+    private fun unregisterNetworkCallback() {
+        if (!networkCallbackRegistered) {
+            return
+        }
+        networkCallbackRegistered = false
+        try {
+            (getSystemService(CONNECTIVITY_SERVICE) as? ConnectivityManager)?.unregisterNetworkCallback(networkCallback)
+        } catch (e: RuntimeException) {
+            // was not registered or the phone has no connectivity service
+        }
+    }
+
     private fun holdWakeLock(millis: Long) {
         try {
             val lock = wakeLock ?: (getSystemService(POWER_SERVICE) as PowerManager)
@@ -499,6 +603,9 @@ class LiveService : Service(), SessionHost {
 
         /** How long the phone may sleep before it is woken to look after the Bluetooth connection. */
         const val TICK_MILLIS = 5 * 60_000L
+
+        /** How many failed questions to LibreLinkUp in a row before the user is told. */
+        private const val SYNC_FAIL_LIMIT = 3
 
         /** LibreLinkUp is asked this often. LibreLink sends a new value each minute. */
         const val LOOK_EVERY_MILLIS = 60_000L

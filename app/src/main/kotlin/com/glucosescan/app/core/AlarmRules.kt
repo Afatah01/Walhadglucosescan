@@ -14,7 +14,19 @@ enum class AlarmKind {
      * The value is not below the low limit yet, but the forecast says it will be within 20
      * minutes (see [Forecast]). New at the end, so that the numbers of the older kinds stay.
      */
-    LOW_SOON
+    LOW_SOON,
+
+    /** The value is below the very-low (severe) limit. New at the end, so that the numbers of the older kinds stay. */
+    VERY_LOW,
+
+    /** The value is above the very-high limit. */
+    VERY_HIGH,
+
+    /** The glucose is rising faster than the rapid-change rate the user set. */
+    RAPID_RISE,
+
+    /** The glucose is falling faster than the rapid-change rate the user set. */
+    RAPID_FALL
 }
 
 /** What the user has chosen for the alarms. Glucose numbers are in mg/dL. */
@@ -29,13 +41,29 @@ class AlarmSettings(
     /** While the reason stays, the same alarm sounds again after this many minutes. */
     val repeatMinutes: Int = DEFAULT_REPEAT_MINUTES,
     /** True: an alarm sounds when the forecast goes below [low] within 20 minutes. */
-    val lowSoonOn: Boolean = false
+    val lowSoonOn: Boolean = false,
+    /** True: an alarm sounds when the value is below the very-low limit. */
+    val veryLowOn: Boolean = true,
+    /** The very-low limit (mg/dL). */
+    val veryLow: Int = DEFAULT_VERY_LOW,
+    /** True: an alarm sounds when the value is above the very-high limit. */
+    val veryHighOn: Boolean = false,
+    /** The very-high limit (mg/dL). */
+    val veryHigh: Int = DEFAULT_VERY_HIGH,
+    /** True: an alarm sounds when the glucose changes faster than [rapidRate]. */
+    val rapidOn: Boolean = false,
+    /** The rapid-change rate, mg/dL per minute. */
+    val rapidRate: Double = DEFAULT_RAPID_RATE
 ) {
     companion object {
         const val DEFAULT_LOW = 70
         const val DEFAULT_HIGH = 250
         const val DEFAULT_NO_DATA_MINUTES = 20
         const val DEFAULT_REPEAT_MINUTES = 15
+        const val DEFAULT_VERY_LOW = 54
+        const val DEFAULT_VERY_HIGH = 250
+        const val DEFAULT_RAPID_RATE = 2.0
+        const val DEFAULT_RAPID_TENTHS = 20
         const val SNOOZE_MINUTES = 30
 
         /** "Low soon" is a guess that can come and go: it sounds at most once in this many minutes. */
@@ -70,8 +98,10 @@ object AlarmRules {
      * when the sensor last said that it is still warming up. Before that nobody could expect a value.
      * @param minutesToLow in how many minutes the forecast goes below the low limit, or null if
      * it does not within 20 minutes (see [Forecast.minutesUntilBelow])
+     * @param ratePerMinute the change of the forecast line in mg/dL per minute (from the shown
+     * values and the sensor values alike; the rapider of the two counts), or null if not known
      */
-    fun reason(shown: Glucose?, sensor: Glucose?, now: Long, settings: AlarmSettings, waitingSince: Long, minutesToLow: Int? = null): AlarmKind? {
+    fun reason(shown: Glucose?, sensor: Glucose?, now: Long, settings: AlarmSettings, waitingSince: Long, minutesToLow: Int? = null, ratePerMinute: Double? = null): AlarmKind? {
         val lastSign = Math.max(shown?.timestamp ?: Long.MIN_VALUE, waitingSince)
         if (now - lastSign > settings.noDataMinutes * MINUTE) {
             return if (settings.noDataOn) AlarmKind.NO_DATA else null
@@ -83,6 +113,14 @@ object AlarmRules {
             return null // too old for a glucose alarm, not old enough for "no values"; or the clock is wrong
         }
         // A correction must never hide a low value: the sensor value counts too.
+        val veryLow = shown.value < settings.veryLow || (sensor != null && sensor.value < settings.veryLow)
+        if (settings.veryLowOn && veryLow) {
+            return AlarmKind.VERY_LOW
+        }
+        val veryHigh = shown.value > settings.veryHigh || (sensor != null && sensor.value > settings.veryHigh)
+        if (settings.veryHighOn && veryHigh) {
+            return AlarmKind.VERY_HIGH
+        }
         val low = shown.value < settings.low || (sensor != null && sensor.value < settings.low)
         if (settings.lowOn && low) {
             return AlarmKind.LOW
@@ -92,6 +130,14 @@ object AlarmRules {
         }
         if (settings.highOn && shown.value > settings.high) {
             return AlarmKind.HIGH
+        }
+        if (settings.rapidOn && ratePerMinute != null) {
+            if (ratePerMinute >= settings.rapidRate) {
+                return AlarmKind.RAPID_RISE
+            }
+            if (ratePerMinute <= -settings.rapidRate) {
+                return AlarmKind.RAPID_FALL
+            }
         }
         return null
     }

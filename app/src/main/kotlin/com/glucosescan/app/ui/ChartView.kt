@@ -39,11 +39,24 @@ class ChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     val showsForecast: Boolean
         get() = forecast != null
 
-    private val dp = resources.displayMetrics.density
-    private val labelSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
+    /** Where the finger is, in milliseconds since 1970, or null when nobody touches the chart. */
+    private var touchedTime: Long? = null
 
-    private val blue = context.getColor(R.color.blue)
-    private val red = context.getColor(R.color.red)
+    /** The reading nearest the finger, so a touch always lands on a real value. For tests. */
+    var inspected: Glucose? = null
+        private set
+
+    /** The drawn plot area, filled in by [onDraw] so a touch can be turned back into a time. */
+    private var plotLeft = 0f
+    private var plotRight = 0f
+    private var plotStart = 0L
+    private var plotEnd = 0L
+
+    private val dp = resources.displayMetrics.density
+    private val labelSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10.5f, resources.displayMetrics)
+
+    private val blue = context.getColor(R.color.chart_line)
+    private val red = context.getColor(R.color.p_red)
 
     private val gridPaint = Paint().apply {
         color = context.getColor(R.color.grid)
@@ -58,7 +71,7 @@ class ChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = blue
-        strokeWidth = 2 * dp
+        strokeWidth = 2.6f * dp
         style = Paint.Style.STROKE
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
@@ -88,7 +101,7 @@ class ChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var fillBottom = Float.NaN
     private val forecastPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = context.getColor(R.color.chart_forecast)
-        strokeWidth = 2.5f * dp
+        strokeWidth = 3f * dp
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         pathEffect = DashPathEffect(floatArrayOf(1f * dp, 6 * dp), 0f)
@@ -98,6 +111,28 @@ class ChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         strokeWidth = dp
         style = Paint.Style.STROKE
     }
+    /** The pale red under the low limit and the pale amber over the high limit. */
+    private val lowZonePaint = Paint().apply {
+        color = context.getColor(R.color.chart_low_zone)
+    }
+    private val highZonePaint = Paint().apply {
+        color = context.getColor(R.color.chart_high_zone)
+    }
+
+    /** The upright line under a finger. */
+    private val inspectLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.getColor(R.color.chart_inspect)
+        strokeWidth = 1.5f * dp
+        style = Paint.Style.STROKE
+    }
+
+    /** The words that say which reading the finger is on. */
+    private val inspectTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = AppFont.bold(context)
+        color = context.getColor(R.color.text)
+        textSize = labelSize
+    }
+
     private val emptyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = AppFont.regular(context)
         color = context.getColor(R.color.text_secondary)
@@ -183,10 +218,19 @@ class ChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             return
         }
 
+        plotLeft = left
+        plotRight = right
+        plotStart = start
+        plotEnd = end
+
         fun x(time: Long): Float = left + (time - start).toFloat() / (end - start).toFloat() * (right - left)
         fun y(value: Float): Float = bottom - (value.coerceIn(yMin, yMax) - yMin) / (yMax - yMin) * (bottom - top)
 
-        // a soft green band over the target range
+        // The three regions the design asks for, under everything else so the line and the
+        // numbers stay the strongest things on the chart: pale red below the low limit, a green
+        // band over the target range, pale amber above the high limit.
+        canvas.drawRect(left, y(low.toFloat()), right, bottom, lowZonePaint)
+        canvas.drawRect(left, top, right, y(high.toFloat()), highZonePaint)
         if (high > low) {
             canvas.drawRect(left, y(high.toFloat()), right, y(low.toFloat()), bandPaint)
         }
@@ -346,6 +390,76 @@ class ChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             dotted.lineTo(x(to), y(shownForecast.exact(to).toFloat()))
             canvas.drawPath(dotted, forecastPaint)
         }
+
+        // What the finger is on: an upright line and the value it belongs to, never a made-up
+        // point between two readings.
+        val at = touchedTime
+        if (at != null && visible.isNotEmpty()) {
+            val nearest = nearestTo(at, visible)
+            if (nearest != null) {
+                val px = x(nearest.timestamp)
+                val py = y(nearest.readableValue.toFloat())
+                canvas.drawLine(px, top, px, bottom, inspectLinePaint)
+                canvas.drawCircle(px, py, 7.5f * dp, patchPaint)
+                pointPaint.color = if (nearest.value < low || nearest.value > high) red else blue
+                canvas.drawCircle(px, py, 5f * dp, pointPaint)
+
+                val words = GlucoseFormat.value(nearest.readableValue, unit) + "  " +
+                    inspectFormat().format(Date(nearest.timestamp))
+                val boxWidth = inspectTextPaint.measureText(words) + 16 * dp
+                val boxHeight = inspectTextPaint.textSize * 1.9f
+                val boxLeft = (px - boxWidth / 2).coerceIn(left, Math.max(left, right - boxWidth))
+                val boxTop = top + 2 * dp
+                canvas.drawRoundRect(boxLeft, boxTop, boxLeft + boxWidth, boxTop + boxHeight, 9 * dp, 9 * dp, patchPaint)
+                canvas.drawText(words, boxLeft + 8 * dp, boxTop + boxHeight * 0.68f, inspectTextPaint)
+            }
+        }
+    }
+
+    /** The saved reading nearest to [time]. */
+    private fun nearestTo(time: Long, list: List<Glucose>): Glucose? {
+        var best: Glucose? = null
+        var bestDistance = Long.MAX_VALUE
+        for (glucose in list) {
+            val distance = Math.abs(glucose.timestamp - time)
+            if (distance < bestDistance) {
+                bestDistance = distance
+                best = glucose
+            }
+        }
+        return best
+    }
+
+    private fun inspectFormat(): SimpleDateFormat =
+        SimpleDateFormat(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.getDefault())
+
+    /**
+     * A finger on the chart asks what the value was at that moment. The nearest real reading is
+     * shown; the finger never invents a value between two readings.
+     */
+    override fun onTouchEvent(event: android.view.MotionEvent): Boolean {
+        if (now == 0L || plotRight <= plotLeft) {
+            return super.onTouchEvent(event)
+        }
+        when (event.actionMasked) {
+            android.view.MotionEvent.ACTION_DOWN, android.view.MotionEvent.ACTION_MOVE -> {
+                parent?.requestDisallowInterceptTouchEvent(true)
+                val fraction = ((event.x - plotLeft) / (plotRight - plotLeft)).coerceIn(0f, 1f)
+                val time = plotStart + (fraction * (plotEnd - plotStart)).toLong()
+                touchedTime = time
+                inspected = nearestTo(time, values.filter { it.timestamp in plotStart..plotEnd })
+                invalidate()
+                return true
+            }
+            android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                touchedTime = null
+                inspected = null
+                parent?.requestDisallowInterceptTouchEvent(false)
+                invalidate()
+                return true
+            }
+        }
+        return super.onTouchEvent(event)
     }
 
     companion object {

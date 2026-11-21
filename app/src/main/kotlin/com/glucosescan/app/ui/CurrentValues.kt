@@ -97,16 +97,48 @@ object CurrentValues {
     fun read(store: GlucoseStore, settings: Settings, now: Long): CurrentValue {
         val correction = settings.correction
         val latest = store.latest()
-        val recent = if (latest != null) correction.applyAll(store.since(latest.timestamp - 20 * 60_000L)) else emptyList()
+        // fetch two hours back: the display only reads the last quarter hour, but the
+        // forecast model looks at up to 90 minutes of readings
+        val fetched = if (latest != null) correction.applyAll(store.since(latest.timestamp - Forecaster.HISTORY_MINUTES * 60_000L)) else emptyList()
         val corrected = latest != null && correction.appliesTo(latest)
+        val forecast = Forecaster.of(fetched, now)
+        recordForecastIfDue(store, settings, now, fetched, forecast)
         return CurrentValue(
-            state = DisplayState.of(recent, now),
+            state = DisplayState.of(fetched, now),
             sensor = latest,
             corrected = corrected,
             lowLimit = settings.lowLimit,
             highLimit = settings.highLimit,
-            forecast = Forecaster.of(recent, now),
-            sensorForecast = if (latest != null && correction.appliesTo(latest)) Forecaster.of(store.since(latest.timestamp - 20 * 60_000L), now) else null
+            forecast = forecast,
+            sensorForecast = if (latest != null && correction.appliesTo(latest)) Forecaster.of(store.since(latest.timestamp - Forecaster.HISTORY_MINUTES * 60_000L), now) else null
         )
+    }
+
+    /**
+     * Keep a copy of the three horizon estimates so they can be checked against the readings
+     * that arrive later. At most one set every four minutes, and only when there is a model.
+     * Failures here must never break reading the values.
+     */
+    private fun recordForecastIfDue(store: GlucoseStore, settings: Settings, now: Long, fetched: List<Glucose>, forecast: Forecast?) {
+        try {
+            if (forecast == null) {
+                return
+            }
+            val last = settings.lastForecastRecordTime
+            if (now >= last && now - last < 4 * 60_000L) {
+                return
+            }
+            val modelFrom = forecast.time - Forecaster.MODEL_WINDOW_MINUTES * 60_000L
+            val window = fetched.filter { it.timestamp >= modelFrom }
+            val mean = if (window.isEmpty()) null else window.map { it.readableValue.toDouble() }.average()
+            // what the model was built on: the newest real value, and how fresh it was
+            val newest = fetched.maxByOrNull { it.timestamp }
+            val freshness = newest?.let { ((now - it.timestamp) / 60_000L).toInt().coerceAtLeast(0) }
+            if (store.recordForecasts(forecast, now, mean, settings.lowLimit, settings.highLimit, newest?.readableValue?.toDouble(), newest?.timestamp, freshness) > 0) {
+                settings.lastForecastRecordTime = now
+            }
+        } catch (e: RuntimeException) {
+            // the log must never break the reading of values
+        }
     }
 }
